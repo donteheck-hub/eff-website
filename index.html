@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EFF | Elite Football Federation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logos/League Logo.png" alt="EFF Logo" class="brand-logo">
+
+      <div class="brand-copy">
+        <strong>Elite Football Federation</strong>
+        <span>SEASON 2</span>
+      </div>
+    </div>
+
+    <nav class="desktop-nav">
+      <button class="nav-link active" data-page="home">Home</button>
+      <button class="nav-link" data-page="standings">Standings</button>
+      <button class="nav-link" data-page="teams">Teams</button>
+      <button class="nav-link" data-page="stats">Stats</button>
+      <button class="nav-link" data-page="schedule">Scores</button>
+      <button class="nav-link" data-page="history">History</button>
+      <button class="nav-link" data-page="rulebook">Rulebook</button>
+    </nav>
+
+    <a
+      class="discord-button"
+      href="https://discord.gg/JPdv8gGdvs"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Join Discord
+    </a>
+  </header>
+
+  <main>
+
+    <!-- HOME -->
+    <section class="page active-page" id="home">
+      <section class="hero">
+        <img src="assets/logos/League Logo.png" alt="EFF Logo" class="hero-logo">
+        <div class="season-badge">SEASON 2</div>
+
+        <h1>
+          ELITE FOOTBALL
+          <span>FEDERATION</span>
+        </h1>
+
+        <p>Competition. Community. Legacy.</p>
+
+        <div class="hero-actions">
+          <button class="primary-button" data-go="standings">View Standings</button>
+          <button class="secondary-button" data-go="teams">View Teams</button>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <span>SEASON 2</span>
+            <h2>EFF Super Bowl</h2>
+          </div>
+
+          <p>The biggest stage in the Elite Football Federation.</p>
+        </div>
+
+        <img
+          src="assets/images/S2 Banner.png"
+          alt="EFF Season 2 Super Bowl"
+          class="banner"
+        >
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <span>CONFERENCES</span>
+            <h2>Atlantic & Pacific</h2>
+          </div>
+
+          <p>EFF competition is split between two conferences.</p>
+        </div>
+
+        <div class="conference-grid">
+          <article class="conference-card">
+            <img src="assets/logos/Atlantic Conference.png" alt="Atlantic Conference">
+            <h3>Atlantic Conference</h3>
+            <p>View Atlantic Conference teams and standings.</p>
+            <button data-go="standings">View Standings</button>
+          </article>
+
+          <article class="conference-card">
+            <img src="assets/logos/Pacific Conference.png" alt="Pacific Conference">
+            <h3>Pacific Conference</h3>
+            <p>View Pacific Conference teams and standings.</p>
+            <button data-go="standings">View Standings</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="home-dashboard-section">
+        <div class="home-dashboard-grid">
+          <section class="home-dashboard-card">
+            <div class="home-dashboard-card-head">
+              <div><span>SEASON 2</span><h2>AWARD WATCH</h2></div>
+              <select id="homeAwardPosition" class="home-award-select" aria-label="Award Watch position">
+                <option value="quarterback">QB</option><option value="runningback">RB</option><option value="wide receiver">WR</option><option value="defensive end">DE</option><option value="defensive back">DB</option><option value="kicker">K</option>
+              </select>
+            </div>
+            <div class="home-accent-line"></div>
+            <div id="homeAwardWatchList" class="home-award-list"><div class="home-dashboard-loading">Loading award watch...</div></div>
+          </section>
+
+          <section class="home-dashboard-card">
+            <div class="home-dashboard-card-head">
+              <div><span>LIVE TABLE</span><h2>STANDINGS</h2></div>
+              <button type="button" class="home-full-table-button" data-go="standings">FULL TABLE</button>
+            </div>
+            <div class="home-accent-line"></div>
+            <div class="home-standings-columns">
+              <div><h3>ATLANTIC CONFERENCE · TOP 6</h3><div id="homeAtlanticStandings" class="home-standings-list"><div class="home-dashboard-loading">Loading...</div></div></div>
+              <div><h3>PACIFIC CONFERENCE · TOP 6</h3><div id="homePacificStandings" class="home-standings-list"><div class="home-dashboard-loading">Loading...</div></div></div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- STANDINGS -->
+    <section class="page" id="standings">
+      <div class="page-container">
+        <div class="page-title">
+          <span>LIVE FROM GOOGLE SHEETS</span>
+          <h2>Standings</h2>
+          <p>Updates automatically from the EFF Google Sheet.</p>
+        </div>
+
+        <div class="standings-grid">
+          <section class="standings-card">
+            <div class="standings-header">
+              <img src="assets/logos/Atlantic Conference.png" alt="Atlantic Conference">
+
+              <div>
+                <span>ATLANTIC</span>
+                <h3>Atlantic Conference</h3>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Team</th>
+                    <th>Rec</th>
+                    <th>Conf Rec</th>
+                    <th>PF</th>
+                    <th>PA</th>
+                    <th>PD</th>
+                    <th>Streak</th>
+                  </tr>
+                </thead>
+
+                <tbody id="atlanticStandingsBody">
+                  <tr>
+                    <td colspan="8" class="status-cell">Loading standings...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="standings-card">
+            <div class="standings-header">
+              <img src="assets/logos/Pacific Conference.png" alt="Pacific Conference">
+
+              <div>
+                <span>PACIFIC</span>
+                <h3>Pacific Conference</h3>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Team</th>
+                    <th>Rec</th>
+                    <th>Conf Rec</th>
+                    <th>PF</th>
+                    <th>PA</th>
+                    <th>PD</th>
+                    <th>Streak</th>
+                  </tr>
+                </thead>
+
+                <tbody id="pacificStandingsBody">
+                  <tr>
+                    <td colspan="8" class="status-cell">Loading standings...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TEAMS -->
+    <section class="page" id="teams">
+      <div class="page-container">
+        <div class="page-title">
+          <span>LIVE FROM GOOGLE SHEETS</span>
+          <h2>Teams</h2>
+          <p>Automatically generated from the standings sheet.</p>
+        </div>
+
+        <div class="section-subtitle">
+          <img src="assets/logos/Atlantic Conference.png" alt="Atlantic Conference">
+
+          <div>
+            <span>ATLANTIC</span>
+            <h3>Atlantic Conference</h3>
+          </div>
+        </div>
+
+        <div class="team-grid" id="atlanticTeamGrid">
+          <div class="loading-card">Loading teams...</div>
+        </div>
+
+        <div class="section-subtitle section-gap">
+          <img src="assets/logos/Pacific Conference.png" alt="Pacific Conference">
+
+          <div>
+            <span>PACIFIC</span>
+            <h3>Pacific Conference</h3>
+          </div>
+        </div>
+
+        <div class="team-grid" id="pacificTeamGrid">
+          <div class="loading-card">Loading teams...</div>
+        </div>
+
+        <section class="team-detail-panel" id="teamDetailPanel">
+          <button class="team-detail-back" id="teamDetailBack" type="button">
+            ← Back to Teams
+          </button>
+
+          <div class="team-detail-hero">
+            <img id="teamDetailLogo" src="" alt="">
+            <div>
+              <span class="team-detail-kicker">TEAM PAGE</span>
+              <h2 id="teamDetailName">Team</h2>
+              <p id="teamDetailRecord"></p>
+            </div>
+          </div>
+
+          <div class="team-detail-grid">
+            <section class="team-detail-card">
+              <div class="team-detail-card-title">
+                <span>ROSTER</span>
+                <h3>Current Roster</h3>
+              </div>
+              <div class="roster-list" id="teamRosterList"></div>
+            </section>
+
+            <section class="team-detail-card">
+              <div class="team-detail-card-title">
+                <span>SEASON</span>
+                <h3>Schedule</h3>
+              </div>
+              <div class="team-season-schedule" id="teamSeasonSchedule"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </section>
+
+
+    <!-- STATS -->
+    <section class="page stats-page" id="stats">
+      <div class="stats-shell">
+        <div class="stats-page-heading stats-heading-row">
+          <div>
+            <div class="stats-season-label" id="statsSeasonLabel">EFF SEASON 2</div>
+            <h2 id="statsPageTitle">PLAYER STATS</h2>
+          </div>
+
+          <div class="stats-mode-controls">
+            <button class="stats-mode-btn active" id="seasonStatsBtn" type="button">
+              Season
+            </button>
+
+            <button class="stats-mode-btn" id="allTimeStatsBtn" type="button">
+              All Time
+            </button>
+
+            <button class="stats-refresh-btn" id="refreshStatsBtn" type="button">
+              ↻ Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-tools-row">
+
+          <div class="player-search">
+            <span class="search-icon">⌕</span>
+            <input
+              id="playerSearchInput"
+              type="text"
+              placeholder="Search players..."
+              autocomplete="off"
+            >
+          </div></div>
+
+        <div class="stats-position-tabs" id="statsTabs">
+          <span class="loading-inline">Loading stat categories...</span>
+        </div>
+
+
+        <div class="stats-table-card">
+          <div class="stats-table-wrap">
+            <table class="website-stats-table">
+              <thead id="statsTableHead"></thead>
+
+              <tbody id="statsTableBody">
+                <tr>
+                  <td class="status-cell">Loading stats...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- SCORES / SCHEDULE -->
+    <section class="page" id="schedule">
+      <div class="page-container">
+        <div class="page-title scores-heading">
+          <div>
+            <span>LIVE FROM GOOGLE SHEETS</span>
+            <h2>Scores</h2>
+            <p>Pick a week to view that week's games and scores.</p>
+          </div>
+
+          <div class="week-picker-wrap">
+            <label for="weekSelect">Week</label>
+
+            <select id="weekSelect">
+              <option value="">Loading weeks...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="score-week-title" id="scoreWeekTitle"></div>
+
+        <div class="schedule-grid" id="scheduleGrid">
+          <div class="loading-card">Loading scores...</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- HISTORY / PREVIOUS SEASONS -->
+    <section class="page archive-page" id="history">
+      <div class="history-redesign-shell history-v2-shell">
+
+        <section class="history-v2-hero">
+          <div class="history-v2-copy">
+            <span>EFF LEGACY</span>
+            <h2>THE EFF ARCHIVE</h2>
+            <p>
+              Championships, playoff runs, award winners, and all-league teams
+              from every completed EFF season.
+            </p>
+          </div>
+
+          <div class="history-v2-stats">
+            <div><strong>01</strong><span>Completed Season</span></div>
+            <div><strong>01</strong><span>Champion Crowned</span></div>
+          </div>
+        </section>
+
+        <div class="history-v2-section-title">
+          <span>SEASON ARCHIVE</span>
+          <h3>Previous Seasons</h3>
+        </div>
+
+        <div class="history-season-list history-v2-season-list">
+          <button class="history-v2-season-card" type="button" data-season-archive="1">
+            <div class="history-v2-season-number">S1</div>
+            <div class="history-v2-season-copy">
+              <span>COMPLETED</span>
+              <h4>Season 1</h4>
+              <p>Champion: Miami Sunshines</p>
+            </div>
+            <div class="history-v2-season-meta">
+              <span>Playoff Bracket</span>
+              <span>Standouts</span>
+              <span>Awards</span>
+              <span>All-League Teams</span>
+            </div>
+            <div class="history-v2-open">VIEW SEASON →</div>
+          </button>
+        </div>
+
+<section class="season-detail-panel history-season-detail" id="seasonDetailPanel">
+          <button class="archive-back-button" id="seasonArchiveBack" type="button">
+            ← Previous Seasons
+          </button>
+
+          <div class="history-detail-header">
+            <div>
+              <span>EFF ARCHIVE</span>
+              <h2>SEASON 1</h2>
+            </div>
+            <div class="history-detail-badge">CHAMPION · MIAMI SUNSHINES</div>
+          </div>
+
+          <div class="history-season-summary-grid">
+            <article class="history-summary-card">
+              <span>CHAMPION</span>
+              <h3>Miami Sunshines</h3>
+              <p>Season 1 champions after defeating the Houston Hornets in the EFF Championship.</p>
+            </article>
+            <article class="history-summary-card">
+              <span>BEST RECORD</span>
+              <h3>Roblox Warriors</h3>
+              <p>Finished the regular season at 10-0 and entered the Pacific bracket as the No. 1 seed.</p>
+            </article>
+            <article class="history-summary-card">
+              <span>FINALS MATCHUP</span>
+              <h3>Miami Sunshines vs Houston Hornets</h3>
+              <p>Atlantic champion Miami Sunshines defeated Pacific champion Houston Hornets for the title.</p>
+            </article>
+          </div>
+
+          <section class="season-history-block">
+            <div class="season-history-block-header">
+              <span>POSTSEASON</span>
+              <h3>Playoff Bracket</h3>
+            </div>
+
+            <div class="playoff-bracket-shell playoff-bracket-shell-combined">
+              <div class="season1-bracket-master">
+
+                <div class="master-bracket-column">
+                  <div class="master-column-label">WILDCARD</div>
+
+                  <div class="master-bracket-lane">
+                    <div class="master-lane-head">ATLANTIC</div>
+                    <div class="matchup-card">
+                      <div class="team-row"><span class="seed">3</span><strong>Baltimore Bats</strong><em>6-4</em></div>
+                      <div class="team-row winner"><span class="seed">6</span><strong>Montreal Angels</strong><em>2-8</em></div>
+                    </div>
+                    <div class="matchup-card">
+                      <div class="team-row winner"><span class="seed">4</span><strong>Alabama Black Bears</strong><em>3-7</em></div>
+                      <div class="team-row"><span class="seed">5</span><strong>Culican Red Devils</strong><em>3-7</em></div>
+                    </div>
+                  </div>
+
+                  <div class="master-bracket-lane">
+                    <div class="master-lane-head">PACIFIC</div>
+                    <div class="matchup-card">
+                      <div class="team-row"><span class="seed">3</span><strong>San Diego Cruisers</strong><em>8-2</em></div>
+                      <div class="team-row winner"><span class="seed">6</span><strong>Houston Hornets</strong><em>4-6</em></div>
+                    </div>
+                    <div class="matchup-card">
+                      <div class="team-row winner"><span class="seed">4</span><strong>Los Angeles Tigers</strong><em>6-4</em></div>
+                      <div class="team-row"><span class="seed">5</span><strong>Seattle Evergreens</strong><em>5-5</em></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="master-bracket-column">
+                  <div class="master-column-label">DIVISIONAL</div>
+
+                  <div class="master-bracket-lane">
+                    <div class="master-lane-head">ATLANTIC</div>
+                    <div class="matchup-card">
+                      <div class="team-row winner"><span class="seed">1</span><strong>Miami Sunshines</strong><em>9-1</em></div>
+                      <div class="team-row"><span class="seed">6</span><strong>Montreal Angels</strong><em>2-8</em></div>
+                    </div>
+                    <div class="matchup-card">
+                      <div class="team-row winner"><span class="seed">2</span><strong>Atlantis Tridents</strong><em>7-3</em></div>
+                      <div class="team-row"><span class="seed">4</span><strong>Alabama Black Bears</strong><em>3-7</em></div>
+                    </div>
+                  </div>
+
+                  <div class="master-bracket-lane">
+                    <div class="master-lane-head">PACIFIC</div>
+                    <div class="matchup-card">
+                      <div class="team-row"><span class="seed">1</span><strong>Roblox Warriors</strong><em>10-0</em></div>
+                      <div class="team-row winner"><span class="seed">6</span><strong>Houston Hornets</strong><em>4-6</em></div>
+                    </div>
+                    <div class="matchup-card">
+                      <div class="team-row"><span class="seed">2</span><strong>Anchorage Polar Bears</strong><em>8-2</em></div>
+                      <div class="team-row winner"><span class="seed">4</span><strong>Los Angeles Tigers</strong><em>6-4</em></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="master-bracket-column">
+                  <div class="master-column-label">CONFERENCE CHAMPIONSHIP</div>
+
+                  <div class="master-bracket-lane master-bracket-lane-centered">
+                    <div class="master-lane-head">ATLANTIC FINAL</div>
+                    <div class="matchup-card single-matchup">
+                      <div class="team-row winner"><span class="seed">1</span><strong>Miami Sunshines</strong><em>9-1</em></div>
+                      <div class="team-row"><span class="seed">2</span><strong>Atlantis Tridents</strong><em>7-3</em></div>
+                    </div>
+                  </div>
+
+                  <div class="master-bracket-lane master-bracket-lane-centered">
+                    <div class="master-lane-head">PACIFIC FINAL</div>
+                    <div class="matchup-card single-matchup">
+                      <div class="team-row winner"><span class="seed">6</span><strong>Houston Hornets</strong><em>4-6</em></div>
+                      <div class="team-row"><span class="seed">4</span><strong>Los Angeles Tigers</strong><em>6-4</em></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="master-bracket-column championship-column">
+                  <div class="master-column-label">EFF CHAMPIONSHIP</div>
+                  <section class="eff-finals-card master-finals-card">
+                    <div class="eff-finals-head">
+                      <span>SEASON 1 FINAL</span>
+                      <h4>Miami Sunshines vs Houston Hornets</h4>
+                    </div>
+                    <div class="matchup-card championship-matchup">
+                      <div class="team-row winner"><span class="seed">1</span><strong>Miami Sunshines</strong><em>9-1</em></div>
+                      <div class="team-row"><span class="seed">6</span><strong>Houston Hornets</strong><em>4-6</em></div>
+                    </div>
+                  </section>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          <div class="season-history-grid two-up">
+            <section class="season-history-block">
+              <div class="season-history-block-header">
+                <span>SEASON LEADERS</span>
+                <h3>Standouts</h3>
+              </div>
+              <div class="history-list-grid">
+                <div class="history-list-card">
+                  <div class="mini-label">ATLANTIC</div>
+                  <ul class="award-list role-list">
+                    <li><span>QB</span><strong>Vanishallindark</strong></li>
+                    <li><span>RB</span><strong>Vanishallindark</strong></li>
+                    <li><span>WR</span><strong>lwkvbm</strong></li>
+                    <li><span>WR</span><strong>IMJACOBJAB</strong></li>
+                    <li><span>WR</span><strong>Thebacon_1335</strong></li>
+                    <li><span>WR</span><strong>LFG_Twisty</strong></li>
+                    <li><span>DE</span><strong>Donteheck</strong></li>
+                    <li><span>DE</span><strong>V_kin043</strong></li>
+                    <li><span>DB</span><strong>LFG_Twisty</strong></li>
+                    <li><span>DB</span><strong>kipen</strong></li>
+                    <li><span>K</span><strong>Donteheck</strong></li>
+                  </ul>
+                </div>
+                <div class="history-list-card">
+                  <div class="mini-label">PACIFIC</div>
+                  <ul class="award-list role-list">
+                    <li><span>QB</span><strong>hacr</strong></li>
+                    <li><span>RB</span><strong>hacr</strong></li>
+                    <li><span>WR</span><strong>dihmercyys</strong></li>
+                    <li><span>WR</span><strong>Sl0tMxde</strong></li>
+                    <li><span>WR</span><strong>loby</strong></li>
+                    <li><span>WR</span><strong>graveyarrddd</strong></li>
+                    <li><span>DE</span><strong>vloxcus</strong></li>
+                    <li><span>DE</span><strong>Ceptco</strong></li>
+                    <li><span>DB</span><strong>dihmercyys</strong></li>
+                    <li><span>DB</span><strong>lminsane1v1meb</strong></li>
+                    <li><span>K</span><strong>hacr</strong></li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <section class="season-history-block">
+              <div class="season-history-block-header">
+                <span>HONORS</span>
+                <h3>Awards</h3>
+              </div>
+              <div class="history-list-card award-card-full">
+                <div class="mini-label">S1 AWARDS</div>
+                <ul class="award-list role-list">
+                  <li><span>QBOTY</span><strong>Vanishallindark</strong></li>
+                  <li><span>RBOTY</span><strong>hacr</strong></li>
+                  <li><span>WROTY</span><strong>dihmercyys</strong></li>
+                  <li><span>DEOTY</span><strong>vloxcus</strong></li>
+                  <li><span>DBOTY</span><strong>dihmercyys</strong></li>
+                  <li><span>KOTY</span><strong>Donteheck</strong></li>
+                </ul>
+              </div>
+            </section>
+          </div>
+
+          <section class="season-history-block">
+            <div class="season-history-block-header">
+              <span>ALL-LEAGUE</span>
+              <h3>Season 1 Teams</h3>
+            </div>
+            <div class="history-list-grid three-up">
+              <div class="history-list-card">
+                <div class="mini-label">1ST TEAM</div>
+                <ul class="award-list role-list">
+                  <li><span>QB</span><strong>Vanishallindark</strong></li>
+                  <li><span>WR</span><strong>dihmercyys</strong></li>
+                  <li><span>WR</span><strong>lwkvbm</strong></li>
+                  <li><span>DE</span><strong>vloxcus</strong></li>
+                  <li><span>DB</span><strong>dihmercyys</strong></li>
+                  <li><span>DB</span><strong>LFG_Twisty</strong></li>
+                </ul>
+              </div>
+              <div class="history-list-card">
+                <div class="mini-label">2ND TEAM</div>
+                <ul class="award-list role-list">
+                  <li><span>QB</span><strong>hacr</strong></li>
+                  <li><span>WR</span><strong>IMJACOBJAB</strong></li>
+                  <li><span>WR</span><strong>Thebacon_1335</strong></li>
+                  <li><span>DE</span><strong>Donteheck</strong></li>
+                  <li><span>DB</span><strong>lminsane1v1meb</strong></li>
+                  <li><span>DB</span><strong>Par1henope</strong></li>
+                </ul>
+              </div>
+              <div class="history-list-card">
+                <div class="mini-label">3RD TEAM</div>
+                <ul class="award-list role-list">
+                  <li><span>QB</span><strong>Donteheck</strong></li>
+                  <li><span>WR</span><strong>LFG_Twisty</strong></li>
+                  <li><span>WR</span><strong>V_kin043</strong></li>
+                  <li><span>DE</span><strong>Mqtw2911</strong></li>
+                  <li><span>DB</span><strong>kipen</strong></li>
+                  <li><span>DB</span><strong>IMJACOBJAB</strong></li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </section>
+
+      </div>
+    </section>
+
+    <!-- RULEBOOK -->
+    <section class="page rulebook-page" id="rulebook">
+      <div class="eff-rulebook-shell">
+
+        <header class="eff-rulebook-header">
+          <span>LEAGUE OPERATIONS</span>
+          <h2>EFF Rulebook</h2>
+          <p>
+            Everything you need to run and play an official EFF game,
+            from start-of-game procedure through penalties, special teams,
+            fumbles, overtime, and league operations.
+          </p>
+        </header>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading">
+            <h3>Start of Game</h3><div></div>
+          </div>
+          <p><strong>Force start</strong> is 15 minutes after the scheduled game time.</p>
+          <ul class="rulebook-dash-list">
+            <li>If neither team has 7 players, the game results in a <strong>double FFL.</strong></li>
+            <li>If one team has 7 players and the other has fewer than 7, a <strong>5 minute extension</strong> may be granted — but only if the team with 7 players agrees to it.</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading">
+            <h3>Penalties</h3><div></div>
+          </div>
+
+          <p>Both head coaches are responsible for obeying the rulebook and going by the referees call.</p>
+
+          <div class="penalty-card-list">
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Illegal Formation (IF)</h4><span>5 Yds</span></div>
+              <ul class="rulebook-dash-list">
+                <li>In either formation, <strong>no receiver</strong> may line up in or on the hashes.</li>
+                <li>There are <strong>no running backs</strong> — a handoff to a wide receiver will result in an illegal formation.</li>
+              </ul>
+              <p>Formation-specific requirements are detailed in the two sections below.</p>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Improper Block (IB)</h4><span>5 Yds</span></div>
+              <p>Called when a tight end, in either formation, blocks more than <strong>5 yards</strong> behind the line of scrimmage.</p>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Lag Sack (LS)</h4><span>+5 Yds &amp; 1st down</span></div>
+              <p>Called when a defensive player lags and sacks the quarterback.</p>
+              <ul class="rulebook-dash-list">
+                <li>Determined by how far the defensive end is from the quarterback — for example, if the DE falls well before or after the QB, or if no DE falls but the QB is still sacked.</li>
+                <li>The offending player must also be given a <strong>lag warning.</strong></li>
+              </ul>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Too Many Blockers (TMB)</h4><span>5 Yds &amp; loss of down</span></div>
+              <p>Called when a wide receiver intentionally blocks a defender:</p>
+              <ul class="rulebook-dash-list">
+                <li>A wr intentionally moves toward the DE to block them (forward or backward).</li>
+                <li>A line-of-scrimmage wr lines up in front of the DE and blocks forward or backward (does not apply to DBs).</li>
+                <li>A wr stays on the los blocking backwards — this is <strong>not</strong> considered an off-jam and will be TMB (if the wr is simply held, it does not count).</li>
+                <li>A wr blocks forward against the defender first. If they block each other at the same time, it is not considered TMB.</li>
+              </ul>
+              <p>It is <strong>not</strong> TMB if the wr blocks backwards. TMB can only be called if the quarterback <strong>throws</strong> the ball after the block — the flag will not count if the QB runs the ball.</p>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Grounding (GR)</h4><span>15 Yds &amp; loss of down</span></div>
+              <p>This flag is mostly a judgment call — if a receiver isn't within about 15 yards of the ball, it will be considered grounding, unless the wr and QB clearly had a miscommunication or the wr cut away.</p>
+              <ul class="rulebook-dash-list">
+                <li>If the line of scrimmage is within 20 yards of the endzone, the QB may throw it out of bounds at the back endzone. The QB must be within the hashes — once they step out, the flag is valid.</li>
+                <li>If unsure, the referee may pause for a challenge review and neither team will be penalized due to the review.</li>
+              </ul>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Center Rollout (CR)</h4><span>5 Yds &amp; loss of down</span></div>
+              <p>Called when a center rolls out past the line of scrimmage, regardless of formation, before the ball is thrown.</p>
+              <ul class="rulebook-dash-list">
+                <li>Passes to the center will be considered grounding.</li>
+                <li>Applies if the center passes the los in an attempt to block (does not count on runs).</li>
+              </ul>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Too Many Men (TMM)</h4><span>±5 Yds</span></div>
+              <p>Called when either team has 10 players on the field after the hike.</p>
+              <ul class="rulebook-dash-list">
+                <li>Offense has 10 → <strong>-5 yards</strong></li>
+                <li>Defense has 10 → <strong>+5 yards</strong></li>
+              </ul>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Ineligible Receiver (Inel)</h4><span>Incomplete</span></div>
+              <p>Called when a wr/te steps out of bounds or on the white border before the ball is thrown.</p>
+              <ul class="rulebook-dash-list">
+                <li>The play is ruled incomplete — line it back to the previous play at the same first-down line. Do not reset the down to the play before; they should have lost a down.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>1C · 2TE</h3><div></div></div>
+          <p>An illegal formation is called in the 1C / 2TE formation when:</p>
+          <ul class="rulebook-dash-list">
+            <li>The <strong>center</strong> is not lined up directly in front of the quarterback — it may not be beside the QB or 5 yards in front.</li>
+            <li>A <strong>tight end</strong> is lined up more than 2 yards behind the line of scrimmage.</li>
+            <li>A <strong>tight end</strong> lines up in or on the hash.</li>
+          </ul>
+          <div class="formation-grid">
+            <figure><img src="assets/rulebook/1c2te-ball-centered.png" alt="1C 2TE ball centered"><figcaption>BALL CENTERED</figcaption></figure>
+            <figure><img src="assets/rulebook/1c2te-ball-offset.png" alt="1C 2TE ball offset"><figcaption>BALL OFFSET</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>2C · 1TE</h3><div></div></div>
+          <p>An illegal formation is called in the 2C / 1TE formation when:</p>
+          <ul class="rulebook-dash-list">
+            <li>Either <strong>center</strong> is lined up in or on the hash.</li>
+            <li>The <strong>tight end</strong> is lined up outside of the hash (it may line up on the hash).</li>
+            <li>This also applies if the offense has 8 players with a line of scrimmage but no middle tight end.</li>
+          </ul>
+          <div class="formation-grid">
+            <figure><img src="assets/rulebook/2c1te-ball-centered.png" alt="2C 1TE ball centered"><figcaption>BALL CENTERED</figcaption></figure>
+            <figure><img src="assets/rulebook/2c1te-ball-offset.png" alt="2C 1TE ball offset"><figcaption>BALL OFFSET</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Special Teams</h3><div></div></div>
+          <p>No fake field goals or punts are allowed.</p>
+          <h4 class="rulebook-subhead">Onsides</h4>
+          <ul class="rulebook-dash-list">
+            <li>Must be under <strong>3 minutes</strong> in the 4th quarter.</li>
+            <li>Teams are allowed to go ineligible.</li>
+            <li>Teams are allowed to block anyone.</li>
+            <li>Admins may <strong>not</strong> teleport a player to gain an advantage — this results in an FFL and a suspension if it causes a win.</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Fumbles</h3><div></div></div>
+          <p>Only specific players are able to fumble:</p>
+          <ul class="rulebook-dash-list">
+            <li>The <strong>quarterback</strong> can fumble at all times.</li>
+            <li><strong>Punt / kick returners</strong> can fumble at all times.</li>
+            <li><strong>Onside returners</strong> can fumble at all times.</li>
+            <li>A <strong>wide receiver</strong> can fumble if they catch the ball behind the line of scrimmage.</li>
+            <li>A <strong>defensive back</strong> can fumble once they pass the line of scrimmage (the offense's side).</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Hit Stick</h3><div></div></div>
+          <ul class="rulebook-dash-list"><li>Anyone is allowed to use hitstick in game.</li></ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Diving</h3><div></div></div>
+          <ul class="rulebook-dash-list">
+            <li>Receivers may not dive behind the line of scrimmage.</li>
+            <li>If they catch it behind the los but then pass it and dive, that is allowed.</li>
+            <li>If the quarterback is 20+ yards from the receiver, the receiver is allowed to dive behind the los.</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Milking</h3><div></div></div>
+          <ul class="rulebook-dash-list">
+            <li>Quarterbacks must hike before the play clock hits <strong>10 seconds</strong>, unless there is 1 minute left in the 2nd or 4th quarter.</li>
+            <li>Under 1 minute in the 2nd or 4th quarter, if the defense is trailing: if the QB steps back <strong>30+ yards</strong>, the referee must stop the clock.</li>
+            <li>Under 1 minute in the 2nd or 4th quarter, if the defense is trailing: if the offense is tackled or sacked behind the los, the clock will stop.</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>QBH Glitch</h3><div></div></div>
+          <p>If the game shows a <strong>fumble</strong> on-screen after the quarterback is hit by a defensive end, but something else actually occurs (such as a sack or a throw), the play stands as what the game ruled it — completion, interception, or sack.</p>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Overtime</h3><div></div></div>
+          <h4 class="rulebook-subhead">Format</h4>
+          <ul class="rulebook-dash-list">
+            <li>A coin toss at the beginning of the overtime period determines who starts each period.</li>
+            <li>If a team kicks off, they get the <strong>ball second.</strong></li>
+            <li>If a team receives, they get the <strong>ball first.</strong></li>
+            <li>Each possession starts at the opposing team's 35-yard line.</li>
+            <li>Each possession goes until one team ends up with a lower score than the other.</li>
+          </ul>
+          <h4 class="rulebook-subhead">Scoring</h4>
+          <p>2-point conversions and PATs are all on the table.</p>
+          <ul class="rulebook-dash-list">
+            <li>If Team A scores 7 and Team B scores 8, the game is over.</li>
+            <li>If Team A scores 7 and Team B scores 6, the game is over.</li>
+            <li>If Team A scores 7 and Team B scores 7, the game goes to OT2.</li>
+            <li>Once the teams reach <strong>OT3</strong>, they must go for 2 after every touchdown.</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Mercy Rule</h3><div></div></div>
+          <p>Once a team is winning by <strong>40 or more points</strong>, mercy applies and the referee must end the game instantly.</p>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Operations</h3><div></div></div>
+          <h4 class="rulebook-subhead">Referees</h4>
+          <ul class="rulebook-dash-list">
+            <li>Must stay focused on the game the entire time.</li>
+            <li>Must have the correct settings on.</li>
+            <li>Must accurately call flags (may look back at the rulebook).</li>
+            <li>Must comply with league operations staff and challenges.</li>
+          </ul>
+
+          <h4 class="rulebook-subhead">Streamers</h4>
+          <ul class="rulebook-dash-list">
+            <li>Be present — change camera angles and commentate (commentary is optional).</li>
+            <li>Have VODs turned on.</li>
+            <li>Make sure the link to the stream is posted for league operations to review.</li>
+          </ul>
+
+          <h4 class="rulebook-subhead">Head Coaches / in-game admins</h4>
+          <ul class="rulebook-dash-list">
+            <li>You may <strong>not</strong> newplay at any time throughout the game.</li>
+            <li>You must listen to the referee and make things clear to them, such as challenges, no-reps, and substitutions.</li>
+            <li>If you question the referee's call, you may use an <strong>Ultimate Challenge</strong> with the correct format — otherwise it will not be considered.</li>
+            <li>Any admin abuse (this also applies to refs) may result in penalties (-5 Yards / loss of down) or suspension.</li>
+          </ul>
+        </section>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="currentYear"></span> Elite Football Federation
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
