@@ -3939,3 +3939,72 @@ HISTORY BRACKET + AWARD LOGO TWEAKS
     grid-template-columns: minmax(625px, 1fr) 300px minmax(625px, 1fr);
   }
 }
+
+/* ==================================================
+   PLAYOFF TEAM NAME + RECORD FIT FIX
+================================================== */
+
+.playoff-matchup {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.playoff-team-line {
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: 28px 32px minmax(0, 1fr) 34px;
+  gap: 7px;
+  padding: 8px 7px;
+}
+
+.playoff-team-line strong {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  overflow-wrap: normal;
+  word-break: normal;
+  line-height: 1.15;
+  font-size: 12px;
+}
+
+.playoff-team-line em {
+  width: 34px;
+  min-width: 34px;
+  max-width: 34px;
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 10px;
+}
+
+.playoff-team-line img,
+.playoff-team-logo-placeholder {
+  width: 30px;
+  height: 30px;
+}
+
+.playoff-seed {
+  width: 25px;
+  height: 25px;
+  font-size: 10px;
+}
+
+/* Give Wild Card a little more room for the longest team names. */
+.playoff-rounds-grid {
+  grid-template-columns: 1.16fr 1.08fr .88fr;
+  gap: 14px;
+}
+
+.playoff-round-wildcard .playoff-matchup,
+.playoff-round-divisional .playoff-matchup {
+  width: 100%;
+}
+
+@media (min-width: 1500px) {
+  .playoff-master-grid {
+    grid-template-columns: minmax(720px, 1fr) 330px minmax(720px, 1fr);
+  }
+}
