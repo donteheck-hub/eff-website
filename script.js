@@ -719,189 +719,206 @@ async function getDirectRobloxPicture(
     return "";
   }
 
-
   if (directRobloxPictureCache.has(key)) {
     return directRobloxPictureCache.get(key);
   }
 
-
   /*
-    1) If EFF Bot/Bloxlink already knows the player, use the
-       exact Roblox username and picture it has stored.
-    2) Otherwise ask Roblox for an account whose USERNAME is
-       exactly the stat-sheet name.
-    3) Temporary request failures are retried instead of being
-       permanently cached as a missing player.
+    IMPORTANT:
+    Do NOT call /api/player/:name here.
+
+    The full /api/players endpoint is already loaded once and is used
+    for Discord/team matching. If a stat name is not in that Discord
+    lookup, we go straight to the Roblox username endpoint.
+
+    This avoids hundreds of expected 404 errors in the browser console
+    for players whose stat name is a Roblox username but does not match
+    a Discord/Bloxlink lookup name.
   */
 
-  try {
+  const maxAttempts = 3;
+
+  for (
+    let attempt = 1;
+    attempt <= maxAttempts;
+    attempt += 1
+  ) {
 
     try {
-      const playerResponse =
+      const response =
         await fetch(
-          `${BOT_API_URL}/api/player/${encodeURIComponent(clean)}`,
+          `${BOT_API_URL}/api/roblox/${encodeURIComponent(lookupName)}`,
           {
             method: "GET",
             cache: "no-store"
           }
         );
 
-      if (playerResponse.ok) {
-        const playerResult =
-          await playerResponse.json();
+      if (response.status === 404) {
+        directRobloxPictureCache.set(
+          key,
+          ""
+        );
 
-        const playerData =
-          playerResult?.player ||
-          playerResult?.data ||
-          null;
-
-        const knownPicture =
-          playerData?.robloxPicture ||
-          playerResult?.robloxPicture ||
-          "";
-
-        if (knownPicture) {
-          directRobloxPictureCache.set(
-            key,
-            knownPicture
-          );
-          return knownPicture;
-        }
-
-        const knownRobloxName =
-          playerData?.robloxUsername ||
-          playerResult?.robloxUsername ||
-          "";
-
-        if (
-          knownRobloxName &&
-          normalizePlayerName(knownRobloxName) !== key
-        ) {
-          const knownPictureLookup =
-            await getDirectRobloxPicture(
-              knownRobloxName
-            );
-
-          if (knownPictureLookup) {
-            directRobloxPictureCache.set(
-              key,
-              knownPictureLookup
-            );
-            return knownPictureLookup;
-          }
-        }
+        return "";
       }
-    } catch (playerLookupError) {
-      console.warn(
-        "EFF player lookup failed; trying exact Roblox username:",
-        clean,
-        playerLookupError
-      );
-    }
 
+      if (!response.ok) {
+        throw new Error(
+          `Roblox proxy returned ${response.status}`
+        );
+      }
 
-    const maxAttempts = 3;
+      const result =
+        await response.json();
 
-    for (
-      let attempt = 1;
-      attempt <= maxAttempts;
-      attempt += 1
-    ) {
+      const robloxData =
+        result?.roblox ||
+        result?.data ||
+        {};
 
-      try {
-        const response =
-          await fetch(
-            `${BOT_API_URL}/api/roblox/${encodeURIComponent(lookupName)}`,
-            {
-              method: "GET",
-              cache: "no-store"
-            }
-          );
+      const resolvedUsername =
+        robloxData.username ||
+        robloxData.name ||
+        lookupName;
 
-        /*
-          404 means Roblox has no exact username match.
-          This is a real missing account, so remember it.
-        */
-        if (response.status === 404) {
-          directRobloxPictureCache.set(
-            key,
-            ""
-          );
-          return "";
-        }
+      /*
+        Keep the exact-username safety check so a similar Roblox account
+        cannot be shown for the wrong stat player.
+      */
+      if (
+        normalizePlayerName(resolvedUsername) !==
+        normalizePlayerName(lookupName)
+      ) {
+        directRobloxPictureCache.set(
+          key,
+          ""
+        );
 
-        if (!response.ok) {
-          throw new Error(
-            `Roblox proxy returned ${response.status}`
-          );
-        }
+        return "";
+      }
 
-        const result =
-          await response.json();
+      const picture =
+        result?.success
+          ? (
+              robloxData.picture ||
+              robloxData.avatar ||
+              robloxData.avatarUrl ||
+              robloxData.thumbnail ||
+              ""
+            )
+          : "";
 
-        const robloxUsername =
-          result?.roblox?.username ||
-          result?.roblox?.name ||
-          lookupName;
+      if (picture) {
+        directRobloxPictureCache.set(
+          key,
+          picture
+        );
 
-        /*
-          Only accept the result if it resolves to the exact username
-          we searched for. This prevents a similarly-named account from
-          being shown for the wrong player.
-        */
-        if (
-          normalizePlayerName(robloxUsername) !==
-          normalizePlayerName(lookupName)
-        ) {
-          directRobloxPictureCache.set(
-            key,
-            ""
-          );
-          return "";
-        }
+        return picture;
+      }
 
-        const picture =
-          result?.success
-            ? result?.roblox?.picture || ""
-            : "";
-
-        if (picture) {
-          directRobloxPictureCache.set(
-            key,
-            picture
-          );
-          return picture;
-        }
-
-      } catch (lookupError) {
-        if (attempt === maxAttempts) {
-          console.warn(
-            "Exact Roblox lookup failed after retries:",
-            lookupName,
-            lookupError
-          );
-          return "";
-        }
-
+      /*
+        success:true with no usable picture can happen briefly while the
+        Roblox thumbnail is being generated. Retry instead of caching a
+        permanent missing avatar.
+      */
+      if (attempt < maxAttempts) {
         await new Promise(
           (resolve) =>
             setTimeout(
               resolve,
-              350 * attempt
+              500 * attempt
             )
         );
-      }
-    }
 
-  } catch (error) {
-    console.warn(
-      "EFF Roblox picture lookup failed:",
-      lookupName,
-      error
-    );
+        continue;
+      }
+
+      return "";
+
+    } catch (lookupError) {
+
+      if (attempt === maxAttempts) {
+        console.warn(
+          "Roblox avatar lookup failed after retries:",
+          lookupName,
+          lookupError
+        );
+
+        return "";
+      }
+
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            450 * attempt
+          )
+      );
+    }
   }
 
   return "";
+}
+
+
+async function resolveStatRowRobloxPicture(
+  row,
+  headers
+) {
+
+  const preferredHeaders = [
+    "username",
+    "player",
+    "name"
+  ];
+
+  let statName = "";
+
+  for (const preferred of preferredHeaders) {
+    const actualHeader =
+      headers.find(
+        (header) =>
+          normalize(header) === preferred
+      );
+
+    if (actualHeader) {
+      statName =
+        String(row?.[actualHeader] || "").trim();
+
+      if (statName) {
+        break;
+      }
+    }
+  }
+
+  if (!statName) {
+    return "";
+  }
+
+  const discordPlayer =
+    findDiscordPlayerForStatRow(
+      row,
+      headers
+    );
+
+  const knownPicture =
+    getBestPlayerPicture(discordPlayer);
+
+  if (knownPicture) {
+    return knownPicture;
+  }
+
+  const robloxUsername =
+    getRobloxUsernameForPlayer(
+      discordPlayer,
+      statName
+    );
+
+  return getDirectRobloxPicture(
+    robloxUsername
+  );
 }
 
 
@@ -3455,6 +3472,11 @@ function renderStatsTable(
     2600
   );
 
+  setTimeout(
+    retryVisibleRobloxPictures,
+    5200
+  );
+
 }
 
 
@@ -3891,7 +3913,7 @@ async function retryVisibleRobloxPictures() {
     );
 
   const workers =
-    Math.min(3, queue.length);
+    Math.min(5, queue.length);
 
   async function worker() {
     while (queue.length) {
