@@ -21,6 +21,7 @@
     <nav class="desktop-nav">
       <button class="nav-link active" data-page="home">Home</button>
       <button class="nav-link" data-page="standings">Standings</button>
+      <button class="nav-link" data-page="playoffs">Playoffs</button>
       <button class="nav-link" data-page="teams">Teams</button>
       <button class="nav-link" data-page="stats">Stats</button>
       <button class="nav-link" data-page="schedule">Scores</button>
@@ -100,33 +101,6 @@
             <p>View Pacific Conference teams and standings.</p>
             <button data-go="standings">View Standings</button>
           </article>
-        </div>
-      </section>
-
-      <section class="home-dashboard-section">
-        <div class="home-dashboard-grid">
-          <section class="home-dashboard-card">
-            <div class="home-dashboard-card-head">
-              <div><span>SEASON 2</span><h2>AWARD WATCH</h2></div>
-              <select id="homeAwardPosition" class="home-award-select" aria-label="Award Watch position">
-                <option value="quarterback">QB</option><option value="runningback">RB</option><option value="wide receiver">WR</option><option value="defensive end">DE</option><option value="defensive back">DB</option><option value="kicker">K</option>
-              </select>
-            </div>
-            <div class="home-accent-line"></div>
-            <div id="homeAwardWatchList" class="home-award-list"><div class="home-dashboard-loading">Loading award watch...</div></div>
-          </section>
-
-          <section class="home-dashboard-card">
-            <div class="home-dashboard-card-head">
-              <div><span>LIVE TABLE</span><h2>STANDINGS</h2></div>
-              <button type="button" class="home-full-table-button" data-go="standings">FULL TABLE</button>
-            </div>
-            <div class="home-accent-line"></div>
-            <div class="home-standings-columns">
-              <div><h3>ATLANTIC CONFERENCE · TOP 6</h3><div id="homeAtlanticStandings" class="home-standings-list"><div class="home-dashboard-loading">Loading...</div></div></div>
-              <div><h3>PACIFIC CONFERENCE · TOP 6</h3><div id="homePacificStandings" class="home-standings-list"><div class="home-dashboard-loading">Loading...</div></div></div>
-            </div>
-          </section>
         </div>
       </section>
     </section>
@@ -209,6 +183,34 @@
               </table>
             </div>
           </section>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PLAYOFFS -->
+    <section class="page playoffs-page" id="playoffs">
+      <div class="page-container playoffs-container">
+        <div class="playoffs-hero-row">
+          <div class="page-title playoffs-title-block">
+            <span>LIVE PLAYOFF BRACKET</span>
+            <h2>Season 2 Playoffs</h2>
+            <p>Seeds update automatically from the live standings. The top six teams from each conference qualify.</p>
+          </div>
+
+          <button class="playoff-refresh-button" id="refreshPlayoffsBtn" type="button">
+            ↻ Refresh Bracket
+          </button>
+        </div>
+
+        <div class="playoff-key">
+          <span><b>1–2</b> First-round bye</span>
+          <span><b>3 vs 6</b> Wild Card</span>
+          <span><b>4 vs 5</b> Wild Card</span>
+        </div>
+
+        <div class="live-playoff-bracket" id="livePlayoffBracket">
+          <div class="loading-card">Loading current playoff seeds...</div>
         </div>
       </div>
     </section>

@@ -719,206 +719,189 @@ async function getDirectRobloxPicture(
     return "";
   }
 
+
   if (directRobloxPictureCache.has(key)) {
     return directRobloxPictureCache.get(key);
   }
 
+
   /*
-    IMPORTANT:
-    Do NOT call /api/player/:name here.
-
-    The full /api/players endpoint is already loaded once and is used
-    for Discord/team matching. If a stat name is not in that Discord
-    lookup, we go straight to the Roblox username endpoint.
-
-    This avoids hundreds of expected 404 errors in the browser console
-    for players whose stat name is a Roblox username but does not match
-    a Discord/Bloxlink lookup name.
+    1) If EFF Bot/Bloxlink already knows the player, use the
+       exact Roblox username and picture it has stored.
+    2) Otherwise ask Roblox for an account whose USERNAME is
+       exactly the stat-sheet name.
+    3) Temporary request failures are retried instead of being
+       permanently cached as a missing player.
   */
 
-  const maxAttempts = 3;
-
-  for (
-    let attempt = 1;
-    attempt <= maxAttempts;
-    attempt += 1
-  ) {
+  try {
 
     try {
-      const response =
+      const playerResponse =
         await fetch(
-          `${BOT_API_URL}/api/roblox/${encodeURIComponent(lookupName)}`,
+          `${BOT_API_URL}/api/player/${encodeURIComponent(clean)}`,
           {
             method: "GET",
             cache: "no-store"
           }
         );
 
-      if (response.status === 404) {
-        directRobloxPictureCache.set(
-          key,
-          ""
-        );
+      if (playerResponse.ok) {
+        const playerResult =
+          await playerResponse.json();
 
-        return "";
+        const playerData =
+          playerResult?.player ||
+          playerResult?.data ||
+          null;
+
+        const knownPicture =
+          playerData?.robloxPicture ||
+          playerResult?.robloxPicture ||
+          "";
+
+        if (knownPicture) {
+          directRobloxPictureCache.set(
+            key,
+            knownPicture
+          );
+          return knownPicture;
+        }
+
+        const knownRobloxName =
+          playerData?.robloxUsername ||
+          playerResult?.robloxUsername ||
+          "";
+
+        if (
+          knownRobloxName &&
+          normalizePlayerName(knownRobloxName) !== key
+        ) {
+          const knownPictureLookup =
+            await getDirectRobloxPicture(
+              knownRobloxName
+            );
+
+          if (knownPictureLookup) {
+            directRobloxPictureCache.set(
+              key,
+              knownPictureLookup
+            );
+            return knownPictureLookup;
+          }
+        }
       }
+    } catch (playerLookupError) {
+      console.warn(
+        "EFF player lookup failed; trying exact Roblox username:",
+        clean,
+        playerLookupError
+      );
+    }
 
-      if (!response.ok) {
-        throw new Error(
-          `Roblox proxy returned ${response.status}`
-        );
-      }
 
-      const result =
-        await response.json();
+    const maxAttempts = 3;
 
-      const robloxData =
-        result?.roblox ||
-        result?.data ||
-        {};
+    for (
+      let attempt = 1;
+      attempt <= maxAttempts;
+      attempt += 1
+    ) {
 
-      const resolvedUsername =
-        robloxData.username ||
-        robloxData.name ||
-        lookupName;
+      try {
+        const response =
+          await fetch(
+            `${BOT_API_URL}/api/roblox/${encodeURIComponent(lookupName)}`,
+            {
+              method: "GET",
+              cache: "no-store"
+            }
+          );
 
-      /*
-        Keep the exact-username safety check so a similar Roblox account
-        cannot be shown for the wrong stat player.
-      */
-      if (
-        normalizePlayerName(resolvedUsername) !==
-        normalizePlayerName(lookupName)
-      ) {
-        directRobloxPictureCache.set(
-          key,
-          ""
-        );
+        /*
+          404 means Roblox has no exact username match.
+          This is a real missing account, so remember it.
+        */
+        if (response.status === 404) {
+          directRobloxPictureCache.set(
+            key,
+            ""
+          );
+          return "";
+        }
 
-        return "";
-      }
+        if (!response.ok) {
+          throw new Error(
+            `Roblox proxy returned ${response.status}`
+          );
+        }
 
-      const picture =
-        result?.success
-          ? (
-              robloxData.picture ||
-              robloxData.avatar ||
-              robloxData.avatarUrl ||
-              robloxData.thumbnail ||
-              ""
-            )
-          : "";
+        const result =
+          await response.json();
 
-      if (picture) {
-        directRobloxPictureCache.set(
-          key,
-          picture
-        );
+        const robloxUsername =
+          result?.roblox?.username ||
+          result?.roblox?.name ||
+          lookupName;
 
-        return picture;
-      }
+        /*
+          Only accept the result if it resolves to the exact username
+          we searched for. This prevents a similarly-named account from
+          being shown for the wrong player.
+        */
+        if (
+          normalizePlayerName(robloxUsername) !==
+          normalizePlayerName(lookupName)
+        ) {
+          directRobloxPictureCache.set(
+            key,
+            ""
+          );
+          return "";
+        }
 
-      /*
-        success:true with no usable picture can happen briefly while the
-        Roblox thumbnail is being generated. Retry instead of caching a
-        permanent missing avatar.
-      */
-      if (attempt < maxAttempts) {
+        const picture =
+          result?.success
+            ? result?.roblox?.picture || ""
+            : "";
+
+        if (picture) {
+          directRobloxPictureCache.set(
+            key,
+            picture
+          );
+          return picture;
+        }
+
+      } catch (lookupError) {
+        if (attempt === maxAttempts) {
+          console.warn(
+            "Exact Roblox lookup failed after retries:",
+            lookupName,
+            lookupError
+          );
+          return "";
+        }
+
         await new Promise(
           (resolve) =>
             setTimeout(
               resolve,
-              500 * attempt
+              350 * attempt
             )
         );
-
-        continue;
       }
-
-      return "";
-
-    } catch (lookupError) {
-
-      if (attempt === maxAttempts) {
-        console.warn(
-          "Roblox avatar lookup failed after retries:",
-          lookupName,
-          lookupError
-        );
-
-        return "";
-      }
-
-      await new Promise(
-        (resolve) =>
-          setTimeout(
-            resolve,
-            450 * attempt
-          )
-      );
     }
+
+  } catch (error) {
+    console.warn(
+      "EFF Roblox picture lookup failed:",
+      lookupName,
+      error
+    );
   }
 
   return "";
-}
-
-
-async function resolveStatRowRobloxPicture(
-  row,
-  headers
-) {
-
-  const preferredHeaders = [
-    "username",
-    "player",
-    "name"
-  ];
-
-  let statName = "";
-
-  for (const preferred of preferredHeaders) {
-    const actualHeader =
-      headers.find(
-        (header) =>
-          normalize(header) === preferred
-      );
-
-    if (actualHeader) {
-      statName =
-        String(row?.[actualHeader] || "").trim();
-
-      if (statName) {
-        break;
-      }
-    }
-  }
-
-  if (!statName) {
-    return "";
-  }
-
-  const discordPlayer =
-    findDiscordPlayerForStatRow(
-      row,
-      headers
-    );
-
-  const knownPicture =
-    getBestPlayerPicture(discordPlayer);
-
-  if (knownPicture) {
-    return knownPicture;
-  }
-
-  const robloxUsername =
-    getRobloxUsernameForPlayer(
-      discordPlayer,
-      statName
-    );
-
-  return getDirectRobloxPicture(
-    robloxUsername
-  );
 }
 
 
@@ -2841,6 +2824,15 @@ async function loadStats(
         forceRefresh
       );
 
+    // Load Discord/Bloxlink player data before the first table render.
+    // This keeps TM logos available in both Season and All Time modes.
+    await getDiscordPlayers().catch((error) => {
+      console.warn(
+        "Discord team enrichment unavailable; stats will still load:",
+        error
+      );
+    });
+
     const allSheetNames =
       Object.keys(data || {});
 
@@ -3472,11 +3464,6 @@ function renderStatsTable(
     2600
   );
 
-  setTimeout(
-    retryVisibleRobloxPictures,
-    5200
-  );
-
 }
 
 
@@ -3913,7 +3900,7 @@ async function retryVisibleRobloxPictures() {
     );
 
   const workers =
-    Math.min(5, queue.length);
+    Math.min(3, queue.length);
 
   async function worker() {
     while (queue.length) {
@@ -4813,6 +4800,180 @@ document
 
 /*
 ==================================================
+LIVE PLAYOFFS
+==================================================
+*/
+
+function playoffSeedTeam(team, seed) {
+  if (!team) {
+    return `
+      <div class="playoff-team-line playoff-team-tbd">
+        <span class="playoff-seed">${esc(seed || "")}</span>
+        <span class="playoff-team-logo-placeholder"></span>
+        <strong>TBD</strong>
+        <em></em>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="playoff-team-line">
+      <span class="playoff-seed">${esc(seed)}</span>
+      ${
+        team.Logo
+          ? `<img src="${esc(team.Logo)}" alt="${esc(team.Team || "")}" loading="lazy">`
+          : `<span class="playoff-team-logo-placeholder"></span>`
+      }
+      <strong>${esc(team.Team || "TBD")}</strong>
+      <em>${esc(team.Rec || "")}</em>
+    </div>
+  `;
+}
+
+function playoffMatchup(firstTeam, firstSeed, secondTeam, secondSeed, extraClass = "") {
+  return `
+    <div class="playoff-matchup ${extraClass}">
+      ${playoffSeedTeam(firstTeam, firstSeed)}
+      ${playoffSeedTeam(secondTeam, secondSeed)}
+    </div>
+  `;
+}
+
+function buildConferencePlayoffSide(conferenceName, teams, side) {
+  const seed = (number) => teams[number - 1] || null;
+
+  const wildCardOne = playoffMatchup(seed(3), 3, seed(6), 6);
+  const wildCardTwo = playoffMatchup(seed(4), 4, seed(5), 5);
+  const divisionalOne = playoffMatchup(seed(1), 1, null, "");
+  const divisionalTwo = playoffMatchup(seed(2), 2, null, "");
+  const conferenceFinal = playoffMatchup(null, "", null, "", "playoff-conference-final");
+
+  const rounds = `
+    <div class="playoff-conference-side playoff-side-${side}">
+      <div class="playoff-conference-heading">
+        <span>${esc(conferenceName.toUpperCase())}</span>
+        <h3>${esc(conferenceName)} Conference</h3>
+      </div>
+
+      <div class="playoff-rounds-grid">
+        <div class="playoff-round playoff-round-wildcard">
+          <div class="playoff-round-label">Wild Card</div>
+          <div class="playoff-round-content">
+            ${wildCardOne}
+            ${wildCardTwo}
+          </div>
+        </div>
+
+        <div class="playoff-round playoff-round-divisional">
+          <div class="playoff-round-label">Divisional</div>
+          <div class="playoff-round-content playoff-round-centered">
+            ${divisionalOne}
+            ${divisionalTwo}
+          </div>
+        </div>
+
+        <div class="playoff-round playoff-round-conference">
+          <div class="playoff-round-label">Conference Championship</div>
+          <div class="playoff-round-content playoff-round-centered">
+            ${conferenceFinal}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return rounds;
+}
+
+function renderLivePlayoffBracket(atlantic, pacific) {
+  const container = document.getElementById("livePlayoffBracket");
+
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="playoff-master-grid">
+      ${buildConferencePlayoffSide("Atlantic", atlantic, "left")}
+
+      <div class="playoff-championship-center">
+        <div class="playoff-championship-label">EFF Championship</div>
+        <div class="playoff-championship-card">
+          <span class="playoff-trophy">🏆</span>
+          <h3>Season 2 Final</h3>
+          ${playoffSeedTeam(null, "")}
+          <div class="playoff-final-vs">VS</div>
+          ${playoffSeedTeam(null, "")}
+        </div>
+      </div>
+
+      ${buildConferencePlayoffSide("Pacific", pacific, "right")}
+    </div>
+  `;
+}
+
+async function loadPlayoffs(forceRefresh = false) {
+  const container = document.getElementById("livePlayoffBracket");
+
+  if (!container) return;
+
+  if (forceRefresh) {
+    leagueData = null;
+  }
+
+  container.innerHTML = `<div class="loading-card">Loading current playoff seeds...</div>`;
+
+  try {
+    const data = await getLeagueData();
+    const standings = Array.isArray(data?.[STANDINGS_SHEET])
+      ? data[STANDINGS_SHEET]
+      : [];
+
+    const atlantic = standings
+      .filter((team) => normalize(team.Conference) === "atlantic")
+      .sort(sortStandings)
+      .slice(0, 6);
+
+    const pacific = standings
+      .filter((team) => normalize(team.Conference) === "pacific")
+      .sort(sortStandings)
+      .slice(0, 6);
+
+    renderLivePlayoffBracket(atlantic, pacific);
+  } catch (error) {
+    console.error("Playoff bracket error:", error);
+    container.innerHTML = `
+      <div class="loading-card">
+        Unable to load the live playoff bracket.
+      </div>
+    `;
+  }
+}
+
+const refreshPlayoffsBtn =
+  document.getElementById("refreshPlayoffsBtn");
+
+if (refreshPlayoffsBtn) {
+  refreshPlayoffsBtn.addEventListener("click", async () => {
+    refreshPlayoffsBtn.disabled = true;
+    refreshPlayoffsBtn.textContent = "↻ Loading...";
+
+    try {
+      await loadPlayoffs(true);
+      // Keep standings/teams/home synced to the same refreshed standings data.
+      await Promise.allSettled([
+        loadStandings(),
+        loadTeams(),
+        renderHomeStandingsPreview()
+      ]);
+    } finally {
+      refreshPlayoffsBtn.disabled = false;
+      refreshPlayoffsBtn.textContent = "↻ Refresh Bracket";
+    }
+  });
+}
+
+
+/*
+==================================================
 HOME DASHBOARD
 ==================================================
 */
@@ -4888,6 +5049,7 @@ async function initializeWebsiteData() {
 
   await Promise.allSettled([
     loadStandings(),
+    loadPlayoffs(),
     loadTeams(),
     loadStats(),
     loadSchedule(),
