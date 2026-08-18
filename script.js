@@ -4828,7 +4828,65 @@ function normalizePlayoffLabel(value) {
     .replace(/[^a-z0-9]/g, "");
 }
 
-function getPlayoffWinnerName(updates, conference, round, game) {
+
+/*
+==================================================
+PLAYOFF UPDATE SHEET LOOKUP
+==================================================
+
+Your existing Google Sheet uses these columns:
+
+Game Key | Conference | Round | Matchup | Winner
+
+Examples:
+ATL-WC1
+ATL-WC2
+ATL-SF1
+ATL-SF2
+ATL-C
+PAC-WC1
+PAC-WC2
+PAC-SF1
+PAC-SF2
+PAC-C
+EFF-FINAL
+*/
+
+function getPlayoffWinnerByKey(updates, gameKey) {
+  const target =
+    normalizePlayoffLabel(gameKey);
+
+  if (!target) {
+    return "";
+  }
+
+  const row =
+    updates.find((item) => {
+      const value =
+        item["Game Key"] ??
+        item.GameKey ??
+        item["Game"] ??
+        "";
+
+      return (
+        normalizePlayoffLabel(value) ===
+        target
+      );
+    });
+
+  return String(
+    row?.Winner || ""
+  ).trim();
+}
+
+
+// Backward-compatible helper in case an older sheet format is ever used.
+function getPlayoffWinnerName(
+  updates,
+  conference,
+  round,
+  game
+) {
   const c = normalizePlayoffLabel(conference);
   const r = normalizePlayoffLabel(round);
   const g = normalizePlayoffLabel(game);
@@ -4837,7 +4895,11 @@ function getPlayoffWinnerName(updates, conference, round, game) {
     return (
       normalizePlayoffLabel(item.Conference) === c &&
       normalizePlayoffLabel(item.Round) === r &&
-      normalizePlayoffLabel(item.Game) === g
+      normalizePlayoffLabel(
+        item.Game ??
+        item.Matchup ??
+        ""
+      ) === g
     );
   });
 
@@ -4912,56 +4974,119 @@ function buildConferencePlayoffState(
   updates,
   allStandings
 ) {
-  const seed = (number) => seededTeams[number - 1] || null;
+  const seed = (number) =>
+    seededTeams[number - 1] || null;
 
-  const wc36WinnerName = getPlayoffWinnerName(
-    updates,
-    conferenceName,
-    "Wild Card",
-    "3 vs 6"
-  );
+  const prefix =
+    normalize(conferenceName) === "atlantic"
+      ? "ATL"
+      : "PAC";
 
-  const wc45WinnerName = getPlayoffWinnerName(
-    updates,
-    conferenceName,
-    "Wild Card",
-    "4 vs 5"
-  );
+  const wc36WinnerName =
+    getPlayoffWinnerByKey(
+      updates,
+      `${prefix}-WC1`
+    );
 
-  const wc36Winner = findPlayoffTeamByName(allStandings, wc36WinnerName);
-  const wc45Winner = findPlayoffTeamByName(allStandings, wc45WinnerName);
+  const wc45WinnerName =
+    getPlayoffWinnerByKey(
+      updates,
+      `${prefix}-WC2`
+    );
 
-  const div1WinnerName = getPlayoffWinnerName(
-    updates,
-    conferenceName,
-    "Divisional",
-    "1 Seed Game"
-  );
+  const wc36Winner =
+    findPlayoffTeamByName(
+      allStandings,
+      wc36WinnerName
+    );
 
-  const div2WinnerName = getPlayoffWinnerName(
-    updates,
-    conferenceName,
-    "Divisional",
-    "2 Seed Game"
-  );
+  const wc45Winner =
+    findPlayoffTeamByName(
+      allStandings,
+      wc45WinnerName
+    );
 
-  const div1Winner = findPlayoffTeamByName(allStandings, div1WinnerName);
-  const div2Winner = findPlayoffTeamByName(allStandings, div2WinnerName);
 
-  const conferenceWinnerName = getPlayoffWinnerName(
-    updates,
-    conferenceName,
-    "Conference Championship",
-    "Final"
-  );
+  /*
+    EFF playoff reseeding:
 
-  const conferenceWinner = findPlayoffTeamByName(
-    allStandings,
-    conferenceWinnerName
-  );
+    Seed 1 plays the WORST-SEEDED surviving Wild Card team.
+    Seed 2 plays the BEST-SEEDED surviving Wild Card team.
+
+    Because of that, both Wild Card winners must be known before
+    the two Divisional matchups can be placed correctly.
+  */
+
+  const wildcardWinners =
+    [wc36Winner, wc45Winner]
+      .filter(Boolean)
+      .map((team) => ({
+        team,
+        seed:
+          getPlayoffTeamSeed(
+            team,
+            seededTeams
+          )
+      }))
+      .filter((entry) => entry.seed);
+
+  let worstWildcardWinner = null;
+  let bestWildcardWinner = null;
+
+  if (wildcardWinners.length === 2) {
+    wildcardWinners.sort(
+      (a, b) => a.seed - b.seed
+    );
+
+    bestWildcardWinner =
+      wildcardWinners[0].team;
+
+    worstWildcardWinner =
+      wildcardWinners[
+        wildcardWinners.length - 1
+      ].team;
+  }
+
+
+  const div1WinnerName =
+    getPlayoffWinnerByKey(
+      updates,
+      `${prefix}-SF1`
+    );
+
+  const div2WinnerName =
+    getPlayoffWinnerByKey(
+      updates,
+      `${prefix}-SF2`
+    );
+
+  const div1Winner =
+    findPlayoffTeamByName(
+      allStandings,
+      div1WinnerName
+    );
+
+  const div2Winner =
+    findPlayoffTeamByName(
+      allStandings,
+      div2WinnerName
+    );
+
+  const conferenceWinnerName =
+    getPlayoffWinnerByKey(
+      updates,
+      `${prefix}-C`
+    );
+
+  const conferenceWinner =
+    findPlayoffTeamByName(
+      allStandings,
+      conferenceWinnerName
+    );
 
   return {
     seededTeams,
+
     wc36: {
       first: seed(3),
       firstSeed: 3,
@@ -4969,6 +5094,7 @@ function buildConferencePlayoffState(
       secondSeed: 6,
       winnerName: wc36WinnerName
     },
+
     wc45: {
       first: seed(4),
       firstSeed: 4,
@@ -4976,27 +5102,48 @@ function buildConferencePlayoffState(
       secondSeed: 5,
       winnerName: wc45WinnerName
     },
+
     div1: {
       first: seed(1),
       firstSeed: 1,
-      second: wc36Winner,
-      secondSeed: getPlayoffTeamSeed(wc36Winner, seededTeams),
+      second: worstWildcardWinner,
+      secondSeed:
+        getPlayoffTeamSeed(
+          worstWildcardWinner,
+          seededTeams
+        ),
       winnerName: div1WinnerName
     },
+
     div2: {
       first: seed(2),
       firstSeed: 2,
-      second: wc45Winner,
-      secondSeed: getPlayoffTeamSeed(wc45Winner, seededTeams),
+      second: bestWildcardWinner,
+      secondSeed:
+        getPlayoffTeamSeed(
+          bestWildcardWinner,
+          seededTeams
+        ),
       winnerName: div2WinnerName
     },
+
     conferenceFinal: {
       first: div1Winner,
-      firstSeed: getPlayoffTeamSeed(div1Winner, seededTeams),
+      firstSeed:
+        getPlayoffTeamSeed(
+          div1Winner,
+          seededTeams
+        ),
       second: div2Winner,
-      secondSeed: getPlayoffTeamSeed(div2Winner, seededTeams),
-      winnerName: conferenceWinnerName
+      secondSeed:
+        getPlayoffTeamSeed(
+          div2Winner,
+          seededTeams
+        ),
+      winnerName:
+        conferenceWinnerName
     },
+
     champion: conferenceWinner
   };
 }
@@ -5102,12 +5249,11 @@ function renderLivePlayoffBracket(
     allStandings
   );
 
-  const finalWinnerName = getPlayoffWinnerName(
-    updates,
-    "EFF",
-    "Championship",
-    "Final"
-  );
+  const finalWinnerName =
+    getPlayoffWinnerByKey(
+      updates,
+      "EFF-FINAL"
+    );
 
   const atlanticChampion = atlanticState.champion;
   const pacificChampion = pacificState.champion;
