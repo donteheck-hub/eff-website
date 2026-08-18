@@ -3229,8 +3229,23 @@ function renderStatSheet(
     normalized.headers;
 
 
+  // Only show players who have actually earned points.
+  // This keeps the stat tables focused on players with real production
+  // and removes the long list of 0.0 PTS rows.
+  const pointsHeader =
+    normalized.headers.find(
+      (header) =>
+        normalize(header) === "pts" ||
+        normalize(header) === "points"
+    );
+
   activeStatsRows =
-    calculatedRows;
+    pointsHeader
+      ? calculatedRows.filter(
+          (row) =>
+            (numberFrom(row[pointsHeader]) ?? 0) > 0
+        )
+      : calculatedRows;
 
 
   const ptsHeader =
