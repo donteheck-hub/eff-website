@@ -4008,3 +4008,33 @@ HISTORY BRACKET + AWARD LOGO TWEAKS
     grid-template-columns: minmax(720px, 1fr) 330px minmax(720px, 1fr);
   }
 }
+
+/* ==================================================
+   PLAYOFF RESULT / WINNER STATES
+   ================================================== */
+.playoff-team-line.playoff-team-winner {
+  background: linear-gradient(90deg, rgba(21, 190, 105, 0.18), rgba(21, 190, 105, 0.05));
+  box-shadow: inset 3px 0 0 #24d27d;
+}
+
+.playoff-team-line.playoff-team-winner strong {
+  color: #ffffff;
+}
+
+.playoff-team-line.playoff-team-winner .playoff-seed {
+  background: rgba(36, 210, 125, 0.16);
+  color: #7df0b4;
+}
+
+.playoff-champion-banner {
+  margin-top: 14px;
+  border: 1px solid rgba(255, 194, 70, 0.45);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #ffc246;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+}

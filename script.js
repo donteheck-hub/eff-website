@@ -10,6 +10,9 @@ const STANDINGS_SHEET =
 const SCHEDULE_SHEET =
   "Schedule";
 
+const PLAYOFF_UPDATE_SHEET =
+  "Playoff Bracket update";
+
 const STAT_SHEETS = [
   "quarterback",
   "runningback",
@@ -4803,9 +4806,63 @@ document
 ==================================================
 LIVE PLAYOFFS
 ==================================================
+
+Google Sheet tab used after the playoffs begin:
+  Playoff Bracket update
+
+Columns:
+  Conference | Round | Game | Winner
+
+The standings still control seeds 1-6. You only enter the winner of
+completed playoff games and the website advances that team automatically.
 */
 
-function playoffSeedTeam(team, seed) {
+function getPlayoffUpdateRows(data) {
+  return Array.isArray(data?.[PLAYOFF_UPDATE_SHEET])
+    ? data[PLAYOFF_UPDATE_SHEET]
+    : [];
+}
+
+function normalizePlayoffLabel(value) {
+  return normalize(value)
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function getPlayoffWinnerName(updates, conference, round, game) {
+  const c = normalizePlayoffLabel(conference);
+  const r = normalizePlayoffLabel(round);
+  const g = normalizePlayoffLabel(game);
+
+  const row = updates.find((item) => {
+    return (
+      normalizePlayoffLabel(item.Conference) === c &&
+      normalizePlayoffLabel(item.Round) === r &&
+      normalizePlayoffLabel(item.Game) === g
+    );
+  });
+
+  return String(row?.Winner || "").trim();
+}
+
+function findPlayoffTeamByName(standings, teamName) {
+  if (!teamName) return null;
+
+  return standings.find((team) =>
+    teamNamesMatch(team.Team, teamName)
+  ) || null;
+}
+
+function getPlayoffTeamSeed(team, seededTeams) {
+  if (!team) return "";
+
+  const index = seededTeams.findIndex((seeded) =>
+    teamNamesMatch(seeded.Team, team.Team)
+  );
+
+  return index >= 0 ? index + 1 : "";
+}
+
+function playoffSeedTeam(team, seed, winnerName = "") {
   if (!team) {
     return `
       <div class="playoff-team-line playoff-team-tbd">
@@ -4817,8 +4874,10 @@ function playoffSeedTeam(team, seed) {
     `;
   }
 
+  const isWinner = winnerName && teamNamesMatch(team.Team, winnerName);
+
   return `
-    <div class="playoff-team-line">
+    <div class="playoff-team-line ${isWinner ? "playoff-team-winner" : ""}">
       <span class="playoff-seed">${esc(seed)}</span>
       ${
         team.Logo
@@ -4831,25 +4890,160 @@ function playoffSeedTeam(team, seed) {
   `;
 }
 
-function playoffMatchup(firstTeam, firstSeed, secondTeam, secondSeed, extraClass = "") {
+function playoffMatchup(
+  firstTeam,
+  firstSeed,
+  secondTeam,
+  secondSeed,
+  winnerName = "",
+  extraClass = ""
+) {
   return `
     <div class="playoff-matchup ${extraClass}">
-      ${playoffSeedTeam(firstTeam, firstSeed)}
-      ${playoffSeedTeam(secondTeam, secondSeed)}
+      ${playoffSeedTeam(firstTeam, firstSeed, winnerName)}
+      ${playoffSeedTeam(secondTeam, secondSeed, winnerName)}
     </div>
   `;
 }
 
-function buildConferencePlayoffSide(conferenceName, teams, side) {
-  const seed = (number) => teams[number - 1] || null;
+function buildConferencePlayoffState(
+  conferenceName,
+  seededTeams,
+  updates,
+  allStandings
+) {
+  const seed = (number) => seededTeams[number - 1] || null;
 
-  const wildCardOne = playoffMatchup(seed(3), 3, seed(6), 6);
-  const wildCardTwo = playoffMatchup(seed(4), 4, seed(5), 5);
-  const divisionalOne = playoffMatchup(seed(1), 1, null, "");
-  const divisionalTwo = playoffMatchup(seed(2), 2, null, "");
-  const conferenceFinal = playoffMatchup(null, "", null, "", "playoff-conference-final");
+  const wc36WinnerName = getPlayoffWinnerName(
+    updates,
+    conferenceName,
+    "Wild Card",
+    "3 vs 6"
+  );
 
-  const rounds = `
+  const wc45WinnerName = getPlayoffWinnerName(
+    updates,
+    conferenceName,
+    "Wild Card",
+    "4 vs 5"
+  );
+
+  const wc36Winner = findPlayoffTeamByName(allStandings, wc36WinnerName);
+  const wc45Winner = findPlayoffTeamByName(allStandings, wc45WinnerName);
+
+  const div1WinnerName = getPlayoffWinnerName(
+    updates,
+    conferenceName,
+    "Divisional",
+    "1 Seed Game"
+  );
+
+  const div2WinnerName = getPlayoffWinnerName(
+    updates,
+    conferenceName,
+    "Divisional",
+    "2 Seed Game"
+  );
+
+  const div1Winner = findPlayoffTeamByName(allStandings, div1WinnerName);
+  const div2Winner = findPlayoffTeamByName(allStandings, div2WinnerName);
+
+  const conferenceWinnerName = getPlayoffWinnerName(
+    updates,
+    conferenceName,
+    "Conference Championship",
+    "Final"
+  );
+
+  const conferenceWinner = findPlayoffTeamByName(
+    allStandings,
+    conferenceWinnerName
+  );
+
+  return {
+    seededTeams,
+    wc36: {
+      first: seed(3),
+      firstSeed: 3,
+      second: seed(6),
+      secondSeed: 6,
+      winnerName: wc36WinnerName
+    },
+    wc45: {
+      first: seed(4),
+      firstSeed: 4,
+      second: seed(5),
+      secondSeed: 5,
+      winnerName: wc45WinnerName
+    },
+    div1: {
+      first: seed(1),
+      firstSeed: 1,
+      second: wc36Winner,
+      secondSeed: getPlayoffTeamSeed(wc36Winner, seededTeams),
+      winnerName: div1WinnerName
+    },
+    div2: {
+      first: seed(2),
+      firstSeed: 2,
+      second: wc45Winner,
+      secondSeed: getPlayoffTeamSeed(wc45Winner, seededTeams),
+      winnerName: div2WinnerName
+    },
+    conferenceFinal: {
+      first: div1Winner,
+      firstSeed: getPlayoffTeamSeed(div1Winner, seededTeams),
+      second: div2Winner,
+      secondSeed: getPlayoffTeamSeed(div2Winner, seededTeams),
+      winnerName: conferenceWinnerName
+    },
+    champion: conferenceWinner
+  };
+}
+
+function buildConferencePlayoffSide(conferenceName, state, side) {
+  const wildCardOne = playoffMatchup(
+    state.wc36.first,
+    state.wc36.firstSeed,
+    state.wc36.second,
+    state.wc36.secondSeed,
+    state.wc36.winnerName
+  );
+
+  const wildCardTwo = playoffMatchup(
+    state.wc45.first,
+    state.wc45.firstSeed,
+    state.wc45.second,
+    state.wc45.secondSeed,
+    state.wc45.winnerName
+  );
+
+  const divisionalOne = playoffMatchup(
+    state.div1.first,
+    state.div1.firstSeed,
+    state.div1.second,
+    state.div1.secondSeed,
+    state.div1.winnerName
+  );
+
+  const divisionalTwo = playoffMatchup(
+    state.div2.first,
+    state.div2.firstSeed,
+    state.div2.second,
+    state.div2.secondSeed,
+    state.div2.winnerName
+  );
+
+  const conferenceFinal = playoffMatchup(
+    state.conferenceFinal.first,
+    state.conferenceFinal.firstSeed,
+    state.conferenceFinal.second,
+    state.conferenceFinal.secondSeed,
+    state.conferenceFinal.winnerName,
+    "playoff-conference-final"
+  );
+
+  return `
     <div class="playoff-conference-side playoff-side-${side}">
       <div class="playoff-conference-heading">
         <span>${esc(conferenceName.toUpperCase())}</span>
@@ -4882,31 +5076,81 @@ function buildConferencePlayoffSide(conferenceName, teams, side) {
       </div>
     </div>
   `;
-
-  return rounds;
 }
 
-function renderLivePlayoffBracket(atlantic, pacific) {
+function renderLivePlayoffBracket(
+  atlantic,
+  pacific,
+  updates,
+  allStandings
+) {
   const container = document.getElementById("livePlayoffBracket");
 
   if (!container) return;
 
+  const atlanticState = buildConferencePlayoffState(
+    "Atlantic",
+    atlantic,
+    updates,
+    allStandings
+  );
+
+  const pacificState = buildConferencePlayoffState(
+    "Pacific",
+    pacific,
+    updates,
+    allStandings
+  );
+
+  const finalWinnerName = getPlayoffWinnerName(
+    updates,
+    "EFF",
+    "Championship",
+    "Final"
+  );
+
+  const atlanticChampion = atlanticState.champion;
+  const pacificChampion = pacificState.champion;
+
+  const atlanticChampionSeed = getPlayoffTeamSeed(
+    atlanticChampion,
+    atlantic
+  );
+
+  const pacificChampionSeed = getPlayoffTeamSeed(
+    pacificChampion,
+    pacific
+  );
+
   container.innerHTML = `
     <div class="playoff-master-grid">
-      ${buildConferencePlayoffSide("Atlantic", atlantic, "left")}
+      ${buildConferencePlayoffSide("Atlantic", atlanticState, "left")}
 
       <div class="playoff-championship-center">
         <div class="playoff-championship-label">EFF Championship</div>
         <div class="playoff-championship-card">
           <span class="playoff-trophy">🏆</span>
           <h3>Season 2 Final</h3>
-          ${playoffSeedTeam(null, "")}
+          ${playoffSeedTeam(
+            atlanticChampion,
+            atlanticChampionSeed,
+            finalWinnerName
+          )}
           <div class="playoff-final-vs">VS</div>
-          ${playoffSeedTeam(null, "")}
+          ${playoffSeedTeam(
+            pacificChampion,
+            pacificChampionSeed,
+            finalWinnerName
+          )}
+          ${
+            finalWinnerName
+              ? `<div class="playoff-champion-banner">CHAMPION · ${esc(finalWinnerName)}</div>`
+              : ""
+          }
         </div>
       </div>
 
-      ${buildConferencePlayoffSide("Pacific", pacific, "right")}
+      ${buildConferencePlayoffSide("Pacific", pacificState, "right")}
     </div>
   `;
 }
@@ -4920,13 +5164,15 @@ async function loadPlayoffs(forceRefresh = false) {
     leagueData = null;
   }
 
-  container.innerHTML = `<div class="loading-card">Loading current playoff seeds...</div>`;
+  container.innerHTML = `<div class="loading-card">Loading current playoff bracket...</div>`;
 
   try {
     const data = await getLeagueData();
     const standings = Array.isArray(data?.[STANDINGS_SHEET])
       ? data[STANDINGS_SHEET]
       : [];
+
+    const updates = getPlayoffUpdateRows(data);
 
     const atlantic = standings
       .filter((team) => normalize(team.Conference) === "atlantic")
@@ -4938,7 +5184,12 @@ async function loadPlayoffs(forceRefresh = false) {
       .sort(sortStandings)
       .slice(0, 6);
 
-    renderLivePlayoffBracket(atlantic, pacific);
+    renderLivePlayoffBracket(
+      atlantic,
+      pacific,
+      updates,
+      standings
+    );
   } catch (error) {
     console.error("Playoff bracket error:", error);
     container.innerHTML = `
@@ -4959,7 +5210,6 @@ if (refreshPlayoffsBtn) {
 
     try {
       await loadPlayoffs(true);
-      // Keep standings/teams/home synced to the same refreshed standings data.
       await Promise.allSettled([
         loadStandings(),
         loadTeams(),
