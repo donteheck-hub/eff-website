@@ -141,6 +141,10 @@ let discordPlayers = [];
 
 let discordPlayerLookup = new Map();
 
+let discordIdentityWarmComplete = false;
+let discordIdentityMappedCount = 0;
+let statsIdentityPollRunning = false;
+
 let activeStatsRows = [];
 
 let activeStatsHeaders = [];
@@ -276,9 +280,12 @@ FETCH DISCORD / ROBLOX PLAYER DATA
 ==================================================
 */
 
-async function getDiscordPlayers() {
+async function getDiscordPlayers(forceRefresh = false) {
 
-  if (discordPlayers.length) {
+  if (
+    discordPlayers.length &&
+    !forceRefresh
+  ) {
     return discordPlayers;
   }
 
@@ -312,9 +319,71 @@ async function getDiscordPlayers() {
       ? result.players
       : [];
 
+  discordIdentityWarmComplete =
+    Boolean(result.identityWarmComplete);
+
+  discordIdentityMappedCount =
+    Number(result.identityMappedCount || 0);
+
   buildDiscordPlayerLookup();
 
   return discordPlayers;
+}
+
+
+async function refreshStatsIdentityUntilReady() {
+
+  if (
+    statsIdentityPollRunning ||
+    discordIdentityWarmComplete
+  ) {
+    return;
+  }
+
+  statsIdentityPollRunning = true;
+
+  try {
+    const maxAttempts = 15;
+
+    for (
+      let attempt = 0;
+      attempt < maxAttempts;
+      attempt += 1
+    ) {
+
+      await new Promise(
+        (resolve) =>
+          setTimeout(resolve, 2500)
+      );
+
+      try {
+        await getDiscordPlayers(true);
+      } catch (error) {
+        console.warn(
+          "Stats identity refresh failed:",
+          error
+        );
+        continue;
+      }
+
+      if (
+        activeStatSheetName &&
+        Array.isArray(activeRawStatRows)
+      ) {
+        renderStatSheet(
+          activeStatSheetName,
+          activeRawStatRows,
+          true
+        );
+      }
+
+      if (discordIdentityWarmComplete) {
+        break;
+      }
+    }
+  } finally {
+    statsIdentityPollRunning = false;
+  }
 }
 
 
@@ -2985,6 +3054,8 @@ async function loadStats(
     );
 
     updateStatsModeUI();
+
+    refreshStatsIdentityUntilReady();
 
     getDiscordPlayers()
       .then(() => {
