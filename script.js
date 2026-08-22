@@ -5053,6 +5053,18 @@ function buildConferencePlayoffState(
       ? "ATL"
       : "PAC";
 
+  /*
+    FIXED EFF BRACKET PATH — NO RESEEDING
+
+    Wild Card 1: Seed 3 vs Seed 6
+      winner always advances to play Seed 1.
+
+    Wild Card 2: Seed 4 vs Seed 5
+      winner always advances to play Seed 2.
+
+    The bracket path never changes based on the winner's seed.
+  */
+
   const wc36WinnerName =
     getPlayoffWinnerByKey(
       updates,
@@ -5076,48 +5088,6 @@ function buildConferencePlayoffState(
       allStandings,
       wc45WinnerName
     );
-
-
-  /*
-    EFF playoff reseeding:
-
-    Seed 1 plays the WORST-SEEDED surviving Wild Card team.
-    Seed 2 plays the BEST-SEEDED surviving Wild Card team.
-
-    Because of that, both Wild Card winners must be known before
-    the two Divisional matchups can be placed correctly.
-  */
-
-  const wildcardWinners =
-    [wc36Winner, wc45Winner]
-      .filter(Boolean)
-      .map((team) => ({
-        team,
-        seed:
-          getPlayoffTeamSeed(
-            team,
-            seededTeams
-          )
-      }))
-      .filter((entry) => entry.seed);
-
-  let worstWildcardWinner = null;
-  let bestWildcardWinner = null;
-
-  if (wildcardWinners.length === 2) {
-    wildcardWinners.sort(
-      (a, b) => a.seed - b.seed
-    );
-
-    bestWildcardWinner =
-      wildcardWinners[0].team;
-
-    worstWildcardWinner =
-      wildcardWinners[
-        wildcardWinners.length - 1
-      ].team;
-  }
-
 
   const div1WinnerName =
     getPlayoffWinnerByKey(
@@ -5174,25 +5144,27 @@ function buildConferencePlayoffState(
       winnerName: wc45WinnerName
     },
 
+    // Fixed bracket: WC1 winner -> Seed 1
     div1: {
       first: seed(1),
       firstSeed: 1,
-      second: worstWildcardWinner,
+      second: wc36Winner,
       secondSeed:
         getPlayoffTeamSeed(
-          worstWildcardWinner,
+          wc36Winner,
           seededTeams
         ),
       winnerName: div1WinnerName
     },
 
+    // Fixed bracket: WC2 winner -> Seed 2
     div2: {
       first: seed(2),
       firstSeed: 2,
-      second: bestWildcardWinner,
+      second: wc45Winner,
       secondSeed:
         getPlayoffTeamSeed(
-          bestWildcardWinner,
+          wc45Winner,
           seededTeams
         ),
       winnerName: div2WinnerName
