@@ -138,6 +138,8 @@ let allTimeData = null;
 let currentStatsMode = "season";
 
 let discordPlayers = [];
+let discordPlayersLoadedAt = 0;
+const DISCORD_PLAYERS_CACHE_MS = 60 * 1000;
 
 let discordPlayerLookup = new Map();
 
@@ -282,42 +284,72 @@ FETCH DISCORD / ROBLOX PLAYER DATA
 
 async function getDiscordPlayers(forceRefresh = false) {
 
-  if (
-    discordPlayers.length &&
-    !forceRefresh
-  ) {
+  const cacheFresh =
+    discordPlayers.length > 0 &&
+    Date.now() - discordPlayersLoadedAt < DISCORD_PLAYERS_CACHE_MS;
+
+  if (cacheFresh && !forceRefresh) {
     return discordPlayers;
   }
 
-  const response =
-    await fetch(
-      `${BOT_API_URL}/api/players?cacheBust=${Date.now()}`,
-      {
-        method: "GET",
-        cache: "no-store"
+  let result = null;
+  let lastError = null;
+
+  // The team-rosters endpoint is the preferred source because every
+  // returned player is attached directly to a Discord team role.
+  const endpoints = [
+    '/api/team-rosters',
+    '/api/players'
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(
+        `${BOT_API_URL}${endpoint}?cacheBust=${Date.now()}`,
+        {
+          method: 'GET',
+          cache: 'no-store'
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `EFF Bot API ${endpoint} returned ${response.status}`
+        );
       }
-    );
 
-  if (!response.ok) {
-    throw new Error(
-      `EFF Bot API HTTP error: ${response.status}`
-    );
+      const payload = await response.json();
+
+      if (!payload.success) {
+        throw new Error(
+          payload.error ||
+          `EFF Bot API ${endpoint} returned an error.`
+        );
+      }
+
+      if (Array.isArray(payload.players)) {
+        result = payload;
+        break;
+      }
+    } catch (error) {
+      lastError = error;
+      console.warn(
+        `EFF Bot player source failed (${endpoint}):`,
+        error
+      );
+    }
   }
 
-  const result =
-    await response.json();
+  if (!result) {
+    if (discordPlayers.length) {
+      return discordPlayers;
+    }
 
-  if (!result.success) {
-    throw new Error(
-      result.error ||
-      "EFF Bot API returned an error."
-    );
+    throw lastError || new Error('Unable to load EFF Bot players.');
   }
 
-  discordPlayers =
-    Array.isArray(result.players)
-      ? result.players
-      : [];
+  discordPlayers = result.players;
+  discordPlayersLoadedAt = Date.now();
 
   discordIdentityWarmComplete =
     Boolean(result.identityWarmComplete);
@@ -329,7 +361,6 @@ async function getDiscordPlayers(forceRefresh = false) {
 
   return discordPlayers;
 }
-
 
 async function refreshStatsIdentityUntilReady() {
 
@@ -1769,7 +1800,7 @@ async function openTeamDetail(
       );
 
 
-    const teamPlayers =
+    let teamPlayers =
       players.filter(
         (player) =>
           teamNamesMatch(
@@ -1777,6 +1808,23 @@ async function openTeamDetail(
             teamName
           )
       );
+
+    // If the first cached response arrived before Discord role data was
+    // ready, refresh once before declaring the roster empty.
+    if (!teamPlayers.length) {
+      const refreshedPlayers =
+        await getDiscordPlayers(true)
+          .catch(() => players);
+
+      teamPlayers =
+        refreshedPlayers.filter(
+          (player) =>
+            teamNamesMatch(
+              player.team,
+              teamName
+            )
+        );
+    }
 
 
     if (logoElement) {
@@ -3939,6 +3987,7 @@ if (refreshStatsBtn) {
         }
 
         discordPlayers = [];
+        discordPlayersLoadedAt = 0;
 
         discordPlayerLookup =
           new Map();
