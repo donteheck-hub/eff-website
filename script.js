@@ -1404,6 +1404,50 @@ function normalize(value) {
 }
 
 
+
+function getDisplayImageUrl(
+  value
+) {
+  const raw =
+    String(value || "").trim();
+
+  if (!raw) {
+    return "";
+  }
+
+  // Google Drive normal share links:
+  // https://drive.google.com/file/d/FILE_ID/view?...
+  let match =
+    raw.match(
+      /drive\.google\.com\/file\/d\/([^/?#]+)/i
+    );
+
+  // Google Drive uc links:
+  // https://drive.google.com/uc?export=view&id=FILE_ID
+  if (!match) {
+    match =
+      raw.match(
+        /[?&]id=([^&#]+)/i
+      );
+  }
+
+  if (match?.[1]) {
+    const fileId =
+      decodeURIComponent(
+        match[1]
+      );
+
+    return (
+      "https://drive.google.com/thumbnail" +
+      `?id=${encodeURIComponent(fileId)}` +
+      "&sz=w1000"
+    );
+  }
+
+  return raw;
+}
+
+
 function esc(value) {
 
   return String(value ?? "")
@@ -1719,7 +1763,7 @@ function createStandingsRow(
             logo
               ? `
                 <img
-                  src="${esc(logo)}"
+                  src="${esc(getDisplayImageUrl(logo))}"
                   alt="${esc(name)}"
                   loading="lazy"
                 >
@@ -1866,7 +1910,7 @@ function renderTeams(grid, teams) {
     >
       ${
         team.Logo
-          ? `<img src="${esc(team.Logo)}" alt="${esc(team.Team)}" loading="lazy">`
+          ? `<img src="${esc(getDisplayImageUrl(team.Logo))}" alt="${esc(team.Team)}" loading="lazy">`
           : ""
       }
 
@@ -2294,7 +2338,7 @@ function renderTeamRoster(
                 player.robloxPicture
                   ? `
                     <img
-                      src="${esc(player.robloxPicture)}"
+                      src="${esc(getDisplayImageUrl(player.robloxPicture))}"
                       alt="${esc(name)}"
                       class="roster-roblox-avatar"
                       loading="lazy"
@@ -2559,7 +2603,7 @@ function renderTeamSeasonSchedule(
                   opponentLogo
                     ? `
                       <img
-                        src="${esc(opponentLogo)}"
+                        src="${esc(getDisplayImageUrl(opponentLogo))}"
                         alt="${esc(opponent)}"
                         loading="lazy"
                       >
@@ -4024,7 +4068,7 @@ function createStatsRow(
                     teamLogo
                       ? `
                         <img
-                          src="${esc(teamLogo)}"
+                          src="${esc(getDisplayImageUrl(teamLogo))}"
                           alt="${esc(teamName)}"
                           title="${esc(teamName)}"
                           class="stats-tm-logo"
@@ -4071,7 +4115,7 @@ function createStatsRow(
                       playerPicture
                         ? `
                           <img
-                            src="${esc(playerPicture)}"
+                            src="${esc(getDisplayImageUrl(playerPicture))}"
                             alt="${esc(value)}"
                             class="stat-avatar"
                             loading="lazy"
@@ -4930,7 +4974,7 @@ function createGameCard(game) {
             awayLogo
               ? `
                 <img
-                  src="${esc(awayLogo)}"
+                  src="${esc(getDisplayImageUrl(awayLogo))}"
                   alt="${esc(awayTeam)}"
                   loading="lazy"
                 >
@@ -4964,7 +5008,7 @@ function createGameCard(game) {
             homeLogo
               ? `
                 <img
-                  src="${esc(homeLogo)}"
+                  src="${esc(getDisplayImageUrl(homeLogo))}"
                   alt="${esc(homeTeam)}"
                   loading="lazy"
                 >
@@ -5345,7 +5389,7 @@ function playoffSeedTeam(team, seed, winnerName = "") {
       <span class="playoff-seed">${esc(seed)}</span>
       ${
         team.Logo
-          ? `<img src="${esc(team.Logo)}" alt="${esc(team.Team || "")}" loading="lazy">`
+          ? `<img src="${esc(getDisplayImageUrl(team.Logo))}" alt="${esc(team.Team || "")}" loading="lazy">`
           : `<span class="playoff-team-logo-placeholder"></span>`
       }
       <strong>${esc(team.Team || "TBD")}</strong>
@@ -5794,13 +5838,13 @@ async function renderHomeAwardWatch(positionName="quarterback") {
       const player=findDiscordPlayerByLooseName(item.name);
       const logo=player?.teamLogo||"";
       const team=player?.team||"";
-      return `<div class="home-award-row"><span class="home-award-rank">${index+1}</span><div class="home-award-player">${logo?`<img src="${esc(logo)}" alt="${esc(team)}" loading="lazy">`:`<span class="home-award-logo-empty">—</span>`}<strong>${esc(item.name)}</strong></div><span class="home-award-position">${label}</span><strong class="home-award-points">${formatPoints(item.pts)}</strong></div>`;
+      return `<div class="home-award-row"><span class="home-award-rank">${index+1}</span><div class="home-award-player">${logo?`<img src="${esc(getDisplayImageUrl(logo))}" alt="${esc(team)}" loading="lazy">`:`<span class="home-award-logo-empty">—</span>`}<strong>${esc(item.name)}</strong></div><span class="home-award-position">${label}</span><strong class="home-award-points">${formatPoints(item.pts)}</strong></div>`;
     }).join("");
   } catch(error){console.error("Home award watch error:",error);container.innerHTML='<div class="home-dashboard-loading">Unable to load award watch.</div>';}
 }
 function renderHomeStandingsList(container,teams){
   if(!container)return;
-  container.innerHTML=teams.map((team,index)=>`<div class="home-standing-row"><span class="home-standing-rank">${index+1}</span>${team.Logo?`<img src="${esc(team.Logo)}" alt="${esc(team.Team||"")}" loading="lazy">`:`<span class="home-standing-logo-empty">—</span>`}<strong>${esc(team.Team||"")}</strong><span>${esc(team.Rec||"0-0")}</span></div>`).join("");
+  container.innerHTML=teams.map((team,index)=>`<div class="home-standing-row"><span class="home-standing-rank">${index+1}</span>${team.Logo?`<img src="${esc(getDisplayImageUrl(team.Logo))}" alt="${esc(team.Team||"")}" loading="lazy">`:`<span class="home-standing-logo-empty">—</span>`}<strong>${esc(team.Team||"")}</strong><span>${esc(team.Rec||"0-0")}</span></div>`).join("");
 }
 async function renderHomeStandingsPreview(){
   const a=document.getElementById("homeAtlanticStandings"); const p=document.getElementById("homePacificStandings");
