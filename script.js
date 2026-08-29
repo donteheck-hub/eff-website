@@ -251,14 +251,9 @@ async function getActiveFranchiseNames(
 function isActiveFranchise(
   teamName
 ) {
-  if (
-    !activeFranchiseNames ||
-    !activeFranchiseNames.size
-  ) {
-    return true;
-  }
-
-  return activeFranchiseNames.has(
+  // The standings sheet is the website's source of truth for active teams.
+  // If a team exists on the sheet, show it on Standings, Teams, Home, and Playoffs.
+  return Boolean(
     normalizeTeamName(
       teamName
     )
@@ -5805,7 +5800,7 @@ async function renderHomeAwardWatch(positionName="quarterback") {
 }
 function renderHomeStandingsList(container,teams){
   if(!container)return;
-  container.innerHTML=teams.slice(0,6).map((team,index)=>`<div class="home-standing-row"><span class="home-standing-rank">${index+1}</span>${team.Logo?`<img src="${esc(team.Logo)}" alt="${esc(team.Team||"")}" loading="lazy">`:`<span class="home-standing-logo-empty">—</span>`}<strong>${esc(team.Team||"")}</strong><span>${esc(team.Rec||"0-0")}</span></div>`).join("");
+  container.innerHTML=teams.map((team,index)=>`<div class="home-standing-row"><span class="home-standing-rank">${index+1}</span>${team.Logo?`<img src="${esc(team.Logo)}" alt="${esc(team.Team||"")}" loading="lazy">`:`<span class="home-standing-logo-empty">—</span>`}<strong>${esc(team.Team||"")}</strong><span>${esc(team.Rec||"0-0")}</span></div>`).join("");
 }
 async function renderHomeStandingsPreview(){
   const a=document.getElementById("homeAtlanticStandings"); const p=document.getElementById("homePacificStandings");
