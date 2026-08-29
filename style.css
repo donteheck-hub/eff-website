@@ -4038,3 +4038,18 @@ HISTORY BRACKET + AWARD LOGO TWEAKS
   text-transform: uppercase;
   text-align: center;
 }
+
+
+/* AUTO PUNTS RULEBOOK IMAGE */
+.auto-punt-rule-figure {
+  margin: 24px 0 0;
+  max-width: 760px;
+}
+
+.auto-punt-rule-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+}
