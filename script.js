@@ -858,10 +858,65 @@ const SEASON_1_HISTORICAL_TEAMS = {
 };
 
 
+/*
+==================================================
+SEASON 2 HISTORICAL TEAM LOGOS
+==================================================
+*/
+
+const SEASON_2_HISTORICAL_TEAMS = {
+  "dequaviusiv": "Miami Sunshines",
+  "l85wru": "Atlantis Tridents",
+  "fpny": "Baltimore Bats",
+  "sxqrafice": "Miami Sunshines",
+  "mkisdaddy": "Colorado Blizzards",
+  "cheese_qb11": "Miami Sunshines",
+  "zay_thereal": "Miami Sunshines",
+  "landenistheone1": "Colorado Blizzards",
+  "imafreeballer": "Miami Sunshines",
+  "dominater22610": "Seattle Evergreens",
+  "hacr": "Los Angeles Tigers",
+  "luvyourz_j": "Seattle Evergreens",
+  "thebestfoxingame": "Glendale Ghosts",
+  "boomboomyay432": "Seattle Evergreens",
+  "m": "Los Angeles Tigers",
+  "ninjasboost78": "Seattle Evergreens",
+  "pjritter89": "Roblox Warriors",
+  "kpoopmj": "Anchorage Polar Bears",
+  "cfbx": "Houston Hornets"
+};
+
+
+function getHistoricalTeamName(
+  playerName,
+  season
+) {
+  const key =
+    normalizePlayerName(
+      playerName
+    );
+
+  if (String(season) === "2") {
+    return (
+      SEASON_2_HISTORICAL_TEAMS[
+        key
+      ] || ""
+    );
+  }
+
+  return (
+    SEASON_1_HISTORICAL_TEAMS[
+      key
+    ] || ""
+  );
+}
+
+
 function getSeason1HistoricalTeamName(playerName) {
-  return SEASON_1_HISTORICAL_TEAMS[
-    normalizePlayerName(playerName)
-  ] || "";
+  return getHistoricalTeamName(
+    playerName,
+    1
+  );
 }
 
 
@@ -920,7 +975,9 @@ function getHistoricalTeamLogoFromLeagueData(teamName) {
 }
 
 
-async function enhanceSeason1HistoricalLogos() {
+async function enhanceHistoricalSeasonLogos(
+  season
+) {
 
   try {
     await getLeagueData();
@@ -932,9 +989,18 @@ async function enhanceSeason1HistoricalLogos() {
     return;
   }
 
+  const panel =
+    document.querySelector(
+      `[data-season-detail="${season}"]`
+    );
+
+  if (!panel) {
+    return;
+  }
+
   const historyRows =
-    document.querySelectorAll(
-      "#history .award-list li"
+    panel.querySelectorAll(
+      ".award-list li"
     );
 
   historyRows.forEach((row) => {
@@ -958,8 +1024,9 @@ async function enhanceSeason1HistoricalLogos() {
       playerNode.textContent.trim();
 
     const historicalTeam =
-      getSeason1HistoricalTeamName(
-        playerName
+      getHistoricalTeamName(
+        playerName,
+        season
       );
 
     const logo =
@@ -998,6 +1065,17 @@ async function enhanceSeason1HistoricalLogos() {
     playerNode.replaceWith(playerWrap);
   });
 }
+
+
+async function enhanceSeason1HistoricalLogos() {
+  return enhanceHistoricalSeasonLogos(1);
+}
+
+
+async function enhanceSeason2HistoricalLogos() {
+  return enhanceHistoricalSeasonLogos(2);
+}
+
 
 
 async function getDirectRobloxPicture(
@@ -5054,14 +5132,14 @@ const seasonArchiveCards =
     "[data-season-archive]"
   );
 
-const seasonDetailPanel =
-  document.getElementById(
-    "seasonDetailPanel"
+const seasonDetailPanels =
+  document.querySelectorAll(
+    "[data-season-detail]"
   );
 
-const seasonArchiveBack =
-  document.getElementById(
-    "seasonArchiveBack"
+const seasonArchiveBackButtons =
+  document.querySelectorAll(
+    "[data-season-archive-back]"
   );
 
 
@@ -5072,6 +5150,12 @@ seasonArchiveCards.forEach(
       "click",
       () => {
 
+        const season =
+          String(
+            card.dataset.seasonArchive ||
+            "1"
+          );
+
         document
           .querySelector(
             ".history-season-list"
@@ -5080,14 +5164,19 @@ seasonArchiveCards.forEach(
             "archive-hidden"
           );
 
+        seasonDetailPanels.forEach(
+          (panel) => {
+            panel.classList.toggle(
+              "active",
+              panel.dataset.seasonDetail ===
+                season
+            );
+          }
+        );
 
-        seasonDetailPanel
-          ?.classList.add(
-            "active"
-          );
-
-        enhanceSeason1HistoricalLogos();
-
+        enhanceHistoricalSeasonLogos(
+          season
+        );
 
         window.scrollTo({
           top: 0,
@@ -5101,36 +5190,38 @@ seasonArchiveCards.forEach(
 );
 
 
-if (seasonArchiveBack) {
+seasonArchiveBackButtons.forEach(
+  (button) => {
 
-  seasonArchiveBack.addEventListener(
-    "click",
-    () => {
+    button.addEventListener(
+      "click",
+      () => {
 
-      seasonDetailPanel
-        ?.classList.remove(
-          "active"
+        seasonDetailPanels.forEach(
+          (panel) =>
+            panel.classList.remove(
+              "active"
+            )
         );
 
+        document
+          .querySelector(
+            ".history-season-list"
+          )
+          ?.classList.remove(
+            "archive-hidden"
+          );
 
-      document
-        .querySelector(
-          ".history-season-list"
-        )
-        ?.classList.remove(
-          "archive-hidden"
-        );
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
 
+      }
+    );
 
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-
-    }
-  );
-
-}
+  }
+);
 
 
 document
