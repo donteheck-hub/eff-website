@@ -977,7 +977,9 @@ async function enhanceSeason1HistoricalLogos() {
       const img =
         document.createElement("img");
 
-      img.src = logo;
+      img.src = getDisplayImageUrl(
+        logo
+      );
       img.alt = historicalTeam;
       img.title = historicalTeam;
       img.loading = "lazy";
@@ -3516,7 +3518,7 @@ function updateStatsModeUI() {
     seasonLabel.textContent =
       currentStatsMode === "alltime"
         ? "EFF ALL TIME"
-        : "EFF SEASON 2";
+        : "EFF SEASON 3";
   }
 }
 
@@ -5694,7 +5696,7 @@ function renderLivePlayoffBracket(
         <div class="playoff-championship-label">EFF Championship</div>
         <div class="playoff-championship-card">
           <span class="playoff-trophy">🏆</span>
-          <h3>Season 2 Final</h3>
+          <h3>Season 3 Final</h3>
           ${playoffSeedTeam(
             atlanticChampion,
             atlanticChampionSeed,
