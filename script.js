@@ -131,6 +131,37 @@ GLOBAL DATA
 ==================================================
 */
 
+
+const EFF_PLAYER_CACHE_KEY =
+  "eff:last-good-player-data:v1";
+
+const EFF_ROBLOX_CACHE_PREFIX =
+  "eff:roblox-picture:v1:";
+
+function readBrowserJson(key, fallback = null) {
+  try {
+    const value =
+      localStorage.getItem(key);
+
+    return value
+      ? JSON.parse(value)
+      : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeBrowserJson(key, value) {
+  try {
+    localStorage.setItem(
+      key,
+      JSON.stringify(value)
+    );
+  } catch {
+    // Browser storage may be blocked; the live API still works.
+  }
+}
+
 let leagueData = null;
 
 let allTimeData = null;
@@ -138,6 +169,102 @@ let allTimeData = null;
 let currentStatsMode = "season";
 
 let discordPlayers = [];
+
+let activeFranchiseNames = null;
+
+async function getActiveFranchiseNames(
+  forceRefresh = false
+) {
+  if (
+    activeFranchiseNames &&
+    !forceRefresh
+  ) {
+    return activeFranchiseNames;
+  }
+
+  try {
+    const controller =
+      new AbortController();
+
+    const timeout =
+      setTimeout(
+        () => controller.abort(),
+        5000
+      );
+
+    let response;
+
+    try {
+      response =
+        await fetch(
+          `${BOT_API_URL}/api/franchises`,
+          {
+            method: "GET",
+            cache: "no-store",
+            signal:
+              controller.signal
+          }
+        );
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `Franchise API HTTP error: ${response.status}`
+      );
+    }
+
+    const result =
+      await response.json();
+
+    const names =
+      Array.isArray(
+        result?.franchises
+      )
+        ? result.franchises
+            .map(
+              franchise =>
+                normalizeTeamName(
+                  franchise?.name
+                )
+            )
+            .filter(Boolean)
+        : [];
+
+    if (names.length) {
+      activeFranchiseNames =
+        new Set(names);
+    }
+
+  } catch (error) {
+    console.warn(
+      "Active franchise list unavailable; using Google Sheet teams:",
+      error
+    );
+  }
+
+  return activeFranchiseNames;
+}
+
+
+function isActiveFranchise(
+  teamName
+) {
+  if (
+    !activeFranchiseNames ||
+    !activeFranchiseNames.size
+  ) {
+    return true;
+  }
+
+  return activeFranchiseNames.has(
+    normalizeTeamName(
+      teamName
+    )
+  );
+}
+
 let discordPlayersLoadedAt = 0;
 const DISCORD_PLAYERS_CACHE_MS = 60 * 1000;
 
@@ -284,82 +411,154 @@ FETCH DISCORD / ROBLOX PLAYER DATA
 
 async function getDiscordPlayers(forceRefresh = false) {
 
-  const cacheFresh =
-    discordPlayers.length > 0 &&
-    Date.now() - discordPlayersLoadedAt < DISCORD_PLAYERS_CACHE_MS;
-
-  if (cacheFresh && !forceRefresh) {
+  if (
+    discordPlayers.length &&
+    !forceRefresh
+  ) {
     return discordPlayers;
   }
 
-  let result = null;
-  let lastError = null;
+  const cachedResult =
+    readBrowserJson(
+      EFF_PLAYER_CACHE_KEY,
+      null
+    );
 
-  // The team-rosters endpoint is the preferred source because every
-  // returned player is attached directly to a Discord team role.
-  const endpoints = [
-    '/api/team-rosters',
-    '/api/players'
-  ];
+  // Use last-known-good data immediately when this is the first load.
+  if (
+    !discordPlayers.length &&
+    Array.isArray(cachedResult?.players) &&
+    cachedResult.players.length
+  ) {
+    discordPlayers =
+      cachedResult.players;
 
-  for (const endpoint of endpoints) {
+    discordIdentityWarmComplete =
+      Boolean(
+        cachedResult.identityWarmComplete
+      );
+
+    discordIdentityMappedCount =
+      Number(
+        cachedResult.identityMappedCount || 0
+      );
+
+    buildDiscordPlayerLookup();
+  }
+
+  try {
+    const controller =
+      new AbortController();
+
+    const timeout =
+      setTimeout(
+        () => controller.abort(),
+        5000
+      );
+
+    let response;
+
     try {
-      const response = await fetch(
-        `${BOT_API_URL}${endpoint}?cacheBust=${Date.now()}`,
+      response =
+        await fetch(
+          `${BOT_API_URL}/api/players${forceRefresh ? "?refresh=1" : ""}`,
+          {
+            method: "GET",
+            cache: "no-store",
+            signal:
+              controller.signal
+          }
+        );
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `EFF Bot API HTTP error: ${response.status}`
+      );
+    }
+
+    const result =
+      await response.json();
+
+    if (!result.success) {
+      throw new Error(
+        result.error ||
+        "EFF Bot API returned an error."
+      );
+    }
+
+    const livePlayers =
+      Array.isArray(result.players)
+        ? result.players
+        : [];
+
+    // Do not replace useful cached data with an accidental empty response.
+    if (livePlayers.length) {
+      discordPlayers =
+        livePlayers;
+
+      discordIdentityWarmComplete =
+        Boolean(
+          result.identityWarmComplete ??
+          true
+        );
+
+      discordIdentityMappedCount =
+        Number(
+          result.identityMappedCount ||
+          livePlayers.length
+        );
+
+      writeBrowserJson(
+        EFF_PLAYER_CACHE_KEY,
         {
-          method: 'GET',
-          cache: 'no-store'
+          savedAt:
+            Date.now(),
+
+          players:
+            discordPlayers,
+
+          identityWarmComplete:
+            discordIdentityWarmComplete,
+
+          identityMappedCount:
+            discordIdentityMappedCount
         }
       );
 
-      if (!response.ok) {
-        throw new Error(
-          `EFF Bot API ${endpoint} returned ${response.status}`
-        );
-      }
-
-      const payload = await response.json();
-
-      if (!payload.success) {
-        throw new Error(
-          payload.error ||
-          `EFF Bot API ${endpoint} returned an error.`
-        );
-      }
-
-      if (Array.isArray(payload.players)) {
-        result = payload;
-        break;
-      }
-    } catch (error) {
-      lastError = error;
-      console.warn(
-        `EFF Bot player source failed (${endpoint}):`,
-        error
-      );
+      buildDiscordPlayerLookup();
     }
-  }
 
-  if (!result) {
+    return discordPlayers;
+
+  } catch (error) {
+
+    console.warn(
+      "EFF Bot live player data unavailable; using last-known-good browser cache:",
+      error
+    );
+
+    // Keep the last successful data instead of changing TM/avatars/rosters to dashes.
     if (discordPlayers.length) {
+      buildDiscordPlayerLookup();
       return discordPlayers;
     }
 
-    throw lastError || new Error('Unable to load EFF Bot players.');
+    if (
+      Array.isArray(cachedResult?.players)
+    ) {
+      discordPlayers =
+        cachedResult.players;
+
+      buildDiscordPlayerLookup();
+
+      return discordPlayers;
+    }
+
+    return [];
   }
-
-  discordPlayers = result.players;
-  discordPlayersLoadedAt = Date.now();
-
-  discordIdentityWarmComplete =
-    Boolean(result.identityWarmComplete);
-
-  discordIdentityMappedCount =
-    Number(result.identityMappedCount || 0);
-
-  buildDiscordPlayerLookup();
-
-  return discordPlayers;
 }
 
 async function refreshStatsIdentityUntilReady() {
@@ -829,103 +1028,169 @@ async function getDirectRobloxPicture(
     return directRobloxPictureCache.get(key);
   }
 
-  /*
-    If another part of the page is already resolving the same Roblox
-    username, reuse that request instead of firing another Railway/Roblox
-    request. This matters because Stats can render/re-render several times.
-  */
+  const browserCacheKey =
+    `${EFF_ROBLOX_CACHE_PREFIX}${key}`;
+
+  const savedPicture =
+    readBrowserJson(
+      browserCacheKey,
+      ""
+    );
+
+  if (
+    typeof savedPicture === "string" &&
+    savedPicture
+  ) {
+    directRobloxPictureCache.set(
+      key,
+      savedPicture
+    );
+  }
+
   if (directRobloxPicturePromiseCache.has(key)) {
     return directRobloxPicturePromiseCache.get(key);
   }
 
-  const lookupPromise = (async () => {
-    const maxAttempts = 2;
+  const lookupPromise =
+    (async () => {
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
+      const maxAttempts = 2;
 
-        let response;
+      for (
+        let attempt = 1;
+        attempt <= maxAttempts;
+        attempt += 1
+      ) {
 
         try {
-          response = await fetch(
-            `${BOT_API_URL}/api/roblox/${encodeURIComponent(lookupName)}`,
-            {
-              method: "GET",
-              cache: "no-store",
-              signal: controller.signal
-            }
-          );
-        } finally {
-          clearTimeout(timeout);
-        }
+          const controller =
+            new AbortController();
 
-        if (response.status === 404) {
-          directRobloxPictureCache.set(key, "");
-          return "";
-        }
+          const timeout =
+            setTimeout(
+              () => controller.abort(),
+              5000
+            );
 
-        if (!response.ok) {
-          throw new Error(
-            `Roblox proxy returned ${response.status}`
-          );
-        }
+          let response;
 
-        const result = await response.json();
-        const robloxData =
-          result?.roblox ||
-          result?.data ||
-          {};
+          try {
+            response =
+              await fetch(
+                `${BOT_API_URL}/api/roblox/${encodeURIComponent(lookupName)}`,
+                {
+                  method: "GET",
+                  cache: "no-store",
+                  signal:
+                    controller.signal
+                }
+              );
+          } finally {
+            clearTimeout(timeout);
+          }
 
-        const resolvedUsername =
-          robloxData.username ||
-          robloxData.name ||
-          lookupName;
+          if (!response.ok) {
+            throw new Error(
+              `Roblox proxy returned ${response.status}`
+            );
+          }
 
-        if (
-          normalizePlayerName(resolvedUsername) !==
-          normalizePlayerName(lookupName)
-        ) {
-          directRobloxPictureCache.set(key, "");
-          return "";
-        }
+          const result =
+            await response.json();
 
-        const picture =
-          result?.success
-            ? (
-                robloxData.picture ||
-                robloxData.avatar ||
-                robloxData.avatarUrl ||
-                robloxData.thumbnail ||
-                ""
+          const robloxData =
+            result?.roblox ||
+            result?.data ||
+            {};
+
+          const resolvedUsername =
+            robloxData.username ||
+            robloxData.name ||
+            result?.robloxUsername ||
+            result?.username ||
+            lookupName;
+
+          if (
+            result?.success &&
+            normalizePlayerName(resolvedUsername) !==
+              normalizePlayerName(lookupName)
+          ) {
+            return (
+              directRobloxPictureCache.get(key) ||
+              savedPicture ||
+              ""
+            );
+          }
+
+          const picture =
+            result?.success
+              ? (
+                  robloxData.picture ||
+                  robloxData.avatar ||
+                  robloxData.avatarUrl ||
+                  robloxData.thumbnail ||
+                  result?.robloxPicture ||
+                  result?.picture ||
+                  ""
+                )
+              : "";
+
+          if (picture) {
+            directRobloxPictureCache.set(
+              key,
+              picture
+            );
+
+            writeBrowserJson(
+              browserCacheKey,
+              picture
+            );
+
+            return picture;
+          }
+
+          if (attempt < maxAttempts) {
+            await new Promise(
+              resolve =>
+                setTimeout(
+                  resolve,
+                  250
+                )
+            );
+          }
+
+        } catch (error) {
+
+          if (attempt === maxAttempts) {
+            console.warn(
+              "Roblox avatar lookup failed; keeping cached picture:",
+              lookupName,
+              error
+            );
+
+            return (
+              directRobloxPictureCache.get(key) ||
+              savedPicture ||
+              ""
+            );
+          }
+
+          await new Promise(
+            resolve =>
+              setTimeout(
+                resolve,
+                250
               )
-            : "";
-
-        if (picture) {
-          directRobloxPictureCache.set(key, picture);
-          return picture;
-        }
-
-        if (attempt < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, 250));
-        }
-      } catch (error) {
-        if (attempt === maxAttempts) {
-          console.warn(
-            "Roblox avatar lookup failed:",
-            lookupName,
-            error
           );
-          return "";
         }
-
-        await new Promise(resolve => setTimeout(resolve, 250));
       }
-    }
 
-    return "";
-  })();
+      return (
+        directRobloxPictureCache.get(key) ||
+        savedPicture ||
+        ""
+      );
+    })();
 
   directRobloxPicturePromiseCache.set(
     key,
@@ -938,7 +1203,6 @@ async function getDirectRobloxPicture(
     directRobloxPicturePromiseCache.delete(key);
   }
 }
-
 
 async function resolveStatRowRobloxPicture(
   row,
@@ -1308,7 +1572,16 @@ async function loadStandings() {
 
 
     const standings =
-      data[STANDINGS_SHEET];
+      Array.isArray(
+        data[STANDINGS_SHEET]
+      )
+        ? data[STANDINGS_SHEET].filter(
+            team =>
+              isActiveFranchise(
+                team.Team
+              )
+          )
+        : data[STANDINGS_SHEET];
 
 
     if (!Array.isArray(standings)) {
@@ -1505,7 +1778,16 @@ async function loadTeams() {
 
 
     const standings =
-      data[STANDINGS_SHEET];
+      Array.isArray(
+        data[STANDINGS_SHEET]
+      )
+        ? data[STANDINGS_SHEET].filter(
+            team =>
+              isActiveFranchise(
+                team.Team
+              )
+          )
+        : data[STANDINGS_SHEET];
 
 
     if (!Array.isArray(standings)) {
@@ -1786,7 +2068,12 @@ async function openTeamDetail(
       Array.isArray(
         data[STANDINGS_SHEET]
       )
-        ? data[STANDINGS_SHEET]
+        ? data[STANDINGS_SHEET].filter(
+            item =>
+              isActiveFranchise(
+                item.Team
+              )
+          )
         : [];
 
 
@@ -5407,7 +5694,12 @@ async function loadPlayoffs(forceRefresh = false) {
   try {
     const data = await getLeagueData();
     const standings = Array.isArray(data?.[STANDINGS_SHEET])
-      ? data[STANDINGS_SHEET]
+      ? data[STANDINGS_SHEET].filter(
+          team =>
+            isActiveFranchise(
+              team.Team
+            )
+        )
       : [];
 
     const updates = getPlayoffUpdateRows(data);
@@ -5519,7 +5811,7 @@ async function renderHomeStandingsPreview(){
   const a=document.getElementById("homeAtlanticStandings"); const p=document.getElementById("homePacificStandings");
   if(!a||!p)return;
   try{
-    const data=await getLeagueData(); const standings=Array.isArray(data?.[STANDINGS_SHEET])?data[STANDINGS_SHEET]:[];
+    const data=await getLeagueData(); const standings=Array.isArray(data?.[STANDINGS_SHEET])?data[STANDINGS_SHEET].filter(team=>isActiveFranchise(team.Team)):[];
     renderHomeStandingsList(a,standings.filter(t=>normalize(t.Conference)==="atlantic").sort(sortStandings));
     renderHomeStandingsList(p,standings.filter(t=>normalize(t.Conference)==="pacific").sort(sortStandings));
   }catch(error){console.error("Home standings preview error:",error);a.innerHTML='<div class="home-dashboard-loading">Unable to load.</div>';p.innerHTML='<div class="home-dashboard-loading">Unable to load.</div>';}
@@ -5535,6 +5827,9 @@ START LIVE DATA
 */
 
 async function initializeWebsiteData() {
+
+  await getActiveFranchiseNames()
+    .catch(() => null);
 
   await Promise.allSettled([
     loadStandings(),
