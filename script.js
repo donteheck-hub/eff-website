@@ -13,6 +13,100 @@ const SCHEDULE_SHEET =
 const PLAYOFF_UPDATE_SHEET =
   "Playoff Bracket update";
 
+/*
+==================================================
+SEASON 3 DIVISIONS
+==================================================
+*/
+
+const DIVISION_CONFIG = {
+  colonial: {
+    name: "Colonial Division",
+    conference: "Atlantic",
+    logo: "assets/divisions/Colonial Division.png",
+    teams: ["Baltimore Bats","Atlantis Tridents","Montreal Angels","Boston Snowmen","Philadelphia Liberties"]
+  },
+  gulf: {
+    name: "Gulf Division",
+    conference: "Atlantic",
+    logo: "assets/divisions/Gulf Division.png",
+    teams: ["Alabama Black Bears","Birmingham Bluebirds","Nashville Nightmares","Miami Sunshines","Culican Red Devils"]
+  },
+  cascade: {
+    name: "Cascade Division",
+    conference: "Pacific",
+    logo: "assets/divisions/Cascade Division.png",
+    teams: ["Anchorage Polar Bears","Seattle Evergreens","San Francisco Comets","Colorado Blizzards","Nebraska Sabertooths"]
+  },
+  sunset: {
+    name: "Sunset Division",
+    conference: "Pacific",
+    logo: "assets/divisions/Sunset Division.png",
+    teams: ["Los Angeles Tigers","San Diego Cruisers","Glendale Ghosts","Houston Hornets","Roblox Warriors"]
+  }
+};
+
+const LOCAL_TEAM_LOGOS = {
+  bostonsnowmen: "assets/logos/Boston Snowmen.png",
+  philadelphialiberties: "assets/logos/Philadelphia Liberties.png"
+};
+
+function getDivisionForTeam(teamName) {
+  const target = normalizeTeamName(teamName);
+  for (const division of Object.values(DIVISION_CONFIG)) {
+    if (division.teams.some(team => normalizeTeamName(team) === target)) {
+      return division;
+    }
+  }
+  return null;
+}
+
+function getTeamDisplayLogo(team) {
+  const local = LOCAL_TEAM_LOGOS[normalizeTeamName(team?.Team)];
+  return local || getDisplayImageUrl(team?.Logo || "");
+}
+
+function divisionOrder(teamName) {
+  const division = getDivisionForTeam(teamName);
+  return {
+    "Colonial Division": 1,
+    "Gulf Division": 2,
+    "Cascade Division": 1,
+    "Sunset Division": 2
+  }[division?.name] || 99;
+}
+
+function createDivisionHeaderRow(division) {
+  if (!division) return "";
+  return `
+    <tr class="division-standings-row">
+      <td colspan="8">
+        <div class="division-standings-heading">
+          <img src="${esc(division.logo)}" alt="${esc(division.name)}">
+          <div>
+            <span>${esc(division.conference.toUpperCase())}</span>
+            <strong>${esc(division.name)}</strong>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function createDivisionGridHeading(division) {
+  return `
+    <div class="division-team-heading">
+      <img src="${esc(division.logo)}" alt="${esc(division.name)}">
+      <div>
+        <span>${esc(division.conference.toUpperCase())}</span>
+        <h4>${esc(division.name)}</h4>
+        <p>${esc(division.teams.join(" · "))}</p>
+      </div>
+    </div>
+  `;
+}
+
+
 const STAT_SHEETS = [
   "quarterback",
   "runningback",
@@ -1786,38 +1880,45 @@ function renderStandings(
   body,
   teams
 ) {
-
-  if (!body) {
-    return;
-  }
-
+  if (!body) return;
 
   if (!teams.length) {
-
     body.innerHTML = `
-      <tr>
-        <td colspan="8" class="status-cell">
-          No teams found.
-        </td>
-      </tr>
+      <tr><td colspan="8" class="status-cell">No teams found.</td></tr>
     `;
-
     return;
-
   }
 
+  const rankedTeams = teams.map((team, index) => ({
+    ...team,
+    __displayRank: index + 1
+  }));
 
-  body.innerHTML =
-    teams
-      .map(
-        (team, index) =>
-          createStandingsRow(
-            team,
-            index + 1
-          )
-      )
-      .join("");
+  const grouped = new Map();
 
+  rankedTeams.forEach((team) => {
+    const division = getDivisionForTeam(team.Team);
+    const key = division?.name || "Other";
+
+    if (!grouped.has(key)) {
+      grouped.set(key, { division, teams: [] });
+    }
+
+    grouped.get(key).teams.push(team);
+  });
+
+  const sections = [...grouped.values()].sort(
+    (a, b) =>
+      divisionOrder(a.teams[0]?.Team) -
+      divisionOrder(b.teams[0]?.Team)
+  );
+
+  body.innerHTML = sections.map(({ division, teams: divisionTeams }) => `
+    ${createDivisionHeaderRow(division)}
+    ${divisionTeams.map(team =>
+      createStandingsRow(team, team.__displayRank)
+    ).join("")}
+  `).join("");
 }
 
 
@@ -1827,7 +1928,7 @@ function createStandingsRow(
 ) {
 
   const logo =
-    team.Logo || "";
+    getTeamDisplayLogo(team);
 
   const name =
     team.Team || "";
@@ -1843,7 +1944,7 @@ function createStandingsRow(
             logo
               ? `
                 <img
-                  src="${esc(getDisplayImageUrl(logo))}"
+                  src="${esc(logo)}"
                   alt="${esc(name)}"
                   loading="lazy"
                 >
@@ -1982,32 +2083,45 @@ async function loadTeams() {
 function renderTeams(grid, teams) {
   if (!grid) return;
 
-  grid.innerHTML = teams.map((team) => `
-    <button
-      class="team-card team-card-button"
-      type="button"
-      data-team-name="${esc(team.Team)}"
-    >
-      ${
-        team.Logo
-          ? `<img src="${esc(getDisplayImageUrl(team.Logo))}" alt="${esc(team.Team)}" loading="lazy">`
-          : ""
-      }
+  const grouped = new Map();
 
-      <h4>${esc(team.Team)}</h4>
+  teams.forEach((team) => {
+    const division = getDivisionForTeam(team.Team);
+    const key = division?.name || "Other";
+    if (!grouped.has(key)) {
+      grouped.set(key, { division, teams: [] });
+    }
+    grouped.get(key).teams.push(team);
+  });
 
-      <div class="team-meta">
-        ${esc(team.Conference)} Conference
-      </div>
+  const sections = [...grouped.values()].sort(
+    (a, b) =>
+      divisionOrder(a.teams[0]?.Team) -
+      divisionOrder(b.teams[0]?.Team)
+  );
 
-      <div class="team-record">
-        ${esc(team.Rec || "0-0")}
-      </div>
+  grid.innerHTML = sections.map(({ division, teams: divisionTeams }) => `
+    ${division ? createDivisionGridHeading(division) : ""}
+    ${divisionTeams.map((team) => {
+      const logo = getTeamDisplayLogo(team);
+      const divisionName =
+        getDivisionForTeam(team.Team)?.name ||
+        `${team.Conference} Conference`;
 
-      <div class="team-view-link">
-        View Roster & Schedule →
-      </div>
-    </button>
+      return `
+        <button
+          class="team-card team-card-button"
+          type="button"
+          data-team-name="${esc(team.Team)}"
+        >
+          ${logo ? `<img src="${esc(logo)}" alt="${esc(team.Team)}" loading="lazy">` : ""}
+          <h4>${esc(team.Team)}</h4>
+          <div class="team-meta">${esc(divisionName)}</div>
+          <div class="team-record">${esc(team.Rec || "0-0")}</div>
+          <div class="team-view-link">View Roster & Schedule →</div>
+        </button>
+      `;
+    }).join("")}
   `).join("");
 
   grid.querySelectorAll(".team-card-button").forEach((button) => {

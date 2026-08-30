@@ -4053,3 +4053,91 @@ HISTORY BRACKET + AWARD LOGO TWEAKS
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
 }
+
+
+/* ==================================================
+   SEASON 3 DIVISIONS
+================================================== */
+
+.division-standings-row td {
+  padding: 0 !important;
+  border-bottom: 0 !important;
+  background: linear-gradient(90deg, rgba(242,187,68,.12), rgba(255,255,255,.02));
+}
+
+.division-standings-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 12px 18px;
+  border-top: 1px solid rgba(255,255,255,.09);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+}
+
+.division-standings-heading img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.division-standings-heading div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.division-standings-heading span,
+.division-team-heading span {
+  color: #f2bb44;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
+
+.division-standings-heading strong {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.division-team-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 12px 0 4px;
+  padding: 14px 18px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(242,187,68,.10), rgba(255,255,255,.02));
+}
+
+.division-team-heading img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.division-team-heading h4 {
+  margin: 2px 0 4px;
+  color: #fff;
+  font-size: 1.3rem;
+}
+
+.division-team-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .division-team-heading img {
+    width: 58px;
+    height: 58px;
+  }
+
+  .division-team-heading p {
+    display: none;
+  }
+}
