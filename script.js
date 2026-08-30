@@ -23,32 +23,32 @@ const DIVISION_CONFIG = {
   colonial: {
     name: "Colonial Division",
     conference: "Atlantic",
-    logo: "assets/divisions/Colonial Division.png",
+    logo: "assets/divisions/colonial-division.png",
     teams: ["Baltimore Bats","Atlantis Tridents","Montreal Angels","Boston Snowmen","Philadelphia Liberties"]
   },
   gulf: {
     name: "Gulf Division",
     conference: "Atlantic",
-    logo: "assets/divisions/Gulf Division.png",
+    logo: "assets/divisions/gulf-division.png",
     teams: ["Alabama Black Bears","Birmingham Bluebirds","Nashville Nightmares","Miami Sunshines","Culican Red Devils"]
   },
   cascade: {
     name: "Cascade Division",
     conference: "Pacific",
-    logo: "assets/divisions/Cascade Division.png",
+    logo: "assets/divisions/cascade-division.png",
     teams: ["Anchorage Polar Bears","Seattle Evergreens","San Francisco Comets","Colorado Blizzards","Nebraska Sabertooths"]
   },
   sunset: {
     name: "Sunset Division",
     conference: "Pacific",
-    logo: "assets/divisions/Sunset Division.png",
+    logo: "assets/divisions/sunset-division.png",
     teams: ["Los Angeles Tigers","San Diego Cruisers","Glendale Ghosts","Houston Hornets","Roblox Warriors"]
   }
 };
 
 const LOCAL_TEAM_LOGOS = {
-  bostonsnowmen: "assets/logos/Boston Snowmen.png",
-  philadelphialiberties: "assets/logos/Philadelphia Liberties.png"
+  bostonsnowmen: "assets/logos/boston-snowmen.png",
+  philadelphialiberties: "assets/logos/philadelphia-liberties.png"
 };
 
 function getDivisionForTeam(teamName) {
@@ -1884,41 +1884,74 @@ function renderStandings(
 
   if (!teams.length) {
     body.innerHTML = `
-      <tr><td colspan="8" class="status-cell">No teams found.</td></tr>
+      <tr>
+        <td colspan="8" class="status-cell">
+          No teams found.
+        </td>
+      </tr>
     `;
     return;
   }
 
-  const rankedTeams = teams.map((team, index) => ({
-    ...team,
-    __displayRank: index + 1
-  }));
+  const grouped =
+    new Map();
 
-  const grouped = new Map();
+  teams.forEach((team) => {
+    const division =
+      getDivisionForTeam(
+        team.Team
+      );
 
-  rankedTeams.forEach((team) => {
-    const division = getDivisionForTeam(team.Team);
-    const key = division?.name || "Other";
+    const key =
+      division?.name ||
+      "Other";
 
     if (!grouped.has(key)) {
-      grouped.set(key, { division, teams: [] });
+      grouped.set(
+        key,
+        {
+          division,
+          teams: []
+        }
+      );
     }
 
-    grouped.get(key).teams.push(team);
+    grouped
+      .get(key)
+      .teams
+      .push(team);
   });
 
-  const sections = [...grouped.values()].sort(
-    (a, b) =>
-      divisionOrder(a.teams[0]?.Team) -
-      divisionOrder(b.teams[0]?.Team)
-  );
+  const sections =
+    [...grouped.values()]
+      .sort(
+        (a, b) =>
+          divisionOrder(
+            a.teams[0]?.Team
+          ) -
+          divisionOrder(
+            b.teams[0]?.Team
+          )
+      );
 
-  body.innerHTML = sections.map(({ division, teams: divisionTeams }) => `
-    ${createDivisionHeaderRow(division)}
-    ${divisionTeams.map(team =>
-      createStandingsRow(team, team.__displayRank)
-    ).join("")}
-  `).join("");
+  body.innerHTML =
+    sections
+      .map(
+        ({ division, teams: divisionTeams }) => `
+          ${createDivisionHeaderRow(division)}
+
+          ${divisionTeams
+            .map(
+              (team, index) =>
+                createStandingsRow(
+                  team,
+                  index + 1
+                )
+            )
+            .join("")}
+        `
+      )
+      .join("");
 }
 
 
