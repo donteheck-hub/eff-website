@@ -2432,11 +2432,8 @@ async function openTeamDetail(
 
 
       const logo =
-        getTeamLogoByName(
-          teamName,
-          team?.Logo ||
-          apiTeamLogo
-        );
+        team?.Logo ||
+        apiTeamLogo;
 
 
       logoElement.src =
@@ -5708,6 +5705,122 @@ function playoffMatchup(
   `;
 }
 
+
+function sortPlayoffSeeds(a, b) {
+  const recA = parseDivisionRecord(a?.Rec);
+  const recB = parseDivisionRecord(b?.Rec);
+
+  if (recB.pct !== recA.pct) return recB.pct - recA.pct;
+  if (recB.wins !== recA.wins) return recB.wins - recA.wins;
+
+  const divA = parseDivisionRecord(a?.["Division Rec"]);
+  const divB = parseDivisionRecord(b?.["Division Rec"]);
+
+  if (divB.pct !== divA.pct) return divB.pct - divA.pct;
+  if (divB.wins !== divA.wins) return divB.wins - divA.wins;
+
+  const confA = parseDivisionRecord(a?.["Conf Rec"]);
+  const confB = parseDivisionRecord(b?.["Conf Rec"]);
+
+  if (confB.pct !== confA.pct) return confB.pct - confA.pct;
+  if (confB.wins !== confA.wins) return confB.wins - confA.wins;
+
+  return Number(b?.PD || 0) - Number(a?.PD || 0);
+}
+
+
+function buildConferencePlayoffSeeds(
+  conferenceName,
+  teams
+) {
+  const conferenceTeams =
+    teams.filter(
+      team =>
+        normalize(
+          team.Conference
+        ) ===
+        normalize(
+          conferenceName
+        )
+    );
+
+  const conferenceDivisions =
+    Object.values(
+      DIVISION_CONFIG
+    ).filter(
+      division =>
+        normalize(
+          division.conference
+        ) ===
+        normalize(
+          conferenceName
+        )
+    );
+
+  const divisionWinners =
+    conferenceDivisions
+      .map(
+        division => {
+          const divisionTeams =
+            conferenceTeams
+              .filter(
+                team =>
+                  division.teams.some(
+                    divisionTeam =>
+                      normalizeTeamName(
+                        divisionTeam
+                      ) ===
+                      normalizeTeamName(
+                        team.Team
+                      )
+                  )
+              )
+              .sort(
+                sortPlayoffSeeds
+              );
+
+          return (
+            divisionTeams[0] ||
+            null
+          );
+        }
+      )
+      .filter(Boolean)
+      .sort(
+        sortPlayoffSeeds
+      );
+
+  const winnerNames =
+    new Set(
+      divisionWinners.map(
+        team =>
+          normalizeTeamName(
+            team.Team
+          )
+      )
+    );
+
+  const wildCards =
+    conferenceTeams
+      .filter(
+        team =>
+          !winnerNames.has(
+            normalizeTeamName(
+              team.Team
+            )
+          )
+      )
+      .sort(
+        sortPlayoffSeeds
+      );
+
+  return [
+    ...divisionWinners,
+    ...wildCards
+  ].slice(0, 7);
+}
+
+
 function buildConferencePlayoffState(
   conferenceName,
   seededTeams,
@@ -5723,27 +5836,48 @@ function buildConferencePlayoffState(
       : "PAC";
 
   /*
-    FIXED EFF BRACKET PATH — NO RESEEDING
+    SEASON 3 — 7 TEAM FORMAT
 
-    Wild Card 1: Seed 3 vs Seed 6
-      winner always advances to play Seed 1.
+    Seed 1: division winner, first-round bye.
+    Seed 2: other division winner.
+    Seeds 3-7: remaining best teams.
 
-    Wild Card 2: Seed 4 vs Seed 5
-      winner always advances to play Seed 2.
+    Fixed bracket path:
+      WC1: 2 vs 7
+      WC2: 3 vs 6
+      WC3: 4 vs 5
 
-    The bracket path never changes based on the winner's seed.
+      Divisional 1:
+        Seed 1 vs WC3 winner
+
+      Divisional 2:
+        WC1 winner vs WC2 winner
+
+    No reseeding.
   */
 
-  const wc36WinnerName =
+  const wc27WinnerName =
     getPlayoffWinnerByKey(
       updates,
       `${prefix}-WC1`
     );
 
-  const wc45WinnerName =
+  const wc36WinnerName =
     getPlayoffWinnerByKey(
       updates,
       `${prefix}-WC2`
+    );
+
+  const wc45WinnerName =
+    getPlayoffWinnerByKey(
+      updates,
+      `${prefix}-WC3`
+    );
+
+  const wc27Winner =
+    findPlayoffTeamByName(
+      allStandings,
+      wc27WinnerName
     );
 
   const wc36Winner =
@@ -5797,6 +5931,14 @@ function buildConferencePlayoffState(
   return {
     seededTeams,
 
+    wc27: {
+      first: seed(2),
+      firstSeed: 2,
+      second: seed(7),
+      secondSeed: 7,
+      winnerName: wc27WinnerName
+    },
+
     wc36: {
       first: seed(3),
       firstSeed: 3,
@@ -5813,27 +5955,29 @@ function buildConferencePlayoffState(
       winnerName: wc45WinnerName
     },
 
-    // Fixed bracket: WC1 winner -> Seed 1
     div1: {
       first: seed(1),
       firstSeed: 1,
-      second: wc36Winner,
+      second: wc45Winner,
       secondSeed:
         getPlayoffTeamSeed(
-          wc36Winner,
+          wc45Winner,
           seededTeams
         ),
       winnerName: div1WinnerName
     },
 
-    // Fixed bracket: WC2 winner -> Seed 2
     div2: {
-      first: seed(2),
-      firstSeed: 2,
-      second: wc45Winner,
+      first: wc27Winner,
+      firstSeed:
+        getPlayoffTeamSeed(
+          wc27Winner,
+          seededTeams
+        ),
+      second: wc36Winner,
       secondSeed:
         getPlayoffTeamSeed(
-          wc45Winner,
+          wc36Winner,
           seededTeams
         ),
       winnerName: div2WinnerName
@@ -5856,12 +6000,21 @@ function buildConferencePlayoffState(
         conferenceWinnerName
     },
 
-    champion: conferenceWinner
+    champion:
+      conferenceWinner
   };
 }
 
 function buildConferencePlayoffSide(conferenceName, state, side) {
   const wildCardOne = playoffMatchup(
+    state.wc27.first,
+    state.wc27.firstSeed,
+    state.wc27.second,
+    state.wc27.secondSeed,
+    state.wc27.winnerName
+  );
+
+  const wildCardTwo = playoffMatchup(
     state.wc36.first,
     state.wc36.firstSeed,
     state.wc36.second,
@@ -5869,7 +6022,7 @@ function buildConferencePlayoffSide(conferenceName, state, side) {
     state.wc36.winnerName
   );
 
-  const wildCardTwo = playoffMatchup(
+  const wildCardThree = playoffMatchup(
     state.wc45.first,
     state.wc45.firstSeed,
     state.wc45.second,
@@ -5915,6 +6068,7 @@ function buildConferencePlayoffSide(conferenceName, state, side) {
           <div class="playoff-round-content">
             ${wildCardOne}
             ${wildCardTwo}
+            ${wildCardThree}
           </div>
         </div>
 
@@ -6037,15 +6191,17 @@ async function loadPlayoffs(forceRefresh = false) {
 
     const updates = getPlayoffUpdateRows(data);
 
-    const atlantic = standings
-      .filter((team) => normalize(team.Conference) === "atlantic")
-      .sort(sortStandings)
-      .slice(0, 6);
+    const atlantic =
+      buildConferencePlayoffSeeds(
+        "Atlantic",
+        standings
+      );
 
-    const pacific = standings
-      .filter((team) => normalize(team.Conference) === "pacific")
-      .sort(sortStandings)
-      .slice(0, 6);
+    const pacific =
+      buildConferencePlayoffSeeds(
+        "Pacific",
+        standings
+      );
 
     renderLivePlayoffBracket(
       atlantic,
