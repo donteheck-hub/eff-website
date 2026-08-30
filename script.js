@@ -23,32 +23,32 @@ const DIVISION_CONFIG = {
   colonial: {
     name: "Colonial Division",
     conference: "Atlantic",
-    logo: "assets/divisions/colonial-division.png",
+    logo: "/assets/logos/colonial-division.png",
     teams: ["Baltimore Bats","Atlantis Tridents","Montreal Angels","Boston Snowmen","Philadelphia Liberties"]
   },
   gulf: {
     name: "Gulf Division",
     conference: "Atlantic",
-    logo: "assets/divisions/gulf-division.png",
+    logo: "/assets/logos/gulf-division.png",
     teams: ["Alabama Black Bears","Birmingham Bluebirds","Nashville Nightmares","Miami Sunshines","Culican Red Devils"]
   },
   cascade: {
     name: "Cascade Division",
     conference: "Pacific",
-    logo: "assets/divisions/cascade-division.png",
+    logo: "/assets/logos/cascade-division.png",
     teams: ["Anchorage Polar Bears","Seattle Evergreens","San Francisco Comets","Colorado Blizzards","Nebraska Sabertooths"]
   },
   sunset: {
     name: "Sunset Division",
     conference: "Pacific",
-    logo: "assets/divisions/sunset-division.png",
+    logo: "/assets/logos/sunset-division.png",
     teams: ["Los Angeles Tigers","San Diego Cruisers","Glendale Ghosts","Houston Hornets","Roblox Warriors"]
   }
 };
 
 const LOCAL_TEAM_LOGOS = {
-  bostonsnowmen: "assets/logos/boston-snowmen.png",
-  philadelphialiberties: "assets/logos/philadelphia-liberties.png"
+  bostonsnowmen: "/assets/logos/boston-snowmen.png",
+  philadelphialiberties: "/assets/logos/philadelphia-liberties.png"
 };
 
 function getDivisionForTeam(teamName) {
