@@ -61,9 +61,13 @@ function getDivisionForTeam(teamName) {
   return null;
 }
 
+function getTeamLogoByName(teamName, sheetLogo = "") {
+  const local = LOCAL_TEAM_LOGOS[normalizeTeamName(teamName)];
+  return local || getDisplayImageUrl(sheetLogo || "");
+}
+
 function getTeamDisplayLogo(team) {
-  const local = LOCAL_TEAM_LOGOS[normalizeTeamName(team?.Team)];
-  return local || getDisplayImageUrl(team?.Logo || "");
+  return getTeamLogoByName(team?.Team, team?.Logo);
 }
 
 function divisionOrder(teamName) {
@@ -80,7 +84,7 @@ function createDivisionHeaderRow(division) {
   if (!division) return "";
   return `
     <tr class="division-standings-row">
-      <td colspan="8">
+      <td colspan="9">
         <div class="division-standings-heading">
           <img src="${esc(division.logo)}" alt="${esc(division.name)}">
           <div>
@@ -1850,7 +1854,7 @@ async function loadStandings() {
 
       atlanticBody.innerHTML = `
         <tr>
-          <td colspan="8" class="status-cell">
+          <td colspan="9" class="status-cell">
             Unable to load standings.
           </td>
         </tr>
@@ -1863,7 +1867,7 @@ async function loadStandings() {
 
       pacificBody.innerHTML = `
         <tr>
-          <td colspan="8" class="status-cell">
+          <td colspan="9" class="status-cell">
             Unable to load standings.
           </td>
         </tr>
@@ -1876,6 +1880,41 @@ async function loadStandings() {
 }
 
 
+
+function parseDivisionRecord(record) {
+  const parts = String(record || "0-0").split("-");
+  const wins = Number(parts[0]) || 0;
+  const losses = Number(parts[1]) || 0;
+  const games = wins + losses;
+  return {
+    wins,
+    losses,
+    pct: games ? wins / games : 0
+  };
+}
+
+function sortDivisionStandings(a, b) {
+  const recA = parseDivisionRecord(a?.Rec);
+  const recB = parseDivisionRecord(b?.Rec);
+
+  if (recB.pct !== recA.pct) return recB.pct - recA.pct;
+  if (recB.wins !== recA.wins) return recB.wins - recA.wins;
+
+  const divA = parseDivisionRecord(a?.["Division Rec"]);
+  const divB = parseDivisionRecord(b?.["Division Rec"]);
+
+  if (divB.pct !== divA.pct) return divB.pct - divA.pct;
+  if (divB.wins !== divA.wins) return divB.wins - divA.wins;
+
+  const confA = parseDivisionRecord(a?.["Conf Rec"]);
+  const confB = parseDivisionRecord(b?.["Conf Rec"]);
+
+  if (confB.pct !== confA.pct) return confB.pct - confA.pct;
+  if (confB.wins !== confA.wins) return confB.wins - confA.wins;
+
+  return Number(b?.PD || 0) - Number(a?.PD || 0);
+}
+
 function renderStandings(
   body,
   teams
@@ -1885,7 +1924,7 @@ function renderStandings(
   if (!teams.length) {
     body.innerHTML = `
       <tr>
-        <td colspan="8" class="status-cell">
+        <td colspan="9" class="status-cell">
           No teams found.
         </td>
       </tr>
@@ -1941,6 +1980,8 @@ function renderStandings(
           ${createDivisionHeaderRow(division)}
 
           ${divisionTeams
+            .slice()
+            .sort(sortDivisionStandings)
             .map(
               (team, index) =>
                 createStandingsRow(
@@ -1990,7 +2031,8 @@ function createStandingsRow(
       </td>
 
       <td>${esc(team.Rec)}</td>
-      <td>${esc(team["Conf Rec"])}</td>
+      <td>${esc(team["Division Rec"] || "0-0")}</td>
+      <td>${esc(team["Conf Rec"] || "0-0")}</td>
       <td>${esc(team.PF)}</td>
       <td>${esc(team.PA)}</td>
 
@@ -2766,9 +2808,12 @@ function renderTeamSeasonSchedule(
 
 
           const opponentLogo =
-            isAway
-              ? game["Home Logo"]
-              : game["Away Logo"];
+            getTeamLogoByName(
+              opponent,
+              isAway
+                ? game["Home Logo"]
+                : game["Away Logo"]
+            );
 
 
           const teamScore =
@@ -2830,7 +2875,7 @@ function renderTeamSeasonSchedule(
                   opponentLogo
                     ? `
                       <img
-                        src="${esc(getDisplayImageUrl(opponentLogo))}"
+                        src="${esc(opponentLogo)}"
                         alt="${esc(opponent)}"
                         loading="lazy"
                       >
@@ -5157,10 +5202,16 @@ function createGameCard(game) {
     game["Home Team"] || "";
 
   const awayLogo =
-    game["Away Logo"] || "";
+    getTeamLogoByName(
+      awayTeam,
+      game["Away Logo"]
+    );
 
   const homeLogo =
-    game["Home Logo"] || "";
+    getTeamLogoByName(
+      homeTeam,
+      game["Home Logo"]
+    );
 
   const awayScore =
     game["Away Final Score"] || "";
@@ -5201,7 +5252,7 @@ function createGameCard(game) {
             awayLogo
               ? `
                 <img
-                  src="${esc(getDisplayImageUrl(awayLogo))}"
+                  src="${esc(awayLogo)}"
                   alt="${esc(awayTeam)}"
                   loading="lazy"
                 >
@@ -5235,7 +5286,7 @@ function createGameCard(game) {
             homeLogo
               ? `
                 <img
-                  src="${esc(getDisplayImageUrl(homeLogo))}"
+                  src="${esc(homeLogo)}"
                   alt="${esc(homeTeam)}"
                   loading="lazy"
                 >
