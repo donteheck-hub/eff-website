@@ -5679,8 +5679,16 @@ function playoffSeedTeam(team, seed, winnerName = "") {
     <div class="playoff-team-line ${isWinner ? "playoff-team-winner" : ""}">
       <span class="playoff-seed">${esc(seed)}</span>
       ${
-        team.Logo
-          ? `<img src="${esc(getDisplayImageUrl(team.Logo))}" alt="${esc(team.Team || "")}" loading="lazy">`
+        getTeamLogoByName(
+          team.Team,
+          team.Logo
+        )
+          ? `<img src="${esc(
+              getTeamLogoByName(
+                team.Team,
+                team.Logo
+              )
+            )}" alt="${esc(team.Team || "")}" loading="lazy">`
           : `<span class="playoff-team-logo-placeholder"></span>`
       }
       <strong>${esc(team.Team || "TBD")}</strong>
