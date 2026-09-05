@@ -1886,10 +1886,14 @@ function parseDivisionRecord(record) {
   const wins = Number(parts[0]) || 0;
   const losses = Number(parts[1]) || 0;
   const games = wins + losses;
+
   return {
     wins,
     losses,
-    pct: games ? wins / games : 0
+    pct:
+      games > 0
+        ? wins / games
+        : 0.5
   };
 }
 
@@ -1897,22 +1901,42 @@ function sortDivisionStandings(a, b) {
   const recA = parseDivisionRecord(a?.Rec);
   const recB = parseDivisionRecord(b?.Rec);
 
-  if (recB.pct !== recA.pct) return recB.pct - recA.pct;
-  if (recB.wins !== recA.wins) return recB.wins - recA.wins;
+  if (recB.pct !== recA.pct) {
+    return recB.pct - recA.pct;
+  }
 
-  const divA = parseDivisionRecord(a?.["Division Rec"]);
-  const divB = parseDivisionRecord(b?.["Division Rec"]);
+  const divA =
+    parseDivisionRecord(
+      a?.["Division Rec"]
+    );
 
-  if (divB.pct !== divA.pct) return divB.pct - divA.pct;
-  if (divB.wins !== divA.wins) return divB.wins - divA.wins;
+  const divB =
+    parseDivisionRecord(
+      b?.["Division Rec"]
+    );
 
-  const confA = parseDivisionRecord(a?.["Conf Rec"]);
-  const confB = parseDivisionRecord(b?.["Conf Rec"]);
+  if (divB.pct !== divA.pct) {
+    return divB.pct - divA.pct;
+  }
 
-  if (confB.pct !== confA.pct) return confB.pct - confA.pct;
-  if (confB.wins !== confA.wins) return confB.wins - confA.wins;
+  const confA =
+    parseDivisionRecord(
+      a?.["Conf Rec"]
+    );
 
-  return Number(b?.PD || 0) - Number(a?.PD || 0);
+  const confB =
+    parseDivisionRecord(
+      b?.["Conf Rec"]
+    );
+
+  if (confB.pct !== confA.pct) {
+    return confB.pct - confA.pct;
+  }
+
+  return (
+    Number(b?.PD || 0) -
+    Number(a?.PD || 0)
+  );
 }
 
 function renderStandings(
@@ -5715,25 +5739,10 @@ function playoffMatchup(
 
 
 function sortPlayoffSeeds(a, b) {
-  const recA = parseDivisionRecord(a?.Rec);
-  const recB = parseDivisionRecord(b?.Rec);
-
-  if (recB.pct !== recA.pct) return recB.pct - recA.pct;
-  if (recB.wins !== recA.wins) return recB.wins - recA.wins;
-
-  const divA = parseDivisionRecord(a?.["Division Rec"]);
-  const divB = parseDivisionRecord(b?.["Division Rec"]);
-
-  if (divB.pct !== divA.pct) return divB.pct - divA.pct;
-  if (divB.wins !== divA.wins) return divB.wins - divA.wins;
-
-  const confA = parseDivisionRecord(a?.["Conf Rec"]);
-  const confB = parseDivisionRecord(b?.["Conf Rec"]);
-
-  if (confB.pct !== confA.pct) return confB.pct - confA.pct;
-  if (confB.wins !== confA.wins) return confB.wins - confA.wins;
-
-  return Number(b?.PD || 0) - Number(a?.PD || 0);
+  return sortDivisionStandings(
+    a,
+    b
+  );
 }
 
 
