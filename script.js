@@ -3587,6 +3587,13 @@ function applyCalculatedPoints(
           formatPoints(
             calculated
           );
+      } else {
+        // Some stat tabs (especially Kicker) do not have a physical
+        // PTS column in the Google Sheet. Create one for the website.
+        copy.PTS =
+          formatPoints(
+            calculated
+          );
       }
 
       return copy;
@@ -4362,14 +4369,54 @@ function renderStatSheet(
 
 
   activeStatsHeaders =
-    normalized.headers;
+    [...normalized.headers];
+
+
+  // If the sheet does not physically contain a PTS column,
+  // add one to the website table after USERNAME/PLAYER/NAME.
+  const hasPtsHeader =
+    activeStatsHeaders.some(
+      (header) =>
+        normalize(header) === "pts" ||
+        normalize(header) === "points"
+    );
+
+  if (!hasPtsHeader) {
+    const playerHeaderIndex =
+      activeStatsHeaders.findIndex(
+        (header) => {
+          const key =
+            normalize(header);
+
+          return (
+            key === "username" ||
+            key === "player" ||
+            key === "name"
+          );
+        }
+      );
+
+    const insertAt =
+      playerHeaderIndex >= 0
+        ? playerHeaderIndex + 1
+        : Math.min(
+            3,
+            activeStatsHeaders.length
+          );
+
+    activeStatsHeaders.splice(
+      insertAt,
+      0,
+      "PTS"
+    );
+  }
 
 
   // Only show players who have actually earned points.
   // This keeps the stat tables focused on players with real production
   // and removes the long list of 0.0 PTS rows.
   const pointsHeader =
-    normalized.headers.find(
+    activeStatsHeaders.find(
       (header) =>
         normalize(header) === "pts" ||
         normalize(header) === "points"
