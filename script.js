@@ -3400,8 +3400,14 @@ function calculatePlayerPoints(
 
   /*
     DE:
-    (Tackles + Sacks × 4 + Pressures × 0.25
-     + Swats × 3 + Sack Yards × 0.2) / 2
+    (
+      Tackles × 0.75 +
+      Sacks × 5 +
+      Pressures × 0.3 +
+      Safeties × 4 +
+      QB Hits × 0.5 +
+      Sack Yards × 0.1
+    ) / 2
   */
 
   if (
@@ -3416,7 +3422,8 @@ function calculatePlayerPoints(
           "Tackles",
           "TACK",
           "TKL",
-          "TACKLES"
+          "TACKLES",
+          "TCK"
         ]
       );
 
@@ -3441,13 +3448,23 @@ function calculatePlayerPoints(
         ]
       );
 
-    const swats =
+    const safeties =
       statNumber(
         row,
         [
-          "Swats",
-          "SWAT",
-          "SWATS"
+          "Safeties",
+          "Safety",
+          "SFTY"
+        ]
+      );
+
+    const qbHits =
+      statNumber(
+        row,
+        [
+          "QB Hits",
+          "QB Hit",
+          "QBH"
         ]
       );
 
@@ -3457,17 +3474,19 @@ function calculatePlayerPoints(
         [
           "Sack Yards",
           "SACK YDS",
-          "SackYards"
+          "SackYards",
+          "SCKY"
         ]
       );
 
     return (
       (
-        tackles +
-        sacks * 4 +
-        pressures * 0.25 +
-        swats * 3 +
-        sackYards * 0.2
+        tackles * 0.75 +
+        sacks * 5 +
+        pressures * 0.3 +
+        safeties * 4 +
+        qbHits * 0.5 +
+        sackYards * 0.1
       ) / 2
     );
 
