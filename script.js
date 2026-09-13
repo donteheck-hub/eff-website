@@ -3417,7 +3417,7 @@ function calculatePlayerPoints(
       );
 
     const fieldGoalPercent =
-      statPercent(
+      statNumber(
         row,
         [
           "%",
@@ -4147,7 +4147,7 @@ function repairShiftedSeasonStatRows(
       "FG%",
       "MADE",
       "ATT",
-      "Yards"
+      "LONG"
     ];
 
     buildRow = (v) => ({
@@ -4157,7 +4157,7 @@ function repairShiftedSeasonStatRows(
       "FG%": v[3] ?? "",
       MADE: v[4] ?? "",
       ATT: v[5] ?? "",
-      Yards: v[6] ?? ""
+      LONG: v[6] ?? ""
     });
   }
 
