@@ -3370,10 +3370,15 @@ function calculatePlayerPoints(
 
   /*
     Kicker:
-    FG% × 10 + Made + Yards × 0.15 − (ATT − Made) × 3
+    (
+      MADE × 3 +
+      FG% × 0.10 +
+      LONG × 0.15 -
+      Misses × 2
+    ) / 2
 
-    Note: this follows the formula exactly as provided,
-    with no final /2.
+    FG% is treated as a whole-number percent:
+    100% = 100, 66.67% = 66.67.
   */
 
   if (
@@ -3381,34 +3386,13 @@ function calculatePlayerPoints(
     position === "k"
   ) {
 
-    const fieldGoalPercent =
-      statNumber(
-        row,
-        [
-          "FG%",
-          "FG %",
-          "Field Goal %",
-          "Field Goal Percentage"
-        ]
-      );
-
     const made =
       statNumber(
         row,
         [
+          "MADE",
           "Made",
-          "FGM",
           "FG Made"
-        ]
-      );
-
-    const yards =
-      statNumber(
-        row,
-        [
-          "Yards",
-          "YDS",
-          "FG Yards"
         ]
       );
 
@@ -3418,15 +3402,45 @@ function calculatePlayerPoints(
         [
           "ATT",
           "Attempts",
-          "FGA"
+          "FG Attempts"
         ]
       );
 
+    const long =
+      statNumber(
+        row,
+        [
+          "LONG",
+          "Long",
+          "Longest"
+        ]
+      );
+
+    const fieldGoalPercent =
+      statPercent(
+        row,
+        [
+          "%",
+          "FG%",
+          "FG %",
+          "Field Goal %",
+          "FieldGoal%"
+        ]
+      );
+
+    const misses =
+      Math.max(
+        0,
+        attempts - made
+      );
+
     return (
-      fieldGoalPercent * 10 +
-      made +
-      yards * 0.15 -
-      (attempts - made) * 3
+      (
+        made * 3 +
+        fieldGoalPercent * 0.10 +
+        long * 0.15 -
+        misses * 2
+      ) / 2
     );
 
   }
