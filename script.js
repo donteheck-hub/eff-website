@@ -3266,8 +3266,15 @@ function calculatePlayerPoints(
 
   /*
     DB:
-    ((100 − CA%) / 2 + INTs × 4.5 + PK6 × 10
-     − YDA × 0.012 − TDA × 1.5) / 2
+    (
+      INT × 5 +
+      TCK × 0.5 +
+      PK6 × 10 +
+      TRGT × 0.25 -
+      CA × 1.25 -
+      YDA × 0.02 -
+      TDA × 2
+    ) / 2
   */
 
   if (
@@ -3275,21 +3282,25 @@ function calculatePlayerPoints(
     position === "db"
   ) {
 
-    const completionAllowed =
-      statNumber(
-        row,
-        [
-          "CA %",
-          "CA%",
-          "Completion Allowed %",
-          "Completion % Allowed"
-        ]
-      );
-
     const interceptions =
       statNumber(
         row,
-        ["INT", "INTS", "Interceptions"]
+        [
+          "INT",
+          "INTS",
+          "Interceptions"
+        ]
+      );
+
+    const tackles =
+      statNumber(
+        row,
+        [
+          "TCK",
+          "Tackles",
+          "TKL",
+          "TACKLES"
+        ]
       );
 
     const pickSix =
@@ -3299,6 +3310,27 @@ function calculatePlayerPoints(
           "PK6",
           "PICK 6",
           "PICK6"
+        ]
+      );
+
+    const targets =
+      statNumber(
+        row,
+        [
+          "TRGT",
+          "Targets",
+          "Target",
+          "TGTS"
+        ]
+      );
+
+    const catchesAllowed =
+      statNumber(
+        row,
+        [
+          "CA",
+          "Catches Allowed",
+          "CatchesAllowed"
         ]
       );
 
@@ -3323,11 +3355,13 @@ function calculatePlayerPoints(
 
     return (
       (
-        (100 - completionAllowed) / 2 +
-        interceptions * 4.5 +
-        pickSix * 10 -
-        yardsAllowed * 0.012 -
-        touchdownsAllowed * 1.5
+        interceptions * 5 +
+        tackles * 0.5 +
+        pickSix * 10 +
+        targets * 0.25 -
+        catchesAllowed * 1.25 -
+        yardsAllowed * 0.02 -
+        touchdownsAllowed * 2
       ) / 2
     );
 
