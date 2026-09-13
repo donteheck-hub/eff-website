@@ -3122,7 +3122,7 @@ function calculatePlayerPoints(
 
   /*
     QB:
-    (TDs × 2 − INT × 3 + Yds × 0.04) / 2
+    ((TDs × 3) − (INT × 4) + (Yds × 0.04)) / 2
   */
 
   if (
@@ -3150,8 +3150,8 @@ function calculatePlayerPoints(
 
     return (
       (
-        tds * 2 -
-        interceptions * 3 +
+        tds * 3 -
+        interceptions * 4 +
         yards * 0.04
       ) / 2
     );
@@ -3818,7 +3818,320 @@ function updateStatsModeUI() {
 
 
 
-function normalizeStatSheetRows(rows) {
+
+function repairShiftedSeasonStatRows(
+  sheetName,
+  objectHeaders,
+  rows
+) {
+  if (
+    !Array.isArray(rows) ||
+    rows.length < 2
+  ) {
+    return null;
+  }
+
+  const headerValues =
+    objectHeaders.map(
+      key =>
+        String(
+          rows[0]?.[key] ?? ""
+        ).trim()
+    );
+
+  /*
+    Season 3 stat tabs currently have:
+      A = rank
+      B = blank
+      C = username
+      D = old/blank PTS slot
+      remaining columns = actual football stats
+
+    But row 2 still begins with "username, PTs, YDs...",
+    so Apps Script labels every value two columns too far left.
+    Detect that exact layout and rebuild the rows by physical column.
+  */
+  if (
+    normalize(
+      headerValues[0]
+    ) !== "username" ||
+    normalize(
+      headerValues[1]
+    ) !== "pts"
+  ) {
+    return null;
+  }
+
+  const firstDataValues =
+    objectHeaders.map(
+      key =>
+        rows[1]?.[key] ?? ""
+    );
+
+  const rankLooksNumeric =
+    /^\d+$/.test(
+      String(
+        firstDataValues[0] ?? ""
+      ).trim()
+    );
+
+  const usernameLooksText =
+    String(
+      firstDataValues[2] ?? ""
+    ).trim() !== "" &&
+    !/^-?\d+(?:\.\d+)?%?$/.test(
+      String(
+        firstDataValues[2] ?? ""
+      ).trim()
+    );
+
+  if (
+    !rankLooksNumeric ||
+    !usernameLooksText
+  ) {
+    return null;
+  }
+
+  const position =
+    normalize(sheetName);
+
+  let headers = [];
+  let buildRow = null;
+
+  if (
+    position.includes("quarterback") ||
+    position === "qb"
+  ) {
+    headers = [
+      "Rank",
+      "username",
+      "PTS",
+      "YDs",
+      "CMP",
+      "ATT",
+      "C%",
+      "TDs",
+      "INT",
+      "SCK",
+      "3RD",
+      "4TH",
+      "SNAP"
+    ];
+
+    buildRow = (v) => ({
+      Rank: v[0] ?? "",
+      username: v[2] ?? "",
+      PTS: "",
+      YDs: v[4] ?? "",
+      CMP: v[5] ?? "",
+      ATT: v[6] ?? "",
+      "C%": v[7] ?? "",
+      TDs: v[8] ?? "",
+      INT: v[9] ?? "",
+      SCK: v[10] ?? "",
+      "3RD": v[11] ?? "",
+      "4TH": v[12] ?? "",
+      SNAP: v[13] ?? ""
+    });
+  } else if (
+    position.includes("runningback") ||
+    position.includes("running back") ||
+    position === "rb"
+  ) {
+    headers = [
+      "Rank",
+      "username",
+      "PTS",
+      "YDs",
+      "Y/A",
+      "ATT",
+      "TD",
+      "FUM",
+      "1ST",
+      "3RD",
+      "4TH",
+      "SNAP"
+    ];
+
+    buildRow = (v) => ({
+      Rank: v[0] ?? "",
+      username: v[2] ?? "",
+      PTS: "",
+      YDs: v[4] ?? "",
+      "Y/A": v[5] ?? "",
+      ATT: v[6] ?? "",
+      TD: v[7] ?? "",
+      FUM: v[8] ?? "",
+      "1ST": v[9] ?? "",
+      "3RD": v[10] ?? "",
+      "4TH": v[11] ?? "",
+      SNAP: v[12] ?? ""
+    });
+  } else if (
+    position.includes("wide receiver") ||
+    position.includes("receiver") ||
+    position === "wr"
+  ) {
+    headers = [
+      "Rank",
+      "username",
+      "PTS",
+      "YDs",
+      "REC",
+      "TRGT",
+      "TD",
+      "YAC",
+      "1ST",
+      "3RD",
+      "4TH",
+      "SNAP"
+    ];
+
+    buildRow = (v) => ({
+      Rank: v[0] ?? "",
+      username: v[2] ?? "",
+      PTS: "",
+      YDs: v[4] ?? "",
+      REC: v[5] ?? "",
+      TRGT: v[6] ?? "",
+      TD: v[7] ?? "",
+      YAC: v[8] ?? "",
+      "1ST": v[9] ?? "",
+      "3RD": v[10] ?? "",
+      "4TH": v[11] ?? "",
+      SNAP: v[12] ?? ""
+    });
+  } else if (
+    position.includes("defensive end") ||
+    position === "de"
+  ) {
+    headers = [
+      "Rank",
+      "username",
+      "PTS",
+      "SCK",
+      "SCKY",
+      "TCK",
+      "TFL",
+      "QBH",
+      "PRS",
+      "SFTY",
+      "TD",
+      "RUSH",
+      "SNAP"
+    ];
+
+    buildRow = (v) => ({
+      Rank: v[0] ?? "",
+      username: v[2] ?? "",
+      PTS: "",
+      SCK: v[4] ?? "",
+      SCKY: v[5] ?? "",
+      TCK: v[6] ?? "",
+      TFL: v[7] ?? "",
+      QBH: v[8] ?? "",
+      PRS: v[9] ?? "",
+      SFTY: v[10] ?? "",
+      TD: v[11] ?? "",
+      RUSH: v[12] ?? "",
+      SNAP: v[13] ?? ""
+    });
+  } else if (
+    position.includes("defensive back") ||
+    position === "db"
+  ) {
+    headers = [
+      "Rank",
+      "username",
+      "PTS",
+      "INT",
+      "TCK",
+      "PK6",
+      "TRGT",
+      "CA",
+      "CA%",
+      "YDA",
+      "TDA",
+      "SNAP"
+    ];
+
+    buildRow = (v) => ({
+      Rank: v[0] ?? "",
+      username: v[2] ?? "",
+      PTS: "",
+      INT: v[4] ?? "",
+      TCK: v[5] ?? "",
+      PK6: v[6] ?? "",
+      TRGT: v[7] ?? "",
+      CA: v[8] ?? "",
+      "CA%": v[9] ?? "",
+      YDA: v[10] ?? "",
+      TDA: v[11] ?? "",
+      SNAP: v[12] ?? ""
+    });
+  } else if (
+    position.includes("kicker") ||
+    position === "k"
+  ) {
+    headers = [
+      "Rank",
+      "username",
+      "PTS",
+      "FG%",
+      "MADE",
+      "ATT",
+      "Yards"
+    ];
+
+    buildRow = (v) => ({
+      Rank: v[0] ?? "",
+      username: v[2] ?? "",
+      PTS: "",
+      "FG%": v[3] ?? "",
+      MADE: v[4] ?? "",
+      ATT: v[5] ?? "",
+      Yards: v[6] ?? ""
+    });
+  }
+
+  if (!buildRow) {
+    return null;
+  }
+
+  const repairedRows =
+    rows
+      .slice(1)
+      .map(
+        row => {
+          const values =
+            objectHeaders.map(
+              key =>
+                row?.[key] ?? ""
+            );
+
+          return buildRow(
+            values
+          );
+        }
+      )
+      .filter(
+        row =>
+          String(
+            row.username ?? ""
+          ).trim() !== ""
+      );
+
+  return {
+    headers,
+    rows: repairedRows
+  };
+}
+
+
+function normalizeStatSheetRows(
+  rows,
+  sheetName = ""
+) {
 
   if (
     !Array.isArray(rows) ||
@@ -3862,6 +4175,17 @@ function normalizeStatSheetRows(rows) {
       objectHeaders.length / 2
     )
   ) {
+
+    const repaired =
+      repairShiftedSeasonStatRows(
+        sheetName,
+        objectHeaders,
+        rows
+      );
+
+    if (repaired) {
+      return repaired;
+    }
 
     const firstRow =
       rows[0];
@@ -3958,7 +4282,8 @@ function renderStatSheet(
 
   const normalized =
     normalizeStatSheetRows(
-      rawRows
+      rawRows,
+      sheetName
     );
 
 
