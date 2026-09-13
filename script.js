@@ -3211,7 +3211,7 @@ function calculatePlayerPoints(
 
   /*
     WR:
-    (Receiving Yards × 0.12 + TDs × 4 + Rec × 0.5 + YAC × 0.1) / 2
+    (Receiving Yards × 0.10 + TDs × 5 + Rec × 0.5 + YAC × 0.05) / 2
   */
 
   if (
@@ -3254,10 +3254,10 @@ function calculatePlayerPoints(
 
     return (
       (
-        receivingYards * 0.12 +
-        tds * 4 +
+        receivingYards * 0.10 +
+        tds * 5 +
         receptions * 0.5 +
-        yac * 0.1
+        yac * 0.05
       ) / 2
     );
 
