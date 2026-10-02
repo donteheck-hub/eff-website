@@ -3267,11 +3267,11 @@ function calculatePlayerPoints(
   /*
     DB:
     (
-      INT × 5 +
+      INT × 8 +
       TCK × 0.5 +
       PK6 × 10 +
       TRGT × 0.25 -
-      CA × 1.25 -
+      CA × 0.75 -
       YDA × 0.02 -
       TDA × 2
     ) / 2
@@ -3355,11 +3355,11 @@ function calculatePlayerPoints(
 
     return (
       (
-        interceptions * 5 +
+        interceptions * 8 +
         tackles * 0.5 +
         pickSix * 10 +
         targets * 0.25 -
-        catchesAllowed * 1.25 -
+        catchesAllowed * 0.75 -
         yardsAllowed * 0.02 -
         touchdownsAllowed * 2
       ) / 2
