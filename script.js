@@ -4412,23 +4412,56 @@ function renderStatSheet(
   }
 
 
-  // Only show players who have actually earned points.
-  // This keeps the stat tables focused on players with real production
-  // and removes the long list of 0.0 PTS rows.
-  const pointsHeader =
-    activeStatsHeaders.find(
-      (header) =>
-        normalize(header) === "pts" ||
-        normalize(header) === "points"
-    );
+  /*
+    Display every real stat row from the sheet.
+
+    Position players:
+      show them when SNAP > 0.
+
+    Kickers:
+      show them when ATT > 0.
+
+    Do NOT hide a player just because calculated PTS is
+    zero or negative. A player can have real snaps and
+    production while still ending up with a low/negative
+    rating under the position formula.
+  */
+
+  const isKickerSheet =
+    normalize(sheetName).includes("kicker") ||
+    normalize(sheetName) === "k";
 
   activeStatsRows =
-    pointsHeader
-      ? calculatedRows.filter(
-          (row) =>
-            (numberFrom(row[pointsHeader]) ?? 0) > 0
-        )
-      : calculatedRows;
+    calculatedRows.filter(
+      (row) => {
+
+        if (isKickerSheet) {
+          const attempts =
+            statNumber(
+              row,
+              [
+                "ATT",
+                "Attempts",
+                "FG Attempts"
+              ]
+            );
+
+          return attempts > 0;
+        }
+
+        const snaps =
+          statNumber(
+            row,
+            [
+              "SNAP",
+              "SNAPS",
+              "Snaps"
+            ]
+          );
+
+        return snaps > 0;
+      }
+    );
 
 
   const ptsHeader =
