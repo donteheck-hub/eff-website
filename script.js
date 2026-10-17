@@ -994,6 +994,12 @@ function getHistoricalTeamName(
       playerName
     );
 
+  if (String(season) === "3") {
+    // Season 3 is still active. Do not fall back to Season 1 team mappings.
+    // We can freeze exact Season 3 historical team logos after the postseason.
+    return "";
+  }
+
   if (String(season) === "2") {
     return (
       SEASON_2_HISTORICAL_TEAMS[
