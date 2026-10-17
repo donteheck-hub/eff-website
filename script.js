@@ -990,6 +990,53 @@ const SEASON_2_HISTORICAL_TEAMS = {
 };
 
 
+/*
+==================================================
+SEASON 3 HISTORICAL TEAM LOGOS
+==================================================
+
+These assignments are LOCKED to the team the player
+earned the Season 3 standout/award/All-League honor with.
+Do not replace these with the player's current Discord team.
+*/
+
+const SEASON_3_HISTORICAL_TEAMS = {
+  "diego_pavia": "Baltimore Bats",
+  "noturaverageaaupg": "Montreal Angels",
+  "intechill": "Baltimore Bats",
+  "kelluro": "Montreal Angels",
+  "itzdayday14": "Montreal Angels",
+  "2_7ts": "Baltimore Bats",
+  "cooldariel2021": "Baltimore Bats",
+  "motionachiever": "Baltimore Bats",
+  "austinisdad846": "Culican Red Devils",
+  "antfurious": "Culican Red Devils",
+  "ak47tyw": "Culican Red Devils",
+  "foilowingmyheart": "Birmingham Bluebirds",
+  "4lozer": "Alabama Black Bears",
+  "v1pzs": "Culican Red Devils",
+  "thebacon_1335": "Birmingham Bluebirds",
+  "ga_t": "San Francisco Comets",
+  "dominater22610": "Seattle Evergreens",
+  "rvf": "San Francisco Comets",
+  "boomboomyay432": "Seattle Evergreens",
+  "mushywakawaka4": "Seattle Evergreens",
+  "sinsforg1ven": "Seattle Evergreens",
+  "catsareawesome20234": "Seattle Evergreens",
+  "dxmdxmdxmdxmdxm": "San Francisco Comets",
+  "kajan": "San Francisco Comets",
+  "phantomb819": "Roblox Warriors",
+  "zxc7": "Los Angeles Tigers",
+  "endless_suffering092": "Roblox Warriors",
+  "mayo_man1234567890": "Roblox Warriors",
+  "1zrha": "Houston Hornets",
+  "thundershock9003": "Roblox Warriors",
+  "joshallenisthegoat59": "Roblox Warriors",
+  "donteheck": "Birmingham Bluebirds",
+  "hacr": "Los Angeles Tigers"
+};
+
+
 function getHistoricalTeamName(
   playerName,
   season
@@ -1000,9 +1047,11 @@ function getHistoricalTeamName(
     );
 
   if (String(season) === "3") {
-    // Season 3 is still active. Do not fall back to Season 1 team mappings.
-    // We can freeze exact Season 3 historical team logos after the postseason.
-    return "";
+    return (
+      SEASON_3_HISTORICAL_TEAMS[
+        key
+      ] || ""
+    );
   }
 
   if (String(season) === "2") {
@@ -1145,32 +1194,6 @@ async function enhanceHistoricalSeasonLogos(
         historicalTeam
       );
 
-    /*
-      Season 3 is still active, so use the player's current
-      Season 3 Discord/team mapping for the history page.
-      Once Season 3 ends, these can be frozen just like S1/S2.
-    */
-    if (String(season) === "3" && !logo) {
-      const currentPlayer =
-        findDiscordPlayerByLooseName(
-          playerName
-        );
-
-      historicalTeam =
-        currentPlayer?.team ||
-        historicalTeam ||
-        "";
-
-      logo =
-        getTeamLogoByName(
-          historicalTeam,
-          currentPlayer?.teamLogo || ""
-        ) ||
-        getHistoricalTeamLogoFromLeagueData(
-          historicalTeam
-        ) ||
-        "";
-    }
 
     const playerWrap =
       document.createElement("span");
