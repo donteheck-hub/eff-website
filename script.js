@@ -48,8 +48,12 @@ const DIVISION_CONFIG = {
 
 const LOCAL_TEAM_LOGOS = {
   baltimorebats: "/assets/logos/baltimore-bats.png",
-  bostonsnowmen: "/assets/logos/boston-snowmen.png",
-  philadelphialiberties: "/assets/logos/philadelphia-liberties.png"
+  fairbankreindeers: "/assets/logos/fairbank-reindeers.png",
+  winchesterwidows: "/assets/logos/winchester-widows.png",
+  minnesotahuskies: "/assets/logos/minnesota-huskies.png",
+  philadelphialiberties: "/assets/logos/philadelphia-liberties.png",
+  rushmorerhinos: "/assets/logos/rushmore-rhinos.png",
+  bostonsnowmen: "/assets/logos/boston-snowmen.png"
 };
 
 function getDivisionForTeam(teamName) {
