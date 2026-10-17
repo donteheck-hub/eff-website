@@ -6410,18 +6410,16 @@ function buildConferencePlayoffState(
     Seed 2: other division winner.
     Seeds 3-7: remaining best teams.
 
-    Fixed bracket path:
+    Wild Card:
       WC1: 2 vs 7
       WC2: 3 vs 6
       WC3: 4 vs 5
 
-      Divisional 1:
-        Seed 1 vs WC3 winner
+    Divisional reseeding:
+      Seed 1 always plays the WORST remaining seed
+      (the highest seed number among the three Wild Card winners).
 
-      Divisional 2:
-        WC1 winner vs WC2 winner
-
-    No reseeding.
+      The other two Wild Card winners play each other.
   */
 
   const wc27WinnerName =
@@ -6459,6 +6457,59 @@ function buildConferencePlayoffState(
       allStandings,
       wc45WinnerName
     );
+
+  const wildCardWinners =
+    [
+      wc27Winner,
+      wc36Winner,
+      wc45Winner
+    ]
+      .filter(Boolean)
+      .map((team) => ({
+        team,
+        seed:
+          getPlayoffTeamSeed(
+            team,
+            seededTeams
+          )
+      }))
+      .filter(
+        (entry) =>
+          Number.isFinite(entry.seed) &&
+          entry.seed > 0
+      );
+
+  let seedOneOpponent = null;
+  let seedOneOpponentSeed = "";
+  let otherDivisionalFirst = null;
+  let otherDivisionalFirstSeed = "";
+  let otherDivisionalSecond = null;
+  let otherDivisionalSecondSeed = "";
+
+  if (wildCardWinners.length === 3) {
+    wildCardWinners.sort(
+      (a, b) =>
+        b.seed - a.seed
+    );
+
+    seedOneOpponent =
+      wildCardWinners[0].team;
+
+    seedOneOpponentSeed =
+      wildCardWinners[0].seed;
+
+    otherDivisionalFirst =
+      wildCardWinners[1].team;
+
+    otherDivisionalFirstSeed =
+      wildCardWinners[1].seed;
+
+    otherDivisionalSecond =
+      wildCardWinners[2].team;
+
+    otherDivisionalSecondSeed =
+      wildCardWinners[2].seed;
+  }
 
   const div1WinnerName =
     getPlayoffWinnerByKey(
@@ -6526,28 +6577,16 @@ function buildConferencePlayoffState(
     div1: {
       first: seed(1),
       firstSeed: 1,
-      second: wc45Winner,
-      secondSeed:
-        getPlayoffTeamSeed(
-          wc45Winner,
-          seededTeams
-        ),
+      second: seedOneOpponent,
+      secondSeed: seedOneOpponentSeed,
       winnerName: div1WinnerName
     },
 
     div2: {
-      first: wc27Winner,
-      firstSeed:
-        getPlayoffTeamSeed(
-          wc27Winner,
-          seededTeams
-        ),
-      second: wc36Winner,
-      secondSeed:
-        getPlayoffTeamSeed(
-          wc36Winner,
-          seededTeams
-        ),
+      first: otherDivisionalFirst,
+      firstSeed: otherDivisionalFirstSeed,
+      second: otherDivisionalSecond,
+      secondSeed: otherDivisionalSecondSeed,
       winnerName: div2WinnerName
     },
 
