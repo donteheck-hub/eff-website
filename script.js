@@ -2496,8 +2496,11 @@ async function openTeamDetail(
 
 
       const logo =
-        team?.Logo ||
-        apiTeamLogo;
+        getTeamLogoByName(
+          teamName,
+          team?.Logo ||
+          apiTeamLogo
+        );
 
 
       logoElement.src =
