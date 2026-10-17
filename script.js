@@ -47,6 +47,7 @@ const DIVISION_CONFIG = {
 };
 
 const LOCAL_TEAM_LOGOS = {
+  baltimorebats: "/assets/logos/baltimore-bats.png",
   bostonsnowmen: "/assets/logos/boston-snowmen.png",
   philadelphialiberties: "/assets/logos/philadelphia-liberties.png"
 };
@@ -1157,7 +1158,10 @@ async function enhanceHistoricalSeasonLogos(
         "";
 
       logo =
-        currentPlayer?.teamLogo ||
+        getTeamLogoByName(
+          historicalTeam,
+          currentPlayer?.teamLogo || ""
+        ) ||
         getHistoricalTeamLogoFromLeagueData(
           historicalTeam
         ) ||
