@@ -1006,7 +1006,7 @@ const SEASON_3_HISTORICAL_TEAMS = {
   "intechill": "Baltimore Bats",
   "kelluro": "Montreal Angels",
   "itzdayday14": "Montreal Angels",
-  "2_7ts": "Baltimore Bats",
+  "2_7ts": "Montreal Angels",
   "cooldariel2021": "Baltimore Bats",
   "motionachiever": "Baltimore Bats",
   "austinisdad846": "Culican Red Devils",
@@ -1080,7 +1080,20 @@ function getSeason1HistoricalTeamName(playerName) {
 
 function getHistoricalTeamLogoFromLeagueData(teamName) {
 
-  if (!teamName || !leagueData) {
+  if (!teamName) {
+    return "";
+  }
+
+  const localLogo =
+    LOCAL_TEAM_LOGOS[
+      normalizeTeamName(teamName)
+    ];
+
+  if (localLogo) {
+    return localLogo;
+  }
+
+  if (!leagueData) {
     return "";
   }
 
