@@ -1084,13 +1084,15 @@ async function enhanceHistoricalSeasonLogos(
 ) {
 
   try {
-    await getLeagueData();
+    await Promise.allSettled([
+      getLeagueData(),
+      getDiscordPlayers()
+    ]);
   } catch (error) {
     console.warn(
       "Could not load historical team logos:",
       error
     );
-    return;
   }
 
   const panel =
@@ -1127,16 +1129,40 @@ async function enhanceHistoricalSeasonLogos(
     const playerName =
       playerNode.textContent.trim();
 
-    const historicalTeam =
+    let historicalTeam =
       getHistoricalTeamName(
         playerName,
         season
       );
 
-    const logo =
+    let logo =
       getHistoricalTeamLogoFromLeagueData(
         historicalTeam
       );
+
+    /*
+      Season 3 is still active, so use the player's current
+      Season 3 Discord/team mapping for the history page.
+      Once Season 3 ends, these can be frozen just like S1/S2.
+    */
+    if (String(season) === "3" && !logo) {
+      const currentPlayer =
+        findDiscordPlayerByLooseName(
+          playerName
+        );
+
+      historicalTeam =
+        currentPlayer?.team ||
+        historicalTeam ||
+        "";
+
+      logo =
+        currentPlayer?.teamLogo ||
+        getHistoricalTeamLogoFromLeagueData(
+          historicalTeam
+        ) ||
+        "";
+    }
 
     const playerWrap =
       document.createElement("span");
