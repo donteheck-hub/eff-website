@@ -119,6 +119,8 @@ function createDivisionGridHeading(division) {
 const STAT_SHEETS = [
   "quarterback",
   "runningback",
+  "center",
+  "tight end",
   "wide receiver",
   "defensive end",
   "defensive back",
@@ -3744,7 +3746,6 @@ async function loadStats(
 
           return !(
             name.includes("linebacker") ||
-            name.includes("tight end") ||
             name.includes("linemen") ||
             name.includes("lineman")
           );
@@ -3757,13 +3758,11 @@ async function loadStats(
       const statKeywords = [
         "quarter",
         "running",
+        "center",
+        "tight end",
         "receiver",
         "defensive end",
         "defensive back",
-        
-        
-        
-        
         "kicker",
         "qb",
         "rb",
@@ -4115,6 +4114,62 @@ function repairShiftedSeasonStatRows(
       ATT: v[6] ?? "",
       TD: v[7] ?? "",
       FUM: v[8] ?? "",
+      "1ST": v[9] ?? "",
+      "3RD": v[10] ?? "",
+      "4TH": v[11] ?? "",
+      SNAP: v[12] ?? ""
+    });
+  } else if (
+    position.includes("center") ||
+    position === "c"
+  ) {
+    headers = [
+      "Rank",
+      "username",
+      "PTS",
+      "SCKA",
+      "PRSA",
+      "RYDS",
+      "SNAP"
+    ];
+
+    buildRow = (v) => ({
+      Rank: v[0] ?? "",
+      username: v[2] ?? "",
+      PTS: "",
+      SCKA: v[4] ?? "",
+      PRSA: v[5] ?? "",
+      RYDS: v[6] ?? "",
+      SNAP: v[7] ?? ""
+    });
+  } else if (
+    position.includes("tight end") ||
+    position === "te"
+  ) {
+    headers = [
+      "Rank",
+      "username",
+      "PTS",
+      "YDS",
+      "REC",
+      "TRGT",
+      "TD",
+      "YAC",
+      "1ST",
+      "3RD",
+      "4TH",
+      "SNAP"
+    ];
+
+    buildRow = (v) => ({
+      Rank: v[0] ?? "",
+      username: v[2] ?? "",
+      PTS: "",
+      YDS: v[4] ?? "",
+      REC: v[5] ?? "",
+      TRGT: v[6] ?? "",
+      TD: v[7] ?? "",
+      YAC: v[8] ?? "",
       "1ST": v[9] ?? "",
       "3RD": v[10] ?? "",
       "4TH": v[11] ?? "",
