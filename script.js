@@ -15,8 +15,11 @@ const PLAYOFF_UPDATE_SHEET =
 
 /*
 ==================================================
-SEASON 3 DIVISIONS
+SEASON 4 DIVISIONS
 ==================================================
+
+Season 3 is frozen in History. These are the live Season 4 divisions.
+Each division contains 6 teams (24 teams total).
 */
 
 const DIVISION_CONFIG = {
@@ -24,27 +27,85 @@ const DIVISION_CONFIG = {
     name: "Colonial Division",
     conference: "Atlantic",
     logo: "/assets/logos/colonial-division.png",
-    teams: ["Baltimore Bats","Atlantis Tridents","Montreal Angels","Boston Snowmen","Philadelphia Liberties"]
+    teams: [
+      "Baltimore Bats",
+      "Atlantis Tridents",
+      "Montreal Angels",
+      "Boston Snowmen",
+      "Philadelphia Liberties",
+      "Winchester Widows"
+    ]
   },
   gulf: {
     name: "Gulf Division",
     conference: "Atlantic",
     logo: "/assets/logos/gulf-division.png",
-    teams: ["Alabama Black Bears","Birmingham Bluebirds","Nashville Nightmares","Miami Sunshines","Culican Red Devils"]
+    teams: [
+      "Alabama Black Bears",
+      "Birmingham Bluebirds",
+      "Nashville Nightmares",
+      "Miami Sunshines",
+      "Culican Red Devils",
+      "Houston Hornets"
+    ]
   },
   cascade: {
     name: "Cascade Division",
     conference: "Pacific",
     logo: "/assets/logos/cascade-division.png",
-    teams: ["Anchorage Polar Bears","Seattle Evergreens","San Francisco Comets","Colorado Blizzards","Nebraska Sabertooths"]
+    teams: [
+      "Anchorage Polar Bears",
+      "Colorado Blizzards",
+      "Nebraska Sabertooths",
+      "Minnesota Huskies",
+      "Fairbank Reindeers",
+      "Rushmore Rhinos"
+    ]
   },
   sunset: {
     name: "Sunset Division",
     conference: "Pacific",
     logo: "/assets/logos/sunset-division.png",
-    teams: ["Los Angeles Tigers","San Diego Cruisers","Glendale Ghosts","Houston Hornets","Roblox Warriors"]
+    teams: [
+      "Los Angeles Tigers",
+      "San Diego Cruisers",
+      "Glendale Ghosts",
+      "Roblox Warriors",
+      "San Francisco Comets",
+      "Seattle Evergreens"
+    ]
   }
 };
+
+const SEASON4_SCHEDULE_READY = false;
+
+function buildSeason4Standings(sheetRows = []) {
+  const sheetMap = new Map(
+    (Array.isArray(sheetRows) ? sheetRows : [])
+      .filter(row => row?.Team)
+      .map(row => [normalizeTeamName(row.Team), row])
+  );
+
+  return Object.values(DIVISION_CONFIG)
+    .flatMap(division =>
+      division.teams.map(teamName => {
+        const oldRow = sheetMap.get(normalizeTeamName(teamName)) || {};
+        return {
+          ...oldRow,
+          Conference: division.conference,
+          Team: teamName,
+          Logo: getTeamLogoByName(teamName, oldRow.Logo || ""),
+          Rec: "0-0",
+          "Division Rec": "0-0",
+          "Conf Rec": "0-0",
+          PF: 0,
+          PA: 0,
+          PD: 0,
+          Streak: "-"
+        };
+      })
+    );
+}
 
 const LOCAL_TEAM_LOGOS = {
   baltimorebats: "/assets/logos/baltimore-bats.png",
@@ -1867,16 +1928,9 @@ async function loadStandings() {
 
 
     const standings =
-      Array.isArray(
+      buildSeason4Standings(
         data[STANDINGS_SHEET]
-      )
-        ? data[STANDINGS_SHEET].filter(
-            team =>
-              isActiveFranchise(
-                team.Team
-              )
-          )
-        : data[STANDINGS_SHEET];
+      );
 
 
     if (!Array.isArray(standings)) {
@@ -2175,16 +2229,9 @@ async function loadTeams() {
 
 
     const standings =
-      Array.isArray(
+      buildSeason4Standings(
         data[STANDINGS_SHEET]
-      )
-        ? data[STANDINGS_SHEET].filter(
-            team =>
-              isActiveFranchise(
-                team.Team
-              )
-          )
-        : data[STANDINGS_SHEET];
+      );
 
 
     if (!Array.isArray(standings)) {
@@ -2475,16 +2522,9 @@ async function openTeamDetail(
 
 
     const standings =
-      Array.isArray(
+      buildSeason4Standings(
         data[STANDINGS_SHEET]
-      )
-        ? data[STANDINGS_SHEET].filter(
-            item =>
-              isActiveFranchise(
-                item.Team
-              )
-          )
-        : [];
+      );
 
 
     const team =
@@ -2571,33 +2611,41 @@ async function openTeamDetail(
     );
 
 
-    const schedule =
-      Array.isArray(
-        data[SCHEDULE_SHEET]
-      )
-        ? data[SCHEDULE_SHEET]
-        : [];
+    if (!SEASON4_SCHEDULE_READY) {
+      if (scheduleElement) {
+        scheduleElement.innerHTML = `
+          <div class="loading-card">
+            Season 4 schedule coming soon.
+          </div>
+        `;
+      }
+    } else {
+      const schedule =
+        Array.isArray(
+          data[SCHEDULE_SHEET]
+        )
+          ? data[SCHEDULE_SHEET]
+          : [];
 
+      const games =
+        schedule.filter(
+          (game) =>
+            teamNamesMatch(
+              game["Away Team"],
+              teamName
+            ) ||
+            teamNamesMatch(
+              game["Home Team"],
+              teamName
+            )
+        );
 
-    const games =
-      schedule.filter(
-        (game) =>
-          teamNamesMatch(
-            game["Away Team"],
-            teamName
-          ) ||
-          teamNamesMatch(
-            game["Home Team"],
-            teamName
-          )
+      renderTeamSeasonSchedule(
+        scheduleElement,
+        games,
+        teamName
       );
-
-
-    renderTeamSeasonSchedule(
-      scheduleElement,
-      games,
-      teamName
-    );
+    }
 
 
   } catch (error) {
@@ -5584,6 +5632,29 @@ async function loadSchedule() {
     document.getElementById(
       "scheduleGrid"
     );
+
+
+  if (!SEASON4_SCHEDULE_READY) {
+    if (weekSelect) {
+      weekSelect.innerHTML = `<option value="">Schedule coming soon</option>`;
+      weekSelect.disabled = true;
+    }
+
+    const title = document.getElementById("scoreWeekTitle");
+    if (title) {
+      title.textContent = "SEASON 4";
+    }
+
+    if (grid) {
+      grid.innerHTML = `
+        <div class="loading-card">
+          Season 4 schedule coming soon. The new 24-team schedule will be added after it is built in Google Sheets.
+        </div>
+      `;
+    }
+
+    return;
+  }
 
 
   try {
