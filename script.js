@@ -4012,7 +4012,7 @@ function updateStatsModeUI() {
     seasonLabel.textContent =
       currentStatsMode === "alltime"
         ? "EFF ALL TIME"
-        : "EFF SEASON 3";
+        : "EFF SEASON 4";
   }
 }
 
@@ -6875,7 +6875,7 @@ function renderLivePlayoffBracket(
         <div class="playoff-championship-label">EFF Championship</div>
         <div class="playoff-championship-card">
           <span class="playoff-trophy">🏆</span>
-          <h3>Season 3 Final</h3>
+          <h3>Season 4 Final</h3>
           ${playoffSeedTeam(
             atlanticChampion,
             atlanticChampionSeed,

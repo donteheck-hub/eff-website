@@ -5,6 +5,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EFF | Elite Football Federation</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --season4-bg-start: #040d1f;
+      --season4-bg-end: #071832;
+      --season4-panel: rgba(8, 18, 36, 0.78);
+      --season4-panel-strong: rgba(10, 23, 44, 0.92);
+      --season4-border: rgba(120, 195, 255, 0.22);
+      --season4-glow: rgba(67, 163, 255, 0.22);
+      --season4-accent: #7cc9ff;
+      --season4-accent-strong: #2ea0ff;
+      --season4-accent-soft: #b9e6ff;
+    }
+    body {
+      background:
+        linear-gradient(180deg, rgba(3, 8, 20, 0.9) 0%, rgba(4, 13, 31, 0.95) 30%, rgba(4, 10, 22, 0.98) 100%),
+        radial-gradient(circle at top right, rgba(88, 166, 255, 0.18), transparent 35%),
+        radial-gradient(circle at top left, rgba(170, 225, 255, 0.10), transparent 30%),
+        #030913;
+      color: #f3f8ff;
+    }
+    .topbar, .mobile-nav, .page-container, .content-section, .standings-card, .team-card, .team-panel, .stat-card, .rule-card, .history-card, .playoff-championship-card, .playoff-matchup-card, .playoff-group-card, .history-v2-card, .history-season-block, .history-list-card, .season-history-block, .season-card, .schedule-card {
+      backdrop-filter: blur(12px);
+    }
+    .topbar {
+      background: rgba(4, 13, 31, 0.9);
+      border-bottom: 1px solid var(--season4-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    }
+    .nav-link.active, .nav-link:hover, .primary-button, .discord-button, .season-badge {
+      background: linear-gradient(135deg, #9fe3ff 0%, #4eaefc 45%, #2374ff 100%);
+      color: #03101f !important;
+      border-color: rgba(181, 231, 255, 0.7) !important;
+      box-shadow: 0 10px 24px rgba(46, 160, 255, 0.25);
+    }
+    .secondary-button, .conference-card button, .playoff-refresh-button {
+      border-color: rgba(127, 201, 255, 0.42) !important;
+      color: #e8f6ff !important;
+      box-shadow: 0 0 0 1px rgba(65, 143, 255, 0.08) inset;
+    }
+    .hero {
+      background: linear-gradient(135deg, rgba(8, 20, 42, 0.86), rgba(4, 14, 32, 0.94));
+      border: 1px solid var(--season4-border);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(82, 175, 255, 0.05) inset;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(5, 13, 28, 0.7), rgba(5, 13, 28, 0.18)), url("assets/images/season4-banner.png") center/cover no-repeat;
+      opacity: 0.28;
+      pointer-events: none;
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .hero-logo {
+      width: min(360px, 82%);
+      max-width: 360px;
+      filter: drop-shadow(0 20px 40px rgba(70, 170, 255, 0.3));
+    }
+    .banner, .history-bracket-image {
+      border-radius: 22px;
+      border: 1px solid rgba(129, 203, 255, 0.25);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.34);
+    }
+    .content-section, .standings-card, .history-v2-card, .season-history-block, .history-list-card, .conference-card, .page-title-card, .team-overview-card {
+      background: linear-gradient(180deg, rgba(6, 17, 36, 0.82), rgba(5, 13, 29, 0.94));
+      border: 1px solid rgba(124, 201, 255, 0.16);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+    }
+    .page-title span, .section-heading span, .mini-label, .playoff-championship-label, .brand-copy span {
+      color: var(--season4-accent-soft) !important;
+    }
+    .section-heading h2, .page-title h2, .hero h1 span, .history-season-header h2 {
+      color: #f4fbff;
+      text-shadow: 0 4px 22px rgba(93, 180, 255, 0.12);
+    }
+    .brand-logo { filter: drop-shadow(0 0 16px rgba(90, 170, 255, 0.25)); }
+  </style>
 </head>
 <body>
 
@@ -14,7 +93,7 @@
 
       <div class="brand-copy">
         <strong>Elite Football Federation</strong>
-        <span>SEASON 3</span>
+        <span>SEASON 4</span>
       </div>
     </div>
 
@@ -44,15 +123,12 @@
     <!-- HOME -->
     <section class="page active-page" id="home">
       <section class="hero">
-        <img src="assets/logos/League Logo.png" alt="EFF Logo" class="hero-logo">
-        <div class="season-badge">SEASON 3</div>
+        <img src="assets/logos/super-bowl-iv.png" alt="EFF Super Bowl IV" class="hero-logo">
+        <div class="season-badge">SEASON 4</div>
 
-        <h1>
-          ELITE FOOTBALL
-          <span>FEDERATION</span>
-        </h1>
+        <h1>ELITE FOOTBALL <span>SEASON 4</span></h1>
 
-        <p>Competition. Community. Legacy.</p>
+        <p>New season, new divisions, and a new winter championship chase.</p>
 
         <div class="hero-actions">
           <button class="primary-button" data-go="standings">View Standings</button>
@@ -63,16 +139,16 @@
       <section class="content-section">
         <div class="section-heading">
           <div>
-            <span>SEASON 3</span>
-            <h2>EFF Super Bowl</h2>
+            <span>SEASON 4</span>
+            <h2>EFF Super Bowl IV</h2>
           </div>
 
-          <p>The biggest stage in the Elite Football Federation.</p>
+          <p>The official Season 4 banner and Super Bowl IV identity.</p>
         </div>
 
         <img
-          src="assets/images/Season 3 banner.png"
-          alt="EFF Season 3 Super Bowl"
+          src="assets/images/season4-banner.png"
+          alt="EFF Season 4 Super Bowl IV Banner"
           class="banner"
         >
       </section>
@@ -196,7 +272,7 @@
         <div class="playoffs-hero-row">
           <div class="page-title playoffs-title-block">
             <span>LIVE PLAYOFF BRACKET</span>
-            <h2>Season 3 Playoffs</h2>
+            <h2>Season 4 Playoffs</h2>
             <p>Seeds update automatically from the live standings. Seven teams from each conference qualify. Division winners are guaranteed Seeds 1 and 2, and Seed 1 receives the only first-round bye.</p>
           </div>
 
@@ -295,7 +371,7 @@
       <div class="stats-shell">
         <div class="stats-page-heading stats-heading-row">
           <div>
-            <div class="stats-season-label" id="statsSeasonLabel">EFF SEASON 3</div>
+            <div class="stats-season-label" id="statsSeasonLabel">EFF SEASON 4</div>
             <h2 id="statsPageTitle">PLAYER STATS</h2>
           </div>
 
