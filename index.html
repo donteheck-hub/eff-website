@@ -84,6 +84,87 @@
     }
     .brand-logo { filter: drop-shadow(0 0 16px rgba(90, 170, 255, 0.25)); }
   </style>
+
+  <style id="season4-stats-theme-fix">
+    /* Season 4 Stats theme override */
+    .stats-page {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(61, 151, 255, 0.10), transparent 28%),
+        linear-gradient(180deg, rgba(3, 10, 24, 0.98), rgba(5, 15, 32, 0.98));
+    }
+    .stats-shell {
+      color: #f4f9ff;
+    }
+    .stats-season-label {
+      color: #8ed5ff !important;
+      letter-spacing: .22em;
+    }
+    .stats-mode-btn,
+    .stats-refresh-btn,
+    .stats-tab {
+      background: linear-gradient(180deg, rgba(10, 27, 50, 0.96), rgba(5, 15, 31, 0.96)) !important;
+      border: 1px solid rgba(116, 197, 255, 0.26) !important;
+      color: #eaf7ff !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .stats-mode-btn:hover,
+    .stats-refresh-btn:hover,
+    .stats-tab:hover {
+      border-color: rgba(132, 210, 255, 0.65) !important;
+      background: linear-gradient(180deg, rgba(18, 49, 85, 0.98), rgba(7, 24, 47, 0.98)) !important;
+      box-shadow: 0 0 18px rgba(52, 160, 255, 0.12);
+    }
+    .stats-mode-btn.active,
+    .stats-tab.active {
+      background: linear-gradient(135deg, #b4e9ff 0%, #65c4ff 42%, #2b86ff 100%) !important;
+      color: #041221 !important;
+      border-color: #aee5ff !important;
+      box-shadow: 0 0 22px rgba(58, 167, 255, 0.28) !important;
+    }
+    .player-search {
+      background: rgba(6, 18, 37, 0.90) !important;
+      border: 1px solid rgba(112, 193, 255, 0.22) !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.015);
+    }
+    .player-search input {
+      background: transparent !important;
+      color: #edf8ff !important;
+    }
+    .player-search input::placeholder {
+      color: #7ea9c8 !important;
+    }
+    .search-icon { color: #79caff !important; }
+    .stats-table-card {
+      background: linear-gradient(180deg, rgba(7, 19, 39, 0.96), rgba(4, 13, 28, 0.98)) !important;
+      border: 1px solid rgba(115, 196, 255, 0.20) !important;
+      box-shadow: 0 18px 45px rgba(0,0,0,.30), 0 0 24px rgba(48,148,255,.06) inset !important;
+      overflow: hidden;
+    }
+    .website-stats-table thead,
+    .website-stats-table thead tr,
+    .website-stats-table thead th {
+      background: linear-gradient(180deg, #2c87d8 0%, #1b69b2 100%) !important;
+      color: #f8fcff !important;
+      border-color: rgba(193, 231, 255, 0.18) !important;
+    }
+    .website-stats-table tbody tr {
+      background: rgba(7, 18, 36, 0.74) !important;
+    }
+    .website-stats-table tbody tr:nth-child(even) {
+      background: rgba(10, 25, 48, 0.84) !important;
+    }
+    .website-stats-table tbody tr:hover {
+      background: rgba(21, 62, 101, 0.78) !important;
+    }
+    .website-stats-table td {
+      border-color: rgba(110, 180, 229, 0.13) !important;
+      color: #edf7ff !important;
+    }
+    .website-stats-table .status-cell {
+      color: #9dbbd1 !important;
+    }
+  </style>
+
 </head>
 <body>
 
