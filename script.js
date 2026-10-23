@@ -6980,17 +6980,29 @@ if (refreshPlayoffsBtn) {
 HOME DASHBOARD
 ==================================================
 */
-const HOME_AWARD_SHEETS = {
-  "quarterback": "quarterback",
-  "runningback": "runningback",
-  "wide receiver": "wide receiver",
-  "defensive end": "defensive end",
-  "defensive back": "defensive back",
-  "kicker": "kicker"
+const HOME_AWARD_DEFINITIONS = {
+  mvp: {
+    label: "MVP",
+    sheets: ["quarterback", "runningback", "center", "tight end", "wide receiver", "defensive end", "defensive back", "kicker"]
+  },
+  opoty: {
+    label: "OPOTY",
+    sheets: ["quarterback", "runningback", "center", "tight end", "wide receiver"]
+  },
+  dpoty: {
+    label: "DPOTY",
+    sheets: ["defensive end", "defensive back"]
+  }
 };
-const HOME_AWARD_LABELS = {
-  "quarterback": "QB", "runningback": "RB", "wide receiver": "WR",
-  "defensive end": "DE", "defensive back": "DB", "kicker": "K"
+const HOME_AWARD_POSITION_LABELS = {
+  "quarterback": "QB",
+  "runningback": "RB",
+  "center": "C",
+  "tight end": "TE",
+  "wide receiver": "WR",
+  "defensive end": "DE",
+  "defensive back": "DB",
+  "kicker": "K"
 };
 function getStatsPlayerName(row) {
   const key = findHeaderKey(row,["username","player","name"]);
@@ -7001,29 +7013,68 @@ function getStatsPointsValue(row) {
   const value = key ? Number(row[key]) : 0;
   return Number.isFinite(value) ? value : 0;
 }
-async function renderHomeAwardWatch(positionName="quarterback") {
-  const container=document.getElementById("homeAwardWatchList");
-  if(!container) return;
-  container.innerHTML='<div class="home-dashboard-loading">Loading award watch...</div>';
+function getAwardPlayerKey(name) {
+  return normalize(String(name || "")).replace(/[^a-z0-9]/g, "");
+}
+async function buildHomeAwardLeaders(awardKey) {
+  const definition = HOME_AWARD_DEFINITIONS[awardKey] || HOME_AWARD_DEFINITIONS.mvp;
+  const data = await getStatsSourceData("season", false);
+  const combined = new Map();
+
+  for (const sheetName of definition.sheets) {
+    const rawRows = Array.isArray(data?.[sheetName]) ? data[sheetName] : [];
+    const normalizedRows = normalizeStatSheetRows(rawRows);
+    const calculatedRows = applyCalculatedPoints(sheetName, normalizedRows.rows);
+    const positionLabel = HOME_AWARD_POSITION_LABELS[sheetName] || sheetName.toUpperCase();
+
+    for (const row of calculatedRows) {
+      const name = getStatsPlayerName(row);
+      if (!name) continue;
+      const pts = getStatsPointsValue(row);
+      if (!Number.isFinite(pts) || pts <= 0) continue;
+
+      const key = getAwardPlayerKey(name);
+      if (!key) continue;
+      const current = combined.get(key) || { name, pts: 0, positions: [], bestPositionPts: -Infinity };
+      current.pts += pts;
+      if (!current.positions.includes(positionLabel)) current.positions.push(positionLabel);
+      if (pts > current.bestPositionPts) {
+        current.bestPositionPts = pts;
+        current.name = name;
+      }
+      combined.set(key, current);
+    }
+  }
+
+  return [...combined.values()]
+    .sort((a,b) => b.pts - a.pts || a.name.localeCompare(b.name))
+    .slice(0,5);
+}
+async function renderHomeAwardWatch(awardKey="mvp") {
+  const container = document.getElementById("homeAwardWatchList");
+  if (!container) return;
+  container.innerHTML = '<div class="home-dashboard-loading">Loading award watch...</div>';
+
   try {
-    await getDiscordPlayers().catch(()=>[]);
-    const data=await getStatsSourceData("season",false);
-    const sheetName=HOME_AWARD_SHEETS[positionName]||"quarterback";
-    const rawRows=Array.isArray(data?.[sheetName])?data[sheetName]:[];
-    const normalized=normalizeStatSheetRows(rawRows);
-    const leaders=applyCalculatedPoints(sheetName,normalized.rows)
-      .map(row=>({name:getStatsPlayerName(row),pts:getStatsPointsValue(row)}))
-      .filter(item=>item.name)
-      .sort((a,b)=>b.pts-a.pts).slice(0,3);
-    if(!leaders.length){container.innerHTML='<div class="home-dashboard-loading">No award data found.</div>';return;}
-    const label=HOME_AWARD_LABELS[positionName]||"QB";
-    container.innerHTML=leaders.map((item,index)=>{
-      const player=findDiscordPlayerByLooseName(item.name);
-      const logo=player?.teamLogo||"";
-      const team=player?.team||"";
-      return `<div class="home-award-row"><span class="home-award-rank">${index+1}</span><div class="home-award-player">${logo?`<img src="${esc(getDisplayImageUrl(logo))}" alt="${esc(team)}" loading="lazy">`:`<span class="home-award-logo-empty">—</span>`}<strong>${esc(item.name)}</strong></div><span class="home-award-position">${label}</span><strong class="home-award-points">${formatPoints(item.pts)}</strong></div>`;
+    await getDiscordPlayers().catch(() => []);
+    const leaders = await buildHomeAwardLeaders(String(awardKey || "mvp").toLowerCase());
+
+    if (!leaders.length) {
+      container.innerHTML = '<div class="home-dashboard-loading">No award data found yet.</div>';
+      return;
+    }
+
+    container.innerHTML = leaders.map((item,index) => {
+      const player = findDiscordPlayerByLooseName(item.name);
+      const logo = player?.teamLogo || "";
+      const team = player?.team || "";
+      const positionText = item.positions.join("/");
+      return `<div class="home-award-row"><span class="home-award-rank">${index+1}</span><div class="home-award-player">${logo?`<img src="${esc(getDisplayImageUrl(logo))}" alt="${esc(team)}" loading="lazy">`:`<span class="home-award-logo-empty">—</span>`}<strong>${esc(item.name)}</strong></div><span class="home-award-position">${esc(positionText)}</span><strong class="home-award-points">${formatPoints(item.pts)}</strong></div>`;
     }).join("");
-  } catch(error){console.error("Home award watch error:",error);container.innerHTML='<div class="home-dashboard-loading">Unable to load award watch.</div>';}
+  } catch(error) {
+    console.error("Home award watch error:", error);
+    container.innerHTML = '<div class="home-dashboard-loading">Unable to load award watch.</div>';
+  }
 }
 function renderHomeStandingsList(container,teams){
   if(!container)return;
@@ -7040,7 +7091,7 @@ async function renderHomeStandingsPreview(){
 }
 const homeAwardPosition=document.getElementById("homeAwardPosition");
 if(homeAwardPosition){homeAwardPosition.addEventListener("change",()=>renderHomeAwardWatch(homeAwardPosition.value));}
-async function loadHomeDashboard(){await Promise.all([renderHomeAwardWatch(homeAwardPosition?.value||"quarterback"),renderHomeStandingsPreview()]);}
+async function loadHomeDashboard(){await Promise.all([renderHomeAwardWatch(homeAwardPosition?.value||"mvp"),renderHomeStandingsPreview()]);}
 
 /*
 ==================================================

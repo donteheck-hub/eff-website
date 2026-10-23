@@ -83,7 +83,131 @@
       text-shadow: 0 4px 22px rgba(93, 180, 255, 0.12);
     }
     .brand-logo { filter: drop-shadow(0 0 16px rgba(90, 170, 255, 0.25)); }
-  </style>
+  
+    .home-award-watch {
+      margin-top: 28px;
+      padding: 24px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(7, 19, 39, 0.92), rgba(4, 12, 27, 0.96));
+      border: 1px solid rgba(124, 201, 255, 0.22);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(75, 164, 255, 0.04) inset;
+    }
+    .home-award-watch-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(92, 181, 255, 0.45);
+    }
+    .home-award-watch-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: .03em;
+      color: #f4fbff;
+    }
+    .home-award-live-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #bfe7ff;
+      border: 1px solid rgba(112, 202, 255, 0.35);
+      background: rgba(52, 137, 215, 0.16);
+    }
+    .home-award-select {
+      min-width: 310px;
+      max-width: 100%;
+      padding: 11px 40px 11px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(127, 201, 255, 0.3);
+      background: #071426;
+      color: #edf8ff;
+      font: inherit;
+      font-weight: 800;
+      outline: none;
+      cursor: pointer;
+    }
+    .home-award-select:focus {
+      border-color: #69bdff;
+      box-shadow: 0 0 0 3px rgba(72, 164, 255, 0.13);
+    }
+    .home-award-list {
+      display: grid;
+      margin-top: 10px;
+    }
+    .home-award-row {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 58px;
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+    }
+    .home-award-row:last-child { border-bottom: 0; }
+    .home-award-rank {
+      color: #7ec9ff;
+      font-weight: 950;
+      text-align: center;
+    }
+    .home-award-player {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .home-award-player img,
+    .home-award-logo-empty {
+      width: 30px;
+      height: 30px;
+      flex: 0 0 30px;
+      object-fit: contain;
+      border-radius: 7px;
+    }
+    .home-award-player strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #fff;
+    }
+    .home-award-position {
+      padding: 5px 8px;
+      border-radius: 7px;
+      background: rgba(87, 170, 255, 0.13);
+      color: #a8dcff;
+      font-size: .76rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .home-award-points {
+      min-width: 52px;
+      text-align: right;
+      color: #78caff;
+      font-size: 1.08rem;
+    }
+    .home-dashboard-loading {
+      padding: 22px 8px;
+      color: rgba(225, 241, 255, 0.7);
+      text-align: center;
+      font-weight: 700;
+    }
+    @media (max-width: 620px) {
+      .home-award-watch { padding: 18px; }
+      .home-award-select { min-width: 100%; width: 100%; }
+      .home-award-row { grid-template-columns: 30px minmax(0,1fr) auto; }
+      .home-award-position { display: none; }
+    }
+</style>
 
   <style id="season4-stats-theme-fix">
     /* Season 4 Stats theme override */
@@ -258,6 +382,30 @@
             <p>View Pacific Conference teams and standings.</p>
             <button data-go="standings">View Standings</button>
           </article>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <span>SEASON 4</span>
+            <h2>Award Watch</h2>
+          </div>
+          <p>Live top-five races calculated from Season 4 player points.</p>
+        </div>
+
+        <div class="home-award-watch">
+          <div class="home-award-watch-top">
+            <h3 class="home-award-watch-title">AWARD WATCH <span class="home-award-live-badge">Live Race</span></h3>
+            <select id="homeAwardPosition" class="home-award-select" aria-label="Choose award race">
+              <option value="mvp">MVP — Most Valuable Player</option>
+              <option value="opoty">OPOTY — Offensive Player of the Year</option>
+              <option value="dpoty">DPOTY — Defensive Player of the Year</option>
+            </select>
+          </div>
+          <div id="homeAwardWatchList" class="home-award-list">
+            <div class="home-dashboard-loading">Loading award watch...</div>
+          </div>
         </div>
       </section>
     </section>
