@@ -77,7 +77,7 @@ const DIVISION_CONFIG = {
   }
 };
 
-const SEASON4_SCHEDULE_READY = false;
+const SEASON4_SCHEDULE_READY = true;
 
 function buildSeason4Standings(sheetRows = []) {
   const sheetMap = new Map(
