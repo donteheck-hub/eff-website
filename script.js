@@ -95,13 +95,13 @@ function buildSeason4Standings(sheetRows = []) {
           Conference: division.conference,
           Team: teamName,
           Logo: getTeamLogoByName(teamName, oldRow.Logo || ""),
-          Rec: "0-0",
-          "Division Rec": "0-0",
-          "Conf Rec": "0-0",
-          PF: 0,
-          PA: 0,
-          PD: 0,
-          Streak: "-"
+          Rec: oldRow.Rec || "0-0",
+          "Division Rec": oldRow["Division Rec"] || "0-0",
+          "Conf Rec": oldRow["Conf Rec"] || "0-0",
+          PF: oldRow.PF ?? 0,
+          PA: oldRow.PA ?? 0,
+          PD: oldRow.PD ?? 0,
+          Streak: oldRow.Streak || "-"
         };
       })
     );
