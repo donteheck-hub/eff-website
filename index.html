@@ -325,6 +325,10 @@
     .legacy-record-placeholder strong { color:#eaf7ff; }
     .legacy-empty { padding:24px; text-align:center; color:#8fa8bf; }
     @media (max-width:900px){.legacy-hero,.legacy-grid{grid-template-columns:1fr}.legacy-panel.full{grid-column:auto}.legacy-shell{width:min(100% - 24px,1400px)}.legacy-panel-head{align-items:flex-start;flex-direction:column}.legacy-leader-row{grid-template-columns:34px 1fr auto}.legacy-pos-pill{display:none}}
+
+    /* Legacy player showcase */
+    .legacy-player-showcase { grid-column:1/-1; margin-top:2px; background:linear-gradient(180deg,rgba(7,20,42,.96),rgba(3,10,24,.98)); border:1px solid rgba(124,201,255,.22); border-radius:22px; padding:26px; box-shadow:0 26px 60px rgba(0,0,0,.34); }
+    .legacy-player-showcase[hidden]{display:none!important}.legacy-showcase-topbar{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:20px}.legacy-showcase-topbar h3{margin:5px 0 0;font-size:26px}.legacy-showcase-close{border:1px solid rgba(124,201,255,.28);background:#08172b;color:#dff4ff;padding:10px 15px;border-radius:10px;font-weight:900;cursor:pointer}.legacy-showcase-close:hover{background:#102c4d}.legacy-profile-hero{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:26px;align-items:center;padding:24px;border:1px solid rgba(124,201,255,.16);border-radius:18px;background:radial-gradient(circle at 20% 0%,rgba(51,154,255,.18),transparent 38%),rgba(5,15,31,.82)}.legacy-profile-avatar-wrap{width:150px;height:150px;border-radius:24px;padding:7px;background:linear-gradient(135deg,#9de3ff,#287eff);box-shadow:0 18px 42px rgba(36,134,255,.22)}.legacy-profile-avatar{width:100%;height:100%;object-fit:cover;border-radius:18px;background:#071326}.legacy-profile-copy h2{font-size:clamp(34px,5vw,58px);margin:4px 0 12px;line-height:.95}.legacy-profile-eyebrow{font-size:11px;letter-spacing:2px;font-weight:950;color:#91d5ff}.legacy-profile-team{display:flex;align-items:center;gap:10px;color:#b7cce0;font-weight:800}.legacy-profile-team img{width:34px;height:34px;object-fit:contain}.legacy-profile-summary{display:grid;grid-template-columns:repeat(3,minmax(105px,1fr));gap:10px}.legacy-profile-summary div{padding:15px 16px;border:1px solid rgba(124,201,255,.14);border-radius:14px;background:rgba(7,22,43,.74)}.legacy-profile-summary span{display:block;color:#7899b7;font-size:10px;letter-spacing:1.1px;text-transform:uppercase;font-weight:900}.legacy-profile-summary strong{display:block;margin-top:5px;font-size:23px;color:#eef9ff}.legacy-showcase-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:20px;margin-top:20px}.legacy-showcase-card{padding:22px;border:1px solid rgba(124,201,255,.14);border-radius:18px;background:rgba(4,14,29,.78)}.legacy-profile-breakdown{display:grid;gap:9px}.legacy-breakdown-row{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;background:rgba(11,31,56,.74);border:1px solid rgba(124,201,255,.1)}.legacy-breakdown-pos{font-weight:950;color:#9edcff}.legacy-breakdown-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.legacy-breakdown-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#43a9ff,#9be2ff)}.legacy-breakdown-points{font-weight:950;color:#f2fbff}.legacy-trophy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.legacy-trophy-card{display:flex;gap:12px;align-items:flex-start;padding:13px;border-radius:13px;background:linear-gradient(135deg,rgba(25,55,92,.8),rgba(9,24,44,.82));border:1px solid rgba(123,199,255,.13)}.legacy-trophy-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(126,201,255,.14);font-size:19px;flex:0 0 36px}.legacy-trophy-card span{display:block;color:#83b8dc;font-size:10px;text-transform:uppercase;letter-spacing:.9px;font-weight:900}.legacy-trophy-card strong{display:block;margin-top:3px;color:#f3faff}.legacy-trophy-empty{padding:20px;border:1px dashed rgba(124,201,255,.22);border-radius:13px;color:#8eabc2;text-align:center}.legacy-leader-row,.legacy-player-result{cursor:pointer}.legacy-leader-row:hover,.legacy-player-result:hover{background:rgba(35,91,145,.34)!important}.legacy-player-result::after{content:"VIEW PROFILE →";display:block;margin-top:8px;color:#77c9ff;font-size:10px;font-weight:950;letter-spacing:1px}.legacy-leader-row{grid-template-columns:42px minmax(0,1fr) auto!important}.legacy-pos-pill{display:none!important}@media(max-width:900px){.legacy-profile-hero{grid-template-columns:110px 1fr}.legacy-profile-avatar-wrap{width:110px;height:110px}.legacy-profile-summary{grid-column:1/-1}.legacy-showcase-grid{grid-template-columns:1fr}.legacy-trophy-grid{grid-template-columns:1fr}}@media(max-width:620px){.legacy-profile-hero{grid-template-columns:1fr;text-align:center}.legacy-profile-avatar-wrap{margin:0 auto}.legacy-profile-team{justify-content:center}.legacy-profile-summary{grid-template-columns:1fr}.legacy-showcase-topbar{align-items:flex-start}.legacy-player-showcase{padding:16px}}
 </style>
 
 </head>
@@ -765,9 +769,1604 @@
             <div id="legacyPlayerSearchResults" class="legacy-search-results"><div class="legacy-empty">Start typing a player name.</div></div>
           </section>
 
-          <section class="legacy-panel full">
-            <div class="legacy-panel-head"><div><span class="legacy-kicker">SINGLE-SEASON RECORDS</span><h3>Season Record Book</h3><p>Best performances from archived EFF seasons.</p></div></div>
-            <div class="legacy-record-placeholder"><strong>Record framework added.</strong> Your connected data currently supports career/all-time totals and the live season. We’ll populate true single-season records as the Season 1–3 stat archives are linked or entered, rather than guessing historical numbers.</div>
+          <section class="legacy-player-showcase" id="legacyPlayerShowcase" hidden>
+            <div class="legacy-showcase-topbar">
+              <div>
+                <span class="legacy-kicker">PLAYER SHOWCASE</span>
+                <h3>EFF Career Profile</h3>
+              </div>
+              <button class="legacy-showcase-close" id="legacyShowcaseClose" type="button">Close</button>
+            </div>
+
+            <div class="legacy-profile-hero">
+              <div class="legacy-profile-avatar-wrap">
+                <img id="legacyProfileAvatar" class="legacy-profile-avatar" alt="Player Roblox avatar">
+              </div>
+              <div class="legacy-profile-copy">
+                <span class="legacy-profile-eyebrow">EFF LEGACY PROFILE</span>
+                <h2 id="legacyProfileName">Player</h2>
+                <div class="legacy-profile-team">
+                  <img id="legacyProfileTeamLogo" alt="Team logo">
+                  <span id="legacyProfileTeam">Team unavailable</span>
+                </div>
+              </div>
+              <div class="legacy-profile-summary">
+                <div><span>Career PTS</span><strong id="legacyProfilePoints">0.0</strong></div>
+                <div><span>Top Position</span><strong id="legacyProfilePrimaryPosition">—</strong></div>
+                <div><span>Positions</span><strong id="legacyProfilePositionCount">0</strong></div>
+              </div>
+            </div>
+
+            <div class="legacy-showcase-grid">
+              <section class="legacy-showcase-card">
+                <div class="legacy-panel-head"><div><span class="legacy-kicker">CAREER STATS</span><h3>Position Breakdown</h3><p>Career points from the connected All-Time Stats sheets.</p></div></div>
+                <div id="legacyProfileBreakdown" class="legacy-profile-breakdown"></div>
+              </section>
+
+              <section class="legacy-showcase-card" id="legacyTrophyRoom">
+                <div class="legacy-panel-head"><div><span class="legacy-kicker">TROPHY ROOM</span><h3>Career Honors</h3><p>Locked awards, standouts, and All-League honors from EFF History.</p></div></div>
+                <div id="legacyProfileTrophies" class="legacy-trophy-grid"></div>
+              </section>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- HISTORY / PREVIOUS SEASONS -->
+    <section class="page archive-page" id="history">
+      <div class="history-redesign-shell history-v2-shell">
+
+        <section class="history-v2-hero">
+          <div class="history-v2-copy">
+            <span>EFF LEGACY</span>
+            <h2>THE EFF ARCHIVE</h2>
+            <p>
+              Championships, playoff runs, award winners, and all-league teams
+              from every completed EFF season.
+            </p>
+          </div>
+
+          <div class="history-v2-stats">
+            <div><strong>03</strong><span>Completed Seasons</span></div>
+            <div><strong>03</strong><span>Champions Crowned</span></div>
+          </div>
+        </section>
+
+        <div class="history-v2-section-title">
+          <span>SEASON ARCHIVE</span>
+          <h3>Previous Seasons</h3>
+        </div>
+
+        <div class="history-season-list history-v2-season-list">
+          <button class="history-v2-season-card" type="button" data-season-archive="1">
+            <div class="history-v2-season-number">S1</div>
+            <div class="history-v2-season-copy">
+              <span>COMPLETED</span>
+              <h4>Season 1</h4>
+              <p>Champion: Miami Sunshines</p>
+            </div>
+            <div class="history-v2-season-meta">
+              <span>Playoff Bracket</span>
+              <span>Standouts</span>
+              <span>Awards</span>
+              <span>All-League Teams</span>
+            </div>
+            <div class="history-v2-open">VIEW SEASON →</div>
+          </button>
+
+          <button class="history-v2-season-card" type="button" data-season-archive="2">
+            <div class="history-v2-season-number">S2</div>
+            <div class="history-v2-season-copy">
+              <span>COMPLETED</span>
+              <h4>Season 2</h4>
+              <p>Standouts, awards, and All-League teams</p>
+            </div>
+            <div class="history-v2-season-meta">
+              <span>Bracket Coming Soon</span>
+              <span>Standouts</span>
+              <span>Awards</span>
+              <span>All-League Teams</span>
+            </div>
+            <div class="history-v2-open">VIEW SEASON →</div>
+          </button>
+
+          <button class="history-v2-season-card" type="button" data-season-archive="3">
+            <div class="history-v2-season-number">S3</div>
+            <div class="history-v2-season-copy">
+              <span>IN PROGRESS</span>
+              <h4>Season 3</h4>
+              <p>Standouts, awards, and All-League teams are archived. Playoffs are still underway.</p>
+            </div>
+            <div class="history-v2-season-meta">
+              <span>Playoffs In Progress</span>
+              <span>Division Standouts</span>
+              <span>Awards</span>
+              <span>All-League Teams</span>
+            </div>
+            <div class="history-v2-open">VIEW SEASON →</div>
+          </button>
+        </div>
+
+<section class="season-detail-panel history-season-detail" id="seasonDetailPanel1" data-season-detail="1">
+          <button class="archive-back-button" data-season-archive-back="1" type="button">
+            ← Previous Seasons
+          </button>
+
+          <div class="history-detail-header">
+            <div>
+              <span>EFF ARCHIVE</span>
+              <h2>SEASON 1</h2>
+            </div>
+            <div class="history-detail-badge">CHAMPION · MIAMI SUNSHINES</div>
+          </div>
+
+<section class="season-history-block">
+            <div class="season-history-block-header">
+              <span>POSTSEASON</span>
+              <h3>Playoff Bracket</h3>
+            </div>
+
+            <div class="playoff-bracket-shell playoff-bracket-shell-combined">
+              <div class="season1-bracket-master">
+
+                <div class="master-bracket-column">
+                  <div class="master-column-label">WILDCARD</div>
+
+                  <div class="master-bracket-lane">
+                    <div class="master-lane-head">ATLANTIC</div>
+                    <div class="matchup-card">
+                      <div class="team-row"><span class="seed">3</span><strong>Baltimore Bats</strong><em>6-4</em></div>
+                      <div class="team-row winner"><span class="seed">6</span><strong>Montreal Angels</strong><em>2-8</em></div>
+                    </div>
+                    <div class="matchup-card">
+                      <div class="team-row winner"><span class="seed">4</span><strong>Alabama Black Bears</strong><em>3-7</em></div>
+                      <div class="team-row"><span class="seed">5</span><strong>Culican Red Devils</strong><em>3-7</em></div>
+                    </div>
+                  </div>
+
+                  <div class="master-bracket-lane">
+                    <div class="master-lane-head">PACIFIC</div>
+                    <div class="matchup-card">
+                      <div class="team-row"><span class="seed">3</span><strong>San Diego Cruisers</strong><em>8-2</em></div>
+                      <div class="team-row winner"><span class="seed">6</span><strong>Houston Hornets</strong><em>4-6</em></div>
+                    </div>
+                    <div class="matchup-card">
+                      <div class="team-row winner"><span class="seed">4</span><strong>Los Angeles Tigers</strong><em>6-4</em></div>
+                      <div class="team-row"><span class="seed">5</span><strong>Seattle Evergreens</strong><em>5-5</em></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="master-bracket-column">
+                  <div class="master-column-label">DIVISIONAL</div>
+
+                  <div class="master-bracket-lane">
+                    <div class="master-lane-head">ATLANTIC</div>
+                    <div class="matchup-card">
+                      <div class="team-row winner"><span class="seed">1</span><strong>Miami Sunshines</strong><em>9-1</em></div>
+                      <div class="team-row"><span class="seed">6</span><strong>Montreal Angels</strong><em>2-8</em></div>
+                    </div>
+                    <div class="matchup-card">
+                      <div class="team-row winner"><span class="seed">2</span><strong>Atlantis Tridents</strong><em>7-3</em></div>
+                      <div class="team-row"><span class="seed">4</span><strong>Alabama Black Bears</strong><em>3-7</em></div>
+                    </div>
+                  </div>
+
+                  <div class="master-bracket-lane">
+                    <div class="master-lane-head">PACIFIC</div>
+                    <div class="matchup-card">
+                      <div class="team-row"><span class="seed">1</span><strong>Roblox Warriors</strong><em>10-0</em></div>
+                      <div class="team-row winner"><span class="seed">6</span><strong>Houston Hornets</strong><em>4-6</em></div>
+                    </div>
+                    <div class="matchup-card">
+                      <div class="team-row"><span class="seed">2</span><strong>Anchorage Polar Bears</strong><em>8-2</em></div>
+                      <div class="team-row winner"><span class="seed">4</span><strong>Los Angeles Tigers</strong><em>6-4</em></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="master-bracket-column">
+                  <div class="master-column-label">CONFERENCE CHAMPIONSHIP</div>
+
+                  <div class="master-bracket-lane master-bracket-lane-centered">
+                    <div class="master-lane-head">ATLANTIC FINAL</div>
+                    <div class="matchup-card single-matchup">
+                      <div class="team-row winner"><span class="seed">1</span><strong>Miami Sunshines</strong><em>9-1</em></div>
+                      <div class="team-row"><span class="seed">2</span><strong>Atlantis Tridents</strong><em>7-3</em></div>
+                    </div>
+                  </div>
+
+                  <div class="master-bracket-lane master-bracket-lane-centered">
+                    <div class="master-lane-head">PACIFIC FINAL</div>
+                    <div class="matchup-card single-matchup">
+                      <div class="team-row winner"><span class="seed">6</span><strong>Houston Hornets</strong><em>4-6</em></div>
+                      <div class="team-row"><span class="seed">4</span><strong>Los Angeles Tigers</strong><em>6-4</em></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="master-bracket-column championship-column">
+                  <div class="master-column-label">EFF CHAMPIONSHIP</div>
+                  <section class="eff-finals-card master-finals-card">
+                    <div class="eff-finals-head">
+                      <span>SEASON 1 FINAL</span>
+                      <h4>Miami Sunshines vs Houston Hornets</h4>
+                    </div>
+                    <div class="matchup-card championship-matchup">
+                      <div class="team-row winner"><span class="seed">1</span><strong>Miami Sunshines</strong><em>9-1</em></div>
+                      <div class="team-row"><span class="seed">6</span><strong>Houston Hornets</strong><em>4-6</em></div>
+                    </div>
+                  </section>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          <div class="season-history-grid two-up">
+            <section class="season-history-block">
+              <div class="season-history-block-header">
+                <span>SEASON LEADERS</span>
+                <h3>Standouts</h3>
+              </div>
+              <div class="history-list-grid">
+                <div class="history-list-card">
+                  <div class="mini-label">ATLANTIC</div>
+                  <ul class="award-list role-list">
+                    <li><span>QB</span><strong>Vanishallindark</strong></li>
+                    <li><span>RB</span><strong>Vanishallindark</strong></li>
+                    <li><span>WR</span><strong>lwkvbm</strong></li>
+                    <li><span>WR</span><strong>IMJACOBJAB</strong></li>
+                    <li><span>WR</span><strong>Thebacon_1335</strong></li>
+                    <li><span>WR</span><strong>LFG_Twisty</strong></li>
+                    <li><span>DE</span><strong>Donteheck</strong></li>
+                    <li><span>DE</span><strong>V_kin043</strong></li>
+                    <li><span>DB</span><strong>LFG_Twisty</strong></li>
+                    <li><span>DB</span><strong>kipen</strong></li>
+                    <li><span>K</span><strong>Donteheck</strong></li>
+                  </ul>
+                </div>
+                <div class="history-list-card">
+                  <div class="mini-label">PACIFIC</div>
+                  <ul class="award-list role-list">
+                    <li><span>QB</span><strong>hacr</strong></li>
+                    <li><span>RB</span><strong>hacr</strong></li>
+                    <li><span>WR</span><strong>dihmercyys</strong></li>
+                    <li><span>WR</span><strong>Sl0tMxde</strong></li>
+                    <li><span>WR</span><strong>loby</strong></li>
+                    <li><span>WR</span><strong>graveyarrddd</strong></li>
+                    <li><span>DE</span><strong>vloxcus</strong></li>
+                    <li><span>DE</span><strong>Ceptco</strong></li>
+                    <li><span>DB</span><strong>dihmercyys</strong></li>
+                    <li><span>DB</span><strong>lminsane1v1meb</strong></li>
+                    <li><span>K</span><strong>hacr</strong></li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <section class="season-history-block">
+              <div class="season-history-block-header">
+                <span>HONORS</span>
+                <h3>Awards</h3>
+              </div>
+              <div class="history-list-card award-card-full">
+                <div class="mini-label">S1 AWARDS</div>
+                <ul class="award-list role-list">
+                  <li><span>QBOTY</span><strong>Vanishallindark</strong></li>
+                  <li><span>RBOTY</span><strong>hacr</strong></li>
+                  <li><span>WROTY</span><strong>dihmercyys</strong></li>
+                  <li><span>DEOTY</span><strong>vloxcus</strong></li>
+                  <li><span>DBOTY</span><strong>dihmercyys</strong></li>
+                  <li><span>KOTY</span><strong>Donteheck</strong></li>
+                </ul>
+              </div>
+            </section>
+          </div>
+
+          <section class="season-history-block">
+            <div class="season-history-block-header">
+              <span>ALL-LEAGUE</span>
+              <h3>Season 1 Teams</h3>
+            </div>
+            <div class="history-list-grid three-up">
+              <div class="history-list-card">
+                <div class="mini-label">1ST TEAM</div>
+                <ul class="award-list role-list">
+                  <li><span>QB</span><strong>Vanishallindark</strong></li>
+                  <li><span>WR</span><strong>dihmercyys</strong></li>
+                  <li><span>WR</span><strong>lwkvbm</strong></li>
+                  <li><span>DE</span><strong>vloxcus</strong></li>
+                  <li><span>DB</span><strong>dihmercyys</strong></li>
+                  <li><span>DB</span><strong>LFG_Twisty</strong></li>
+                </ul>
+              </div>
+              <div class="history-list-card">
+                <div class="mini-label">2ND TEAM</div>
+                <ul class="award-list role-list">
+                  <li><span>QB</span><strong>hacr</strong></li>
+                  <li><span>WR</span><strong>IMJACOBJAB</strong></li>
+                  <li><span>WR</span><strong>Thebacon_1335</strong></li>
+                  <li><span>DE</span><strong>Donteheck</strong></li>
+                  <li><span>DB</span><strong>lminsane1v1meb</strong></li>
+                  <li><span>DB</span><strong>Par1henope</strong></li>
+                </ul>
+              </div>
+              <div class="history-list-card">
+                <div class="mini-label">3RD TEAM</div>
+                <ul class="award-list role-list">
+                  <li><span>QB</span><strong>Donteheck</strong></li>
+                  <li><span>WR</span><strong>LFG_Twisty</strong></li>
+                  <li><span>WR</span><strong>V_kin043</strong></li>
+                  <li><span>DE</span><strong>Mqtw2911</strong></li>
+                  <li><span>DB</span><strong>kipen</strong></li>
+                  <li><span>DB</span><strong>IMJACOBJAB</strong></li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </section>
+
+
+<section class="season-detail-panel history-season-detail" id="seasonDetailPanel2" data-season-detail="2">
+  <button class="archive-back-button" type="button" data-season-archive-back="2">
+    ← Previous Seasons
+  </button>
+
+  <div class="history-detail-header">
+    <div>
+      <span>EFF ARCHIVE</span>
+      <h2>SEASON 2</h2>
+    </div>
+    <div class="history-detail-badge">SEASON 2 · COMPLETE</div>
+  </div>
+
+<section class="season-history-block">
+    <div class="season-history-block-header">
+      <span>POSTSEASON</span>
+      <h3>Playoff Bracket</h3>
+    </div>
+    <div class="history-list-card award-card-full">
+      <div class="mini-label">SEASON 2</div>
+      <p style="margin:0;color:var(--muted);font-weight:700;">Season 2 playoff bracket coming soon.</p>
+    </div>
+  </section>
+
+  <div class="season-history-grid two-up">
+    <section class="season-history-block">
+      <div class="season-history-block-header">
+        <span>SEASON LEADERS</span>
+        <h3>Standouts</h3>
+      </div>
+      <div class="history-list-grid">
+        <div class="history-list-card">
+          <div class="mini-label">ATLANTIC</div>
+          <ul class="award-list role-list">
+            <li><span>QB</span><strong>DequaviusIV</strong></li>
+            <li><span>RB</span><strong>DequaviusIV</strong></li>
+            <li><span>WR</span><strong>l85wru</strong></li>
+            <li><span>WR</span><strong>fpny</strong></li>
+            <li><span>WR</span><strong>Sxqrafice</strong></li>
+            <li><span>WR</span><strong>mkisdaddy</strong></li>
+            <li><span>DE</span><strong>Cheese_qb11</strong></li>
+            <li><span>DE</span><strong>Zay_thereal</strong></li>
+            <li><span>DB</span><strong>LandenIsTheOne1</strong></li>
+            <li><span>DB</span><strong>imaFreeballer</strong></li>
+            <li><span>K</span><strong>Sxqrafice</strong></li>
+          </ul>
+        </div>
+
+        <div class="history-list-card">
+          <div class="mini-label">PACIFIC</div>
+          <ul class="award-list role-list">
+            <li><span>QB</span><strong>domiNATEr22610</strong></li>
+            <li><span>RB</span><strong>hacr</strong></li>
+            <li><span>WR</span><strong>Luvyourz_j</strong></li>
+            <li><span>WR</span><strong>TheBestFoxInGame</strong></li>
+            <li><span>WR</span><strong>Boomboomyay432</strong></li>
+            <li><span>WR</span><strong>m</strong></li>
+            <li><span>DE</span><strong>Ninjasboost78</strong></li>
+            <li><span>DE</span><strong>pjritter89</strong></li>
+            <li><span>DB</span><strong>m</strong></li>
+            <li><span>DB</span><strong>kpoopmj</strong></li>
+            <li><span>K</span><strong>hacr</strong></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="season-history-block">
+      <div class="season-history-block-header">
+        <span>HONORS</span>
+        <h3>Awards</h3>
+      </div>
+      <div class="history-list-card award-card-full">
+        <div class="mini-label">S2 AWARDS</div>
+        <ul class="award-list role-list">
+          <li><span>QBOTY</span><strong>domiNATEr22610</strong></li>
+          <li><span>RBOTY</span><strong>hacr</strong></li>
+          <li><span>WROTY</span><strong>Luvyourz_j</strong></li>
+          <li><span>DEOTY</span><strong>Ninjasboost78</strong></li>
+          <li><span>DBOTY</span><strong>LandenIsTheOne1</strong></li>
+          <li><span>KOTY</span><strong>hacr</strong></li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <section class="season-history-block">
+    <div class="season-history-block-header">
+      <span>ALL-LEAGUE</span>
+      <h3>Season 2 Teams</h3>
+    </div>
+
+    <div class="history-list-grid three-up">
+      <div class="history-list-card">
+        <div class="mini-label">1ST TEAM</div>
+        <ul class="award-list role-list">
+          <li><span>QB</span><strong>domiNATEr22610</strong></li>
+          <li><span>WR</span><strong>Luvyourz_j</strong></li>
+          <li><span>WR</span><strong>l85wru</strong></li>
+          <li><span>DE</span><strong>Ninjasboost78</strong></li>
+          <li><span>DB</span><strong>LandenIsTheOne1</strong></li>
+          <li><span>DB</span><strong>imaFreeballer</strong></li>
+        </ul>
+      </div>
+
+      <div class="history-list-card">
+        <div class="mini-label">2ND TEAM</div>
+        <ul class="award-list role-list">
+          <li><span>QB</span><strong>DequaviusIV</strong></li>
+          <li><span>WR</span><strong>fpny</strong></li>
+          <li><span>WR</span><strong>TheBestFoxInGame</strong></li>
+          <li><span>DE</span><strong>Cheese_qb11</strong></li>
+          <li><span>DB</span><strong>m</strong></li>
+          <li><span>DB</span><strong>Sxqrafice</strong></li>
+        </ul>
+      </div>
+
+      <div class="history-list-card">
+        <div class="mini-label">3RD TEAM</div>
+        <ul class="award-list role-list">
+          <li><span>QB</span><strong>cfbx</strong></li>
+          <li><span>WR</span><strong>Boomboomyay432</strong></li>
+          <li><span>WR</span><strong>Sxqrafice</strong></li>
+          <li><span>DE</span><strong>pjritter89</strong></li>
+          <li><span>DB</span><strong>kpoopmj</strong></li>
+          <li><span>DB</span><strong>fpny</strong></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</section>
+
+<section class="season-detail-panel history-season-detail" id="seasonDetailPanel3" data-season-detail="3">
+  <button class="archive-back-button" type="button" data-season-archive-back="3">← Previous Seasons</button>
+
+  <div class="history-detail-header">
+    <div><span>EFF ARCHIVE</span><h2>SEASON 3</h2></div>
+    <div class="history-detail-badge">PLAYOFFS · COMPLETE</div>
+  </div>
+
+  <section class="season-history-block">
+    <div class="season-history-block-header"><span>POSTSEASON</span><h3>Playoff Bracket</h3></div>
+    <div class="history-list-card">
+      <div class="mini-label">SEASON 3 FINAL BRACKET</div>
+      <p style="margin:0 0 16px 0;color:var(--muted);font-weight:700;">Final playoff bracket with Birmingham Bluebirds crowned Season 3 champion.</p>
+      <img src="assets/history/season3-final-bracket.png" alt="Season 3 final playoff bracket" style="display:block;width:100%;height:auto;border-radius:18px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 50px rgba(0,0,0,0.35);">
+    </div>
+  </section>
+
+  <section class="season-history-block">
+    <div class="season-history-block-header"><span>SEASON LEADERS</span><h3>Division Standouts</h3></div>
+    <div class="history-list-grid">
+      <div class="history-list-card"><div class="mini-label">ATLANTIC · COLONIAL DIVISION</div><ul class="award-list role-list">
+        <li><span>QB</span><strong>Diego_Pavia</strong></li><li><span>RB</span><strong>Noturaverageaaupg</strong></li><li><span>WR</span><strong>Intechill</strong></li><li><span>WR</span><strong>kelluro</strong></li><li><span>WR</span><strong>Itzdayday14</strong></li><li><span>WR</span><strong>2_7ts</strong></li><li><span>DE</span><strong>Intechill</strong></li><li><span>DE</span><strong>coolDariel2021</strong></li><li><span>DB</span><strong>Intechill</strong></li><li><span>DB</span><strong>MotionAchiever</strong></li><li><span>K</span><strong>Intechill</strong></li>
+      </ul></div>
+      <div class="history-list-card"><div class="mini-label">ATLANTIC · GULF DIVISION</div><ul class="award-list role-list">
+        <li><span>QB</span><strong>AustinisDad846</strong></li><li><span>RB</span><strong>AustinisDad846</strong></li><li><span>WR</span><strong>AntFurious</strong></li><li><span>WR</span><strong>ak47tyw</strong></li><li><span>WR</span><strong>foIlowingmyheart</strong></li><li><span>WR</span><strong>4lozer</strong></li><li><span>DE</span><strong>v1pzs</strong></li><li><span>DE</span><strong>AntFurious</strong></li><li><span>DB</span><strong>AntFurious</strong></li><li><span>DB</span><strong>Thebacon_1335</strong></li><li><span>K</span><strong>AntFurious</strong></li>
+      </ul></div>
+      <div class="history-list-card"><div class="mini-label">PACIFIC · CASCADE DIVISION</div><ul class="award-list role-list">
+        <li><span>QB</span><strong>ga_t</strong></li><li><span>RB</span><strong>domiNATEr22610</strong></li><li><span>WR</span><strong>rvf</strong></li><li><span>WR</span><strong>Boomboomyay432</strong></li><li><span>WR</span><strong>Mushywakawaka4</strong></li><li><span>WR</span><strong>sinsforg1ven</strong></li><li><span>DE</span><strong>rvf</strong></li><li><span>DE</span><strong>Catsareawesome20234</strong></li><li><span>DB</span><strong>rvf</strong></li><li><span>DB</span><strong>dxmdxmdxmdxmdxm</strong></li><li><span>K</span><strong>kajan</strong></li>
+      </ul></div>
+      <div class="history-list-card"><div class="mini-label">PACIFIC · SUNSET DIVISION</div><ul class="award-list role-list">
+        <li><span>QB</span><strong>phantomB819</strong></li><li><span>RB</span><strong>phantomB819</strong></li><li><span>WR</span><strong>zxc7</strong></li><li><span>WR</span><strong>Endless_Suffering092</strong></li><li><span>WR</span><strong>Mayo_Man1234567890</strong></li><li><span>WR</span><strong>1zrha</strong></li><li><span>DE</span><strong>Thundershock9003</strong></li><li><span>DE</span><strong>1zrha</strong></li><li><span>DB</span><strong>Thundershock9003</strong></li><li><span>DB</span><strong>zxc7</strong></li><li><span>K</span><strong>phantomB819</strong></li>
+      </ul></div>
+    </div>
+  </section>
+
+  <div class="season-history-grid two-up">
+    <section class="season-history-block"><div class="season-history-block-header"><span>HONORS</span><h3>Awards</h3></div><div class="history-list-card"><div class="mini-label">S3 AWARDS</div><ul class="award-list role-list">
+      <li><span>QBOTY</span><strong>AustinisDad846</strong></li><li><span>RBOTY</span><strong>Noturaverageaaupg</strong></li><li><span>WROTY</span><strong>Intechill</strong></li><li><span>DEOTY</span><strong>1zrha</strong></li><li><span>DBOTY</span><strong>rvf</strong></li><li><span>KOTY</span><strong>AntFurious</strong></li>
+    </ul></div></section>
+    <section class="season-history-block"><div class="season-history-block-header"><span>STATUS</span><h3>Season 3 Postseason</h3></div><div class="history-list-card"><div class="mini-label">FINAL RESULTS</div><ul class="award-list role-list">
+      <li><span>ATL</span><strong>Conference Champion · Birmingham Bluebirds</strong></li><li><span>PAC</span><strong>Conference Champion · Roblox Warriors</strong></li><li><span>SB</span><strong>EFF Champion · Birmingham Bluebirds</strong></li>
+    </ul></div></section>
+  </div>
+
+  <section class="season-history-block">
+    <div class="season-history-block-header"><span>ALL-LEAGUE</span><h3>Season 3 Teams</h3></div>
+    <div class="history-list-grid three-up">
+      <div class="history-list-card"><div class="mini-label">1ST TEAM</div><ul class="award-list role-list"><li><span>QB</span><strong>AustinisDad846</strong></li><li><span>WR</span><strong>Intechill</strong></li><li><span>WR</span><strong>AntFurious</strong></li><li><span>DE</span><strong>1zrha</strong></li><li><span>DB</span><strong>rvf</strong></li><li><span>DB</span><strong>Thundershock9003</strong></li><li><span>K</span><strong>Donteheck</strong></li></ul></div>
+      <div class="history-list-card"><div class="mini-label">2ND TEAM</div><ul class="award-list role-list"><li><span>QB</span><strong>Diego_Pavia</strong></li><li><span>WR</span><strong>zxc7</strong></li><li><span>WR</span><strong>Boomboomyay432</strong></li><li><span>DE</span><strong>v1pzs</strong></li><li><span>DB</span><strong>Joshallenisthegoat59</strong></li><li><span>DB</span><strong>dxmdxmdxmdxmdxm</strong></li><li><span>K</span><strong>hacr</strong></li></ul></div>
+      <div class="history-list-card"><div class="mini-label">3RD TEAM</div><ul class="award-list role-list"><li><span>QB</span><strong>phantomB819</strong></li><li><span>WR</span><strong>ak47tyw</strong></li><li><span>WR</span><strong>Endless_Suffering092</strong></li><li><span>DE</span><strong>coolDariel2021</strong></li><li><span>DB</span><strong>Thebacon_1335</strong></li><li><span>DB</span><strong>ga_t</strong></li><li><span>K</span><strong>kajan</strong></li></ul></div>
+    </div>
+  </section>
+</section>
+
+</div>
+    </section>
+
+    <!-- RULEBOOK -->
+    <section class="page rulebook-page" id="rulebook">
+      <div class="eff-rulebook-shell">
+
+        <header class="eff-rulebook-header">
+          <span>LEAGUE OPERATIONS</span>
+          <h2>EFF Rulebook</h2>
+          <p>
+            Everything you need to run and play an official EFF game,
+            from start-of-game procedure through penalties, special teams,
+            fumbles, overtime, and league operations.
+          </p>
+        </header>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading">
+            <h3>Start of Game</h3><div></div>
+          </div>
+          <p><strong>Force start</strong> is 15 minutes after the scheduled game time.</p>
+          <ul class="rulebook-dash-list">
+            <li>If neither team has 6 players, the game results in a <strong>double FFL.</strong></li>
+            <li>If one team has 6 players and the other has fewer than 6, a <strong>5 minute extension</strong> may be granted — but only if the team with 6 players agrees to it.</li>
+            <li>The maximum number of players allowed in game is <strong>8 players.</strong></li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading">
+            <h3>Penalties</h3><div></div>
+          </div>
+
+          <p>Both head coaches are responsible for obeying the rulebook and going by the referees call.</p>
+
+          <div class="penalty-card-list">
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Illegal Formation (IF)</h4><span>5 Yds</span></div>
+              <ul class="rulebook-dash-list">
+                <li>In either formation, <strong>no receiver</strong> may line up in or on the hashes.</li>
+                <li>There are <strong>no running backs</strong> — a handoff to a wide receiver will result in an illegal formation.</li>
+              </ul>
+              <p>Formation-specific requirements are detailed in the section below.</p>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Offensive Formation · 1C 2TE</h4><span>Season 4</span></div>
+              <p>The approved offensive formation uses <strong>1 Center</strong> and <strong>2 Tight Ends</strong>.</p>
+              <div class="formation-grid">
+                <figure style="grid-column: 1 / -1; margin: 0; text-align: center;">
+                  <img src="assets/rulebook/season4-1c-2te.png" alt="Season 4 1 Center 2 Tight End formation" style="width:min(820px,82%); max-width:100%; height:auto; display:block; margin:0 auto; border-radius:10px;">
+                  <figcaption>1C · 2TE FORMATION</figcaption>
+                </figure>
+                <div style="grid-column:1 / -1; margin-top:18px; padding:18px 20px; border:1px solid rgba(255,255,255,0.10); border-radius:12px; background:rgba(255,255,255,0.02);">
+                  <ul style="margin:0; padding-left:22px; line-height:1.8;">
+                    <li><strong>Team of 6 players</strong> - 1 Center and if you want to run, 1/2 Tight Ends or none</li>
+                    <li><strong>Team of 7 players</strong> - 1 Center and 1/2 Tight Ends</li>
+                    <li><strong>Team of 8 players</strong> - 1 Center and 2 Tight Ends</li>
+                  </ul>
+                  <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.10);">
+                    <p style="margin:0;"><strong>Force Eligibility:</strong> If you are forcing a team and decide to remove a player, you must announce the change using the <strong>:H command</strong> so the opposing team knows you are now eligible to run the ball.</p>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Improper Block (IB)</h4><span>5 Yds</span></div>
+              <p>Called when a tight end, in either formation, blocks more than <strong>5 yards</strong> behind the line of scrimmage.</p>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Lag Sack (LS)</h4><span>+5 Yds &amp; 1st down</span></div>
+              <p>Called when a defensive player lags and sacks the quarterback.</p>
+              <ul class="rulebook-dash-list">
+                <li>Determined by how far the defensive end is from the quarterback — for example, if the DE falls well before or after the QB, or if no DE falls but the QB is still sacked.</li>
+                <li>The offending player must also be given a <strong>lag warning.</strong></li>
+              </ul>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Too Many Blockers (TMB)</h4><span>5 Yds &amp; loss of down</span></div>
+              <p>Called when a wide receiver intentionally blocks a defender:</p>
+              <ul class="rulebook-dash-list">
+                <li>A wr intentionally moves toward the DE to block them (forward or backward).</li>
+                <li>A line-of-scrimmage wr lines up in front of the DE and blocks forward or backward (does not apply to DBs).</li>
+                <li>A wr stays on the los blocking backwards — this is <strong>not</strong> considered an off-jam and will be TMB (if the wr is simply held, it does not count).</li>
+                <li>A wr blocks forward against the defender first. If they block each other at the same time, it is not considered TMB.</li>
+              </ul>
+              <p>It is <strong>not</strong> TMB if the wr blocks backwards. TMB can only be called if the quarterback <strong>throws</strong> the ball after the block — the flag will not count if the QB runs the ball.</p>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Grounding (GR)</h4><span>15 Yds &amp; loss of down</span></div>
+              <p>This flag is mostly a judgment call — if a receiver isn't within about 15 yards of the ball, it will be considered grounding, unless the wr and QB clearly had a miscommunication or the wr cut away.</p>
+              <ul class="rulebook-dash-list">
+                <li>If the line of scrimmage is within 20 yards of the endzone, the QB may throw it out of bounds at the back endzone. The QB must be within the hashes — once they step out, the flag is valid.</li>
+                <li>If unsure, the referee may pause for a challenge review and neither team will be penalized due to the review.</li>
+              </ul>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Center Rollout (CR)</h4><span>5 Yds &amp; loss of down</span></div>
+              <p>Called when a center rolls out past the line of scrimmage, regardless of formation, before the ball is thrown.</p>
+              <ul class="rulebook-dash-list">
+                <li>Passes to the center will be considered grounding.</li>
+                <li>Applies if the center passes the los in an attempt to block (does not count on runs).</li>
+              </ul>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Too Many Men (TMM)</h4><span>±5 Yds</span></div>
+              <p>Called when either team has 9 players on the field after the hike.</p>
+              <ul class="rulebook-dash-list">
+                <li>Offense has 9 → <strong>-5 yards</strong></li>
+                <li>Defense has 9 → <strong>+5 yards</strong></li>
+              </ul>
+            </article>
+
+            <article class="penalty-card">
+              <div class="penalty-card-top"><h4>Ineligible Receiver (Inel)</h4><span>Incomplete</span></div>
+              <p>Called when a wr/te steps out of bounds or on the white border before the ball is thrown.</p>
+              <ul class="rulebook-dash-list">
+                <li>The play is ruled incomplete — line it back to the previous play at the same first-down line. Do not reset the down to the play before; they should have lost a down.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Special Teams</h3><div></div></div>
+          <p>No fake field goals or punts are allowed.</p>
+          <h4 class="rulebook-subhead">Onsides</h4>
+          <ul class="rulebook-dash-list">
+            <li>Must be under <strong>3 minutes</strong> in the 4th quarter.</li>
+            <li>Teams <strong>cannot go for an onside kick in a tie game.</strong></li>
+            <li>Teams are allowed to go ineligible.</li>
+            <li>Teams are allowed to block anyone.</li>
+            <li>Admins may <strong>not</strong> teleport a player to gain an advantage — this results in an FFL and a suspension if it causes a win.</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Auto Punts</h3><div></div></div>
+
+          <p>
+            You must punt if the LOS is within your own endzone to the 50 and it is
+            <strong>4th &amp; 8 or longer</strong>. Not applicable under 2 minutes in the
+            2nd or 4th quarter.
+          </p>
+
+          <ul class="rulebook-dash-list">
+            <li>
+              <strong>Example:</strong> you're at your own 20, 4th &amp; 15 in the 1st quarter —
+              this is a force. If it were 1:40 left in the 2nd quarter, it would not be forced.
+            </li>
+            <li>
+              At the opposing 45 with auto FG/punt rules in effect, you may choose between
+              a 62-yard field goal or a punt.
+            </li>
+          </ul>
+
+          <figure class="auto-punt-rule-figure">
+            <img
+              src="assets/rulebook/auto-punt-field.png"
+              alt="Auto punt field guide showing field goal and punt zones"
+            >
+          </figure>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Fumbles</h3><div></div></div>
+          <p>Only specific players are able to fumble:</p>
+          <ul class="rulebook-dash-list">
+            <li>The <strong>quarterback</strong> can fumble at all times.</li>
+            <li><strong>Punt / kick returners</strong> can fumble at all times.</li>
+            <li><strong>Onside returners</strong> can fumble at all times.</li>
+            <li>A <strong>wide receiver</strong> can fumble if they catch the ball behind the line of scrimmage.</li>
+            <li>A <strong>defensive back</strong> can fumble once they pass the line of scrimmage (the offense's side).</li>
+          </ul>
+        </section>
+
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Milking</h3><div></div></div>
+          <ul class="rulebook-dash-list">
+            <li>Quarterbacks must hike before the play clock hits <strong>10 seconds</strong>, unless there is 1 minute left in the 2nd or 4th quarter.</li>
+            <li>Under 1 minute in the 2nd or 4th quarter, if the defense is trailing: if the QB steps back <strong>30+ yards</strong>, the referee must stop the clock.</li>
+            <li>Under 1 minute in the 2nd or 4th quarter, if the defense is trailing: if the offense is tackled or sacked behind the los, the clock will stop.</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>QBH Glitch</h3><div></div></div>
+          <p>If the game shows a <strong>fumble</strong> on-screen after the quarterback is hit by a defensive end, but something else actually occurs (such as a sack or a throw), the play stands as what the game ruled it — completion, interception, or sack.</p>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Overtime</h3><div></div></div>
+          <h4 class="rulebook-subhead">Format</h4>
+          <ul class="rulebook-dash-list">
+            <li>A coin toss at the beginning of the overtime period determines who starts each period.</li>
+            <li>If a team kicks off, they get the <strong>ball second.</strong></li>
+            <li>If a team receives, they get the <strong>ball first.</strong></li>
+            <li>Each possession starts at the opposing team's 35-yard line.</li>
+            <li>Each possession goes until one team ends up with a lower score than the other.</li>
+          </ul>
+          <h4 class="rulebook-subhead">Scoring</h4>
+          <p>2-point conversions and PATs are all on the table.</p>
+          <ul class="rulebook-dash-list">
+            <li>If Team A scores 7 and Team B scores 8, the game is over.</li>
+            <li>If Team A scores 7 and Team B scores 6, the game is over.</li>
+            <li>If Team A scores 7 and Team B scores 7, the game goes to OT2.</li>
+            <li>Once the teams reach <strong>OT3</strong>, they must go for 2 after every touchdown.</li>
+          </ul>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Mercy Rule</h3><div></div></div>
+          <p>Once a team is winning by <strong>40 or more points</strong>, mercy applies and the referee must end the game instantly.</p>
+        </section>
+
+        <section class="rulebook-long-section">
+          <div class="rulebook-long-heading"><h3>Operations</h3><div></div></div>
+          <h4 class="rulebook-subhead">Referees</h4>
+          <ul class="rulebook-dash-list">
+            <li>Must stay focused on the game the entire time.</li>
+            <li>Must have the correct settings on.</li>
+            <li>Must accurately call flags (may look back at the rulebook).</li>
+            <li>Must comply with league operations staff and challenges.</li>
+          </ul>
+
+          <h4 class="rulebook-subhead">Streamers</h4>
+          <ul class="rulebook-dash-list">
+            <li>Be present — change camera angles and commentate (commentary is optional).</li>
+            <li>Have VODs turned on.</li>
+            <li>Make sure the link to the stream is posted for league operations to review.</li>
+          </ul>
+
+          <h4 class="rulebook-subhead">Head Coaches / in-game admins</h4>
+          <ul class="rulebook-dash-list">
+            <li>You may <strong>not</strong> newplay at any time throughout the game.</li>
+            <li>You must listen to the referee and make things clear to them, such as challenges, no-reps, and substitutions.</li>
+            <li>If you question the referee's call, you may use an <strong>Ultimate Challenge</strong> with the correct format — otherwise it will not be considered.</li>
+            <li>Any admin abuse (this also applies to refs) may result in penalties (-5 Yards / loss of down) or suspension.</li>
+          </ul>
+        </section>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="currentYear"></span> Elite Football Federation
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EFF | Elite Football Federation</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --season4-bg-start: #040d1f;
+      --season4-bg-end: #071832;
+      --season4-panel: rgba(8, 18, 36, 0.78);
+      --season4-panel-strong: rgba(10, 23, 44, 0.92);
+      --season4-border: rgba(120, 195, 255, 0.22);
+      --season4-glow: rgba(67, 163, 255, 0.22);
+      --season4-accent: #7cc9ff;
+      --season4-accent-strong: #2ea0ff;
+      --season4-accent-soft: #b9e6ff;
+    }
+    body {
+      background:
+        linear-gradient(180deg, rgba(3, 8, 20, 0.9) 0%, rgba(4, 13, 31, 0.95) 30%, rgba(4, 10, 22, 0.98) 100%),
+        radial-gradient(circle at top right, rgba(88, 166, 255, 0.18), transparent 35%),
+        radial-gradient(circle at top left, rgba(170, 225, 255, 0.10), transparent 30%),
+        #030913;
+      color: #f3f8ff;
+    }
+    .topbar, .mobile-nav, .page-container, .content-section, .standings-card, .team-card, .team-panel, .stat-card, .rule-card, .history-card, .playoff-championship-card, .playoff-matchup-card, .playoff-group-card, .history-v2-card, .history-season-block, .history-list-card, .season-history-block, .season-card, .schedule-card {
+      backdrop-filter: blur(12px);
+    }
+    .topbar {
+      background: rgba(4, 13, 31, 0.9);
+      border-bottom: 1px solid var(--season4-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    }
+    .nav-link.active, .nav-link:hover, .primary-button, .discord-button, .season-badge {
+      background: linear-gradient(135deg, #9fe3ff 0%, #4eaefc 45%, #2374ff 100%);
+      color: #03101f !important;
+      border-color: rgba(181, 231, 255, 0.7) !important;
+      box-shadow: 0 10px 24px rgba(46, 160, 255, 0.25);
+    }
+    .secondary-button, .conference-card button, .playoff-refresh-button {
+      border-color: rgba(127, 201, 255, 0.42) !important;
+      color: #e8f6ff !important;
+      box-shadow: 0 0 0 1px rgba(65, 143, 255, 0.08) inset;
+    }
+    .hero {
+      background: linear-gradient(135deg, rgba(8, 20, 42, 0.86), rgba(4, 14, 32, 0.94));
+      border: 1px solid var(--season4-border);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(82, 175, 255, 0.05) inset;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(5, 13, 28, 0.7), rgba(5, 13, 28, 0.18)), url("assets/images/season4-banner.png") center/cover no-repeat;
+      opacity: 0.28;
+      pointer-events: none;
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .hero-logo {
+      width: min(360px, 82%);
+      max-width: 360px;
+      filter: drop-shadow(0 20px 40px rgba(70, 170, 255, 0.3));
+    }
+    .banner, .history-bracket-image {
+      border-radius: 22px;
+      border: 1px solid rgba(129, 203, 255, 0.25);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.34);
+    }
+    .content-section, .standings-card, .history-v2-card, .season-history-block, .history-list-card, .conference-card, .page-title-card, .team-overview-card {
+      background: linear-gradient(180deg, rgba(6, 17, 36, 0.82), rgba(5, 13, 29, 0.94));
+      border: 1px solid rgba(124, 201, 255, 0.16);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+    }
+    .page-title span, .section-heading span, .mini-label, .playoff-championship-label, .brand-copy span {
+      color: var(--season4-accent-soft) !important;
+    }
+    .section-heading h2, .page-title h2, .hero h1 span, .history-season-header h2 {
+      color: #f4fbff;
+      text-shadow: 0 4px 22px rgba(93, 180, 255, 0.12);
+    }
+    .brand-logo { filter: drop-shadow(0 0 16px rgba(90, 170, 255, 0.25)); }
+  
+    .home-award-watch {
+      margin-top: 28px;
+      padding: 24px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(7, 19, 39, 0.92), rgba(4, 12, 27, 0.96));
+      border: 1px solid rgba(124, 201, 255, 0.22);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(75, 164, 255, 0.04) inset;
+    }
+    .home-award-watch-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(92, 181, 255, 0.45);
+    }
+    .home-award-watch-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: .03em;
+      color: #f4fbff;
+    }
+    .home-award-live-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #bfe7ff;
+      border: 1px solid rgba(112, 202, 255, 0.35);
+      background: rgba(52, 137, 215, 0.16);
+    }
+    .home-award-select {
+      min-width: 310px;
+      max-width: 100%;
+      padding: 11px 40px 11px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(127, 201, 255, 0.3);
+      background: #071426;
+      color: #edf8ff;
+      font: inherit;
+      font-weight: 800;
+      outline: none;
+      cursor: pointer;
+    }
+    .home-award-select:focus {
+      border-color: #69bdff;
+      box-shadow: 0 0 0 3px rgba(72, 164, 255, 0.13);
+    }
+    .home-award-list {
+      display: grid;
+      margin-top: 10px;
+    }
+    .home-award-row {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 58px;
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+    }
+    .home-award-row:last-child { border-bottom: 0; }
+    .home-award-rank {
+      color: #7ec9ff;
+      font-weight: 950;
+      text-align: center;
+    }
+    .home-award-player {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .home-award-player img,
+    .home-award-logo-empty {
+      width: 30px;
+      height: 30px;
+      flex: 0 0 30px;
+      object-fit: contain;
+      border-radius: 7px;
+    }
+    .home-award-player strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #fff;
+    }
+    .home-award-position {
+      padding: 5px 8px;
+      border-radius: 7px;
+      background: rgba(87, 170, 255, 0.13);
+      color: #a8dcff;
+      font-size: .76rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .home-award-points {
+      min-width: 52px;
+      text-align: right;
+      color: #78caff;
+      font-size: 1.08rem;
+    }
+    .home-dashboard-loading {
+      padding: 22px 8px;
+      color: rgba(225, 241, 255, 0.7);
+      text-align: center;
+      font-weight: 700;
+    }
+    @media (max-width: 620px) {
+      .home-award-watch { padding: 18px; }
+      .home-award-select { min-width: 100%; width: 100%; }
+      .home-award-row { grid-template-columns: 30px minmax(0,1fr) auto; }
+      .home-award-position { display: none; }
+    }
+</style>
+
+  <style id="season4-stats-theme-fix">
+    /* Season 4 Stats theme override */
+    .stats-page {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(61, 151, 255, 0.10), transparent 28%),
+        linear-gradient(180deg, rgba(3, 10, 24, 0.98), rgba(5, 15, 32, 0.98));
+    }
+    .stats-shell {
+      color: #f4f9ff;
+    }
+    .stats-season-label {
+      color: #8ed5ff !important;
+      letter-spacing: .22em;
+    }
+    .stats-mode-btn,
+    .stats-refresh-btn,
+    .stats-tab {
+      background: linear-gradient(180deg, rgba(10, 27, 50, 0.96), rgba(5, 15, 31, 0.96)) !important;
+      border: 1px solid rgba(116, 197, 255, 0.26) !important;
+      color: #eaf7ff !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .stats-mode-btn:hover,
+    .stats-refresh-btn:hover,
+    .stats-tab:hover {
+      border-color: rgba(132, 210, 255, 0.65) !important;
+      background: linear-gradient(180deg, rgba(18, 49, 85, 0.98), rgba(7, 24, 47, 0.98)) !important;
+      box-shadow: 0 0 18px rgba(52, 160, 255, 0.12);
+    }
+    .stats-mode-btn.active,
+    .stats-tab.active {
+      background: linear-gradient(135deg, #b4e9ff 0%, #65c4ff 42%, #2b86ff 100%) !important;
+      color: #041221 !important;
+      border-color: #aee5ff !important;
+      box-shadow: 0 0 22px rgba(58, 167, 255, 0.28) !important;
+    }
+    .player-search {
+      background: rgba(6, 18, 37, 0.90) !important;
+      border: 1px solid rgba(112, 193, 255, 0.22) !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.015);
+    }
+    .player-search input {
+      background: transparent !important;
+      color: #edf8ff !important;
+    }
+    .player-search input::placeholder {
+      color: #7ea9c8 !important;
+    }
+    .search-icon { color: #79caff !important; }
+    .stats-table-card {
+      background: linear-gradient(180deg, rgba(7, 19, 39, 0.96), rgba(4, 13, 28, 0.98)) !important;
+      border: 1px solid rgba(115, 196, 255, 0.20) !important;
+      box-shadow: 0 18px 45px rgba(0,0,0,.30), 0 0 24px rgba(48,148,255,.06) inset !important;
+      overflow: hidden;
+    }
+    .website-stats-table thead,
+    .website-stats-table thead tr,
+    .website-stats-table thead th {
+      background: linear-gradient(180deg, #2c87d8 0%, #1b69b2 100%) !important;
+      color: #f8fcff !important;
+      border-color: rgba(193, 231, 255, 0.18) !important;
+    }
+    .website-stats-table tbody tr {
+      background: rgba(7, 18, 36, 0.74) !important;
+    }
+    .website-stats-table tbody tr:nth-child(even) {
+      background: rgba(10, 25, 48, 0.84) !important;
+    }
+    .website-stats-table tbody tr:hover {
+      background: rgba(21, 62, 101, 0.78) !important;
+    }
+    .website-stats-table td {
+      border-color: rgba(110, 180, 229, 0.13) !important;
+      color: #edf7ff !important;
+    }
+    .website-stats-table .status-cell {
+      color: #9dbbd1 !important;
+    }
+  
+
+    /* LEGACY RECORD BOOK */
+    .legacy-shell { width:min(1400px, calc(100% - 40px)); margin:0 auto; padding:42px 0 72px; }
+    .legacy-hero { display:grid; grid-template-columns:1.35fr .65fr; gap:24px; align-items:stretch; margin-bottom:26px; }
+    .legacy-hero-copy, .legacy-summary-card, .legacy-panel { background:linear-gradient(180deg, rgba(7,20,42,.92), rgba(4,12,28,.96)); border:1px solid rgba(124,201,255,.18); border-radius:20px; box-shadow:0 20px 45px rgba(0,0,0,.25); }
+    .legacy-hero-copy { padding:34px; position:relative; overflow:hidden; }
+    .legacy-hero-copy::after { content:""; position:absolute; width:320px; height:320px; right:-90px; top:-120px; border-radius:50%; background:radial-gradient(circle, rgba(80,177,255,.18), transparent 68%); pointer-events:none; }
+    .legacy-kicker { display:inline-flex; align-items:center; gap:8px; font-size:11px; letter-spacing:2px; font-weight:900; color:#a9dcff; text-transform:uppercase; }
+    .legacy-hero h2 { margin:10px 0 10px; font-size:clamp(34px,5vw,64px); line-height:.95; letter-spacing:-2px; }
+    .legacy-hero p { margin:0; max-width:760px; color:#a9bdd2; font-weight:650; line-height:1.6; }
+    .legacy-summary-card { padding:26px; display:grid; gap:12px; }
+    .legacy-summary-stat { display:flex; justify-content:space-between; gap:18px; align-items:end; padding:16px 0; border-bottom:1px solid rgba(255,255,255,.08); }
+    .legacy-summary-stat:last-child{border-bottom:0}.legacy-summary-stat span{color:#8fa8bf;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px}.legacy-summary-stat strong{font-size:28px;color:#eaf7ff}
+    .legacy-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:24px; }
+    .legacy-panel { padding:24px; min-width:0; }
+    .legacy-panel.full { grid-column:1/-1; }
+    .legacy-panel-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .legacy-panel-head h3 { margin:4px 0 0; font-size:24px; }
+    .legacy-panel-head p { margin:4px 0 0; color:#8fa8bf; font-size:13px; }
+    .legacy-select, .legacy-search { background:#071326; color:#eef8ff; border:1px solid rgba(124,201,255,.22); border-radius:10px; min-height:42px; padding:0 13px; font-weight:800; outline:none; }
+    .legacy-search { width:100%; min-height:46px; margin-bottom:14px; }
+    .legacy-leader-list { display:grid; gap:8px; }
+    .legacy-leader-row { display:grid; grid-template-columns:42px 1fr auto auto; gap:12px; align-items:center; padding:12px 14px; background:rgba(255,255,255,.025); border:1px solid rgba(255,255,255,.06); border-radius:12px; }
+    .legacy-rank { color:#75c9ff; font-weight:950; text-align:center; }
+    .legacy-player-main { min-width:0; display:flex; align-items:center; gap:10px; }
+    .legacy-player-main img { width:30px; height:30px; object-fit:contain; }
+    .legacy-player-main strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .legacy-pos-pill { padding:5px 8px; border-radius:8px; background:rgba(66,157,255,.13); color:#a9dcff; font-size:11px; font-weight:900; }
+    .legacy-points { color:#e9f7ff; font-weight:950; min-width:62px; text-align:right; }
+    .legacy-search-results { display:grid; gap:8px; max-height:420px; overflow:auto; }
+    .legacy-player-result { padding:14px; border:1px solid rgba(255,255,255,.07); border-radius:12px; background:rgba(255,255,255,.025); }
+    .legacy-player-result-top { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .legacy-player-result small { display:block; margin-top:6px; color:#8fa8bf; }
+    .legacy-record-placeholder { border:1px dashed rgba(124,201,255,.22); border-radius:14px; padding:26px; color:#9db6ca; line-height:1.6; background:rgba(41,123,201,.04); }
+    .legacy-record-placeholder strong { color:#eaf7ff; }
+    .legacy-empty { padding:24px; text-align:center; color:#8fa8bf; }
+    @media (max-width:900px){.legacy-hero,.legacy-grid{grid-template-columns:1fr}.legacy-panel.full{grid-column:auto}.legacy-shell{width:min(100% - 24px,1400px)}.legacy-panel-head{align-items:flex-start;flex-direction:column}.legacy-leader-row{grid-template-columns:34px 1fr auto}.legacy-pos-pill{display:none}}
+
+    /* Legacy player showcase */
+    .legacy-player-showcase { grid-column:1/-1; margin-top:2px; background:linear-gradient(180deg,rgba(7,20,42,.96),rgba(3,10,24,.98)); border:1px solid rgba(124,201,255,.22); border-radius:22px; padding:26px; box-shadow:0 26px 60px rgba(0,0,0,.34); }
+    .legacy-player-showcase[hidden]{display:none!important}.legacy-showcase-topbar{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:20px}.legacy-showcase-topbar h3{margin:5px 0 0;font-size:26px}.legacy-showcase-close{border:1px solid rgba(124,201,255,.28);background:#08172b;color:#dff4ff;padding:10px 15px;border-radius:10px;font-weight:900;cursor:pointer}.legacy-showcase-close:hover{background:#102c4d}.legacy-profile-hero{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:26px;align-items:center;padding:24px;border:1px solid rgba(124,201,255,.16);border-radius:18px;background:radial-gradient(circle at 20% 0%,rgba(51,154,255,.18),transparent 38%),rgba(5,15,31,.82)}.legacy-profile-avatar-wrap{width:150px;height:150px;border-radius:24px;padding:7px;background:linear-gradient(135deg,#9de3ff,#287eff);box-shadow:0 18px 42px rgba(36,134,255,.22)}.legacy-profile-avatar{width:100%;height:100%;object-fit:cover;border-radius:18px;background:#071326}.legacy-profile-copy h2{font-size:clamp(34px,5vw,58px);margin:4px 0 12px;line-height:.95}.legacy-profile-eyebrow{font-size:11px;letter-spacing:2px;font-weight:950;color:#91d5ff}.legacy-profile-team{display:flex;align-items:center;gap:10px;color:#b7cce0;font-weight:800}.legacy-profile-team img{width:34px;height:34px;object-fit:contain}.legacy-profile-summary{display:grid;grid-template-columns:repeat(3,minmax(105px,1fr));gap:10px}.legacy-profile-summary div{padding:15px 16px;border:1px solid rgba(124,201,255,.14);border-radius:14px;background:rgba(7,22,43,.74)}.legacy-profile-summary span{display:block;color:#7899b7;font-size:10px;letter-spacing:1.1px;text-transform:uppercase;font-weight:900}.legacy-profile-summary strong{display:block;margin-top:5px;font-size:23px;color:#eef9ff}.legacy-showcase-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:20px;margin-top:20px}.legacy-showcase-card{padding:22px;border:1px solid rgba(124,201,255,.14);border-radius:18px;background:rgba(4,14,29,.78)}.legacy-profile-breakdown{display:grid;gap:9px}.legacy-breakdown-row{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;background:rgba(11,31,56,.74);border:1px solid rgba(124,201,255,.1)}.legacy-breakdown-pos{font-weight:950;color:#9edcff}.legacy-breakdown-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.legacy-breakdown-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#43a9ff,#9be2ff)}.legacy-breakdown-points{font-weight:950;color:#f2fbff}.legacy-trophy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.legacy-trophy-card{display:flex;gap:12px;align-items:flex-start;padding:13px;border-radius:13px;background:linear-gradient(135deg,rgba(25,55,92,.8),rgba(9,24,44,.82));border:1px solid rgba(123,199,255,.13)}.legacy-trophy-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(126,201,255,.14);font-size:19px;flex:0 0 36px}.legacy-trophy-card span{display:block;color:#83b8dc;font-size:10px;text-transform:uppercase;letter-spacing:.9px;font-weight:900}.legacy-trophy-card strong{display:block;margin-top:3px;color:#f3faff}.legacy-trophy-empty{padding:20px;border:1px dashed rgba(124,201,255,.22);border-radius:13px;color:#8eabc2;text-align:center}.legacy-leader-row,.legacy-player-result{cursor:pointer}.legacy-leader-row:hover,.legacy-player-result:hover{background:rgba(35,91,145,.34)!important}.legacy-player-result::after{content:"VIEW PROFILE →";display:block;margin-top:8px;color:#77c9ff;font-size:10px;font-weight:950;letter-spacing:1px}.legacy-leader-row{grid-template-columns:42px minmax(0,1fr) auto!important}.legacy-pos-pill{display:none!important}@media(max-width:900px){.legacy-profile-hero{grid-template-columns:110px 1fr}.legacy-profile-avatar-wrap{width:110px;height:110px}.legacy-profile-summary{grid-column:1/-1}.legacy-showcase-grid{grid-template-columns:1fr}.legacy-trophy-grid{grid-template-columns:1fr}}@media(max-width:620px){.legacy-profile-hero{grid-template-columns:1fr;text-align:center}.legacy-profile-avatar-wrap{margin:0 auto}.legacy-profile-team{justify-content:center}.legacy-profile-summary{grid-template-columns:1fr}.legacy-showcase-topbar{align-items:flex-start}.legacy-player-showcase{padding:16px}}
+</style>
+
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logos/League Logo.png" alt="EFF Logo" class="brand-logo">
+
+      <div class="brand-copy">
+        <strong>Elite Football Federation</strong>
+        <span>SEASON 4</span>
+      </div>
+    </div>
+
+    <nav class="desktop-nav">
+      <button class="nav-link active" data-page="home">Home</button>
+      <button class="nav-link" data-page="standings">Standings</button>
+      <button class="nav-link" data-page="playoffs">Playoffs</button>
+      <button class="nav-link" data-page="teams">Teams</button>
+      <button class="nav-link" data-page="stats">Stats</button>
+      <button class="nav-link" data-page="schedule">Scores</button>
+      <button class="nav-link" data-page="legacy">Legacy</button>
+      <button class="nav-link" data-page="history">History</button>
+      <button class="nav-link" data-page="rulebook">Rulebook</button>
+    </nav>
+
+    <a
+      class="discord-button"
+      href="https://discord.gg/J5dh8Qffd"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Join Discord
+    </a>
+  </header>
+
+  <main>
+
+    <!-- HOME -->
+    <section class="page active-page" id="home">
+      <section class="hero">
+        <img src="assets/logos/super-bowl-iv.png" alt="EFF Super Bowl IV" class="hero-logo">
+        <div class="season-badge">SEASON 4</div>
+
+        <h1>ELITE FOOTBALL <span>SEASON 4</span></h1>
+
+        <p>New season, new divisions, and a new winter championship chase.</p>
+
+        <div class="hero-actions">
+          <button class="primary-button" data-go="standings">View Standings</button>
+          <button class="secondary-button" data-go="teams">View Teams</button>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <span>SEASON 4</span>
+            <h2>EFF Super Bowl IV</h2>
+          </div>
+
+          <p>The official Season 4 banner and Super Bowl IV identity.</p>
+        </div>
+
+        <img
+          src="assets/images/season4-banner.png"
+          alt="EFF Season 4 Super Bowl IV Banner"
+          class="banner"
+        >
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <span>SEASON 4</span>
+            <h2>Award Watch</h2>
+          </div>
+          <p>Live top-five races calculated from Season 4 player points.</p>
+        </div>
+
+        <div class="home-award-watch">
+          <div class="home-award-watch-top">
+            <h3 class="home-award-watch-title">AWARD WATCH <span class="home-award-live-badge">Live Race</span></h3>
+            <select id="homeAwardPosition" class="home-award-select" aria-label="Choose award race">
+              <option value="mvp">MVP — Most Valuable Player</option>
+              <option value="opoty">OPOTY — Offensive Player of the Year</option>
+              <option value="dpoty">DPOTY — Defensive Player of the Year</option>
+            </select>
+          </div>
+          <div id="homeAwardWatchList" class="home-award-list">
+            <div class="home-dashboard-loading">Loading award watch...</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <span>CONFERENCES</span>
+            <h2>Atlantic & Pacific</h2>
+          </div>
+
+          <p>EFF competition is split between two conferences.</p>
+        </div>
+
+        <div class="conference-grid">
+          <article class="conference-card">
+            <img src="assets/logos/Atlantic Conference.png" alt="Atlantic Conference">
+            <h3>Atlantic Conference</h3>
+            <p>View Atlantic Conference teams and standings.</p>
+            <button data-go="standings">View Standings</button>
+          </article>
+
+          <article class="conference-card">
+            <img src="assets/logos/Pacific Conference.png" alt="Pacific Conference">
+            <h3>Pacific Conference</h3>
+            <p>View Pacific Conference teams and standings.</p>
+            <button data-go="standings">View Standings</button>
+          </article>
+        </div>
+      </section>
+
+
+    </section>
+
+
+    <!-- STANDINGS -->
+    <section class="page" id="standings">
+      <div class="page-container">
+        <div class="page-title">
+          <span>LIVE FROM GOOGLE SHEETS</span>
+          <h2>Standings</h2>
+          <p>Season 4 standings with 24 teams across the Colonial, Gulf, Cascade, and Sunset divisions.</p>
+        </div>
+
+        <div class="standings-grid">
+          <section class="standings-card">
+            <div class="standings-header">
+              <img src="assets/logos/Atlantic Conference.png" alt="Atlantic Conference">
+
+              <div>
+                <span>ATLANTIC</span>
+                <h3>Atlantic Conference</h3>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Team</th>
+                    <th>Rec</th>
+                    <th>Division Rec</th>
+                    <th>Conf Rec</th>
+                    <th>PF</th>
+                    <th>PA</th>
+                    <th>PD</th>
+                    <th>Streak</th>
+                  </tr>
+                </thead>
+
+                <tbody id="atlanticStandingsBody">
+                  <tr>
+                    <td colspan="9" class="status-cell">Loading standings...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="standings-card">
+            <div class="standings-header">
+              <img src="assets/logos/Pacific Conference.png" alt="Pacific Conference">
+
+              <div>
+                <span>PACIFIC</span>
+                <h3>Pacific Conference</h3>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Team</th>
+                    <th>Rec</th>
+                    <th>Division Rec</th>
+                    <th>Conf Rec</th>
+                    <th>PF</th>
+                    <th>PA</th>
+                    <th>PD</th>
+                    <th>Streak</th>
+                  </tr>
+                </thead>
+
+                <tbody id="pacificStandingsBody">
+                  <tr>
+                    <td colspan="9" class="status-cell">Loading standings...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PLAYOFFS -->
+    <section class="page playoffs-page" id="playoffs">
+      <div class="page-container playoffs-container">
+        <div class="playoffs-hero-row">
+          <div class="page-title playoffs-title-block">
+            <span>LIVE PLAYOFF BRACKET</span>
+            <h2>Season 4 Playoffs</h2>
+            <p>Seeds update automatically from the live standings. Seven teams from each conference qualify. Division winners are guaranteed Seeds 1 and 2, and Seed 1 receives the only first-round bye.</p>
+          </div>
+
+          <button class="playoff-refresh-button" id="refreshPlayoffsBtn" type="button">
+            ↻ Refresh Bracket
+          </button>
+        </div>
+
+        <div class="playoff-key">
+          <span><b>1</b> First-round bye</span>
+          <span><b>2 vs 7</b> Wild Card</span>
+          <span><b>3 vs 6</b> Wild Card</span>
+          <span><b>4 vs 5</b> Wild Card</span>
+        </div>
+
+        <div class="live-playoff-bracket" id="livePlayoffBracket">
+          <div class="loading-card">Loading current playoff seeds...</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TEAMS -->
+    <section class="page" id="teams">
+      <div class="page-container">
+        <div class="page-title">
+          <span>LIVE FROM GOOGLE SHEETS</span>
+          <h2>Teams</h2>
+          <p>Season 4 teams grouped into four divisions with 6 teams per division.</p>
+        </div>
+
+        <div class="section-subtitle">
+          <img src="assets/logos/Atlantic Conference.png" alt="Atlantic Conference">
+
+          <div>
+            <span>ATLANTIC</span>
+            <h3>Atlantic Conference</h3>
+          </div>
+        </div>
+
+        <div class="team-grid" id="atlanticTeamGrid">
+          <div class="loading-card">Loading teams...</div>
+        </div>
+
+        <div class="section-subtitle section-gap">
+          <img src="assets/logos/Pacific Conference.png" alt="Pacific Conference">
+
+          <div>
+            <span>PACIFIC</span>
+            <h3>Pacific Conference</h3>
+          </div>
+        </div>
+
+        <div class="team-grid" id="pacificTeamGrid">
+          <div class="loading-card">Loading teams...</div>
+        </div>
+
+        <section class="team-detail-panel" id="teamDetailPanel">
+          <button class="team-detail-back" id="teamDetailBack" type="button">
+            ← Back to Teams
+          </button>
+
+          <div class="team-detail-hero">
+            <img id="teamDetailLogo" src="" alt="">
+            <div>
+              <span class="team-detail-kicker">TEAM PAGE</span>
+              <h2 id="teamDetailName">Team</h2>
+              <p id="teamDetailRecord"></p>
+            </div>
+          </div>
+
+          <div class="team-detail-grid">
+            <section class="team-detail-card">
+              <div class="team-detail-card-title">
+                <span>ROSTER</span>
+                <h3>Current Roster</h3>
+              </div>
+              <div class="roster-list" id="teamRosterList"></div>
+            </section>
+
+            <section class="team-detail-card">
+              <div class="team-detail-card-title">
+                <span>SEASON</span>
+                <h3>Schedule</h3>
+              </div>
+              <div class="team-season-schedule" id="teamSeasonSchedule"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </section>
+
+
+    <!-- STATS -->
+    <section class="page stats-page" id="stats">
+      <div class="stats-shell">
+        <div class="stats-page-heading stats-heading-row">
+          <div>
+            <div class="stats-season-label" id="statsSeasonLabel">EFF SEASON 4</div>
+            <h2 id="statsPageTitle">PLAYER STATS</h2>
+          </div>
+
+          <div class="stats-mode-controls">
+            <button class="stats-mode-btn active" id="seasonStatsBtn" type="button">
+              Season
+            </button>
+
+            <button class="stats-mode-btn" id="allTimeStatsBtn" type="button">
+              All Time
+            </button>
+
+            <button class="stats-refresh-btn" id="refreshStatsBtn" type="button">
+              ↻ Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-tools-row">
+
+          <div class="player-search">
+            <span class="search-icon">⌕</span>
+            <input
+              id="playerSearchInput"
+              type="text"
+              placeholder="Search players..."
+              autocomplete="off"
+            >
+          </div></div>
+
+        <div class="stats-position-tabs" id="statsTabs">
+          <span class="loading-inline">Loading stat categories...</span>
+        </div>
+
+
+        <div class="stats-table-card">
+          <div class="stats-table-wrap">
+            <table class="website-stats-table">
+              <thead id="statsTableHead"></thead>
+
+              <tbody id="statsTableBody">
+                <tr>
+                  <td class="status-cell">Loading stats...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- SCORES / SCHEDULE -->
+    <section class="page" id="schedule">
+      <div class="page-container">
+        <div class="page-title scores-heading">
+          <div>
+            <span>LIVE FROM GOOGLE SHEETS</span>
+            <h2>Season 4 Schedule</h2>
+            <p>The Season 4 schedule will appear here after the new Google Sheet schedule is created.</p>
+          </div>
+
+          <div class="week-picker-wrap">
+            <label for="weekSelect">Week</label>
+
+            <select id="weekSelect">
+              <option value="">Loading weeks...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="score-week-title" id="scoreWeekTitle"></div>
+
+        <div class="schedule-grid" id="scheduleGrid">
+          <div class="loading-card">Loading scores...</div>
+        </div>
+      </div>
+    </section>
+
+
+
+
+    <!-- LEGACY / RECORD BOOK -->
+    <section class="page" id="legacy">
+      <div class="legacy-shell">
+        <section class="legacy-hero">
+          <div class="legacy-hero-copy">
+            <span class="legacy-kicker">EFF LEGACY · RECORD BOOK</span>
+            <h2>EFF LEGACY</h2>
+            <p>Career leaders, all-time player search, records, and long-term league milestones. History remains the locked season archive; Legacy is the statistical record book.</p>
+          </div>
+          <div class="legacy-summary-card">
+            <div class="legacy-summary-stat"><span>Completed Seasons</span><strong>03</strong></div>
+            <div class="legacy-summary-stat"><span>Champions Crowned</span><strong>03</strong></div>
+            <div class="legacy-summary-stat"><span>Record Book</span><strong>LIVE</strong></div>
+          </div>
+        </section>
+
+        <div class="legacy-grid">
+          <section class="legacy-panel">
+            <div class="legacy-panel-head">
+              <div><span class="legacy-kicker">ALL-TIME LEADERS</span><h3>Career Points Leaders</h3><p>Uses the connected All-Time Stats workbook.</p></div>
+              <select id="legacyLeaderPosition" class="legacy-select">
+                <option value="overall">Overall</option>
+                <option value="quarterback">QB</option>
+                <option value="runningback">RB</option>
+                <option value="center">C</option>
+                <option value="tight end">TE</option>
+                <option value="wide receiver">WR</option>
+                <option value="defensive end">DE</option>
+                <option value="defensive back">DB</option>
+                <option value="kicker">K</option>
+              </select>
+            </div>
+            <div id="legacyLeaderList" class="legacy-leader-list"><div class="legacy-empty">Open Legacy to load career leaders.</div></div>
+          </section>
+
+          <section class="legacy-panel">
+            <div class="legacy-panel-head"><div><span class="legacy-kicker">PLAYER SEARCH</span><h3>Career Lookup</h3><p>Search a Roblox username across all-time position sheets.</p></div></div>
+            <input id="legacyPlayerSearch" class="legacy-search" type="text" placeholder="Search player..." autocomplete="off">
+            <div id="legacyPlayerSearchResults" class="legacy-search-results"><div class="legacy-empty">Start typing a player name.</div></div>
+          </section>
+
+          <section class="legacy-player-showcase" id="legacyPlayerShowcase" hidden>
+            <div class="legacy-showcase-topbar">
+              <div>
+                <span class="legacy-kicker">PLAYER SHOWCASE</span>
+                <h3>EFF Career Profile</h3>
+              </div>
+              <button class="legacy-showcase-close" id="legacyShowcaseClose" type="button">Close</button>
+            </div>
+
+            <div class="legacy-profile-hero">
+              <div class="legacy-profile-avatar-wrap">
+                <img id="legacyProfileAvatar" class="legacy-profile-avatar" alt="Player Roblox avatar">
+              </div>
+              <div class="legacy-profile-copy">
+                <span class="legacy-profile-eyebrow">EFF LEGACY PROFILE</span>
+                <h2 id="legacyProfileName">Player</h2>
+                <div class="legacy-profile-team">
+                  <img id="legacyProfileTeamLogo" alt="Team logo">
+                  <span id="legacyProfileTeam">Team unavailable</span>
+                </div>
+              </div>
+              <div class="legacy-profile-summary">
+                <div><span>Career PTS</span><strong id="legacyProfilePoints">0.0</strong></div>
+                <div><span>Top Position</span><strong id="legacyProfilePrimaryPosition">—</strong></div>
+                <div><span>Positions</span><strong id="legacyProfilePositionCount">0</strong></div>
+              </div>
+            </div>
+
+            <div class="legacy-showcase-grid">
+              <section class="legacy-showcase-card">
+                <div class="legacy-panel-head"><div><span class="legacy-kicker">CAREER STATS</span><h3>Position Breakdown</h3><p>Career points from the connected All-Time Stats sheets.</p></div></div>
+                <div id="legacyProfileBreakdown" class="legacy-profile-breakdown"></div>
+              </section>
+
+              <section class="legacy-showcase-card" id="legacyTrophyRoom">
+                <div class="legacy-panel-head"><div><span class="legacy-kicker">TROPHY ROOM</span><h3>Career Honors</h3><p>Locked awards, standouts, and All-League honors from EFF History.</p></div></div>
+                <div id="legacyProfileTrophies" class="legacy-trophy-grid"></div>
+              </section>
+            </div>
           </section>
         </div>
       </div>
