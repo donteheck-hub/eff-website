@@ -6975,6 +6975,95 @@ if (refreshPlayoffsBtn) {
 }
 
 
+
+/*
+==================================================
+LEGACY RECORD BOOK
+==================================================
+*/
+const LEGACY_POSITION_LABELS = {
+  "quarterback":"QB","runningback":"RB","center":"C","tight end":"TE",
+  "wide receiver":"WR","defensive end":"DE","defensive back":"DB","kicker":"K"
+};
+let legacyCareerPlayers = null;
+let legacyLoaded = false;
+
+async function buildLegacyCareerPlayers(forceRefresh=false){
+  if(legacyCareerPlayers && !forceRefresh) return legacyCareerPlayers;
+  const data = await getStatsSourceData("alltime", forceRefresh);
+  const combined = new Map();
+  for(const sheetName of Object.keys(LEGACY_POSITION_LABELS)){
+    const rawRows = Array.isArray(data?.[sheetName]) ? data[sheetName] : [];
+    const normalized = normalizeStatSheetRows(rawRows);
+    const rows = applyCalculatedPoints(sheetName, normalized.rows);
+    for(const row of rows){
+      const name = getStatsPlayerName(row);
+      if(!name) continue;
+      const pts = getStatsPointsValue(row);
+      if(!Number.isFinite(pts)) continue;
+      const key = getAwardPlayerKey(name);
+      if(!key) continue;
+      const current = combined.get(key) || {name, total:0, positions:{}};
+      current.total += pts;
+      current.positions[LEGACY_POSITION_LABELS[sheetName]] = (current.positions[LEGACY_POSITION_LABELS[sheetName]] || 0) + pts;
+      combined.set(key,current);
+    }
+  }
+  legacyCareerPlayers = [...combined.values()];
+  return legacyCareerPlayers;
+}
+
+async function renderLegacyLeaders(position="overall"){
+  const container=document.getElementById("legacyLeaderList");
+  if(!container) return;
+  container.innerHTML='<div class="legacy-empty">Loading all-time leaders...</div>';
+  try{
+    await getDiscordPlayers().catch(()=>[]);
+    const players=await buildLegacyCareerPlayers(false);
+    const label=position==="overall" ? null : LEGACY_POSITION_LABELS[position];
+    const ranked=players.map(p=>({
+      ...p,
+      displayPoints: label ? Number(p.positions[label]||0) : Number(p.total||0),
+      displayPositions: label ? label : Object.keys(p.positions).join("/")
+    })).filter(p=>p.displayPoints>0).sort((a,b)=>b.displayPoints-a.displayPoints || a.name.localeCompare(b.name)).slice(0,10);
+    if(!ranked.length){container.innerHTML='<div class="legacy-empty">No all-time data found for this position.</div>';return;}
+    container.innerHTML=ranked.map((p,i)=>{
+      const player=findDiscordPlayerByLooseName(p.name); const logo=player?.teamLogo||""; const team=player?.team||"";
+      return `<div class="legacy-leader-row"><span class="legacy-rank">${i+1}</span><div class="legacy-player-main">${logo?`<img src="${esc(getDisplayImageUrl(logo))}" alt="${esc(team)}" loading="lazy">`:""}<strong>${esc(p.name)}</strong></div><span class="legacy-pos-pill">${esc(p.displayPositions||"—")}</span><strong class="legacy-points">${formatPoints(p.displayPoints)}</strong></div>`;
+    }).join("");
+  }catch(error){console.error("Legacy leaders error:",error);container.innerHTML='<div class="legacy-empty">Unable to load all-time leaders.</div>';}
+}
+
+async function searchLegacyPlayers(query){
+  const container=document.getElementById("legacyPlayerSearchResults");
+  if(!container) return;
+  const q=normalize(String(query||"").trim());
+  if(!q){container.innerHTML='<div class="legacy-empty">Start typing a player name.</div>';return;}
+  try{
+    const players=await buildLegacyCareerPlayers(false);
+    const matches=players.filter(p=>normalize(p.name).includes(q)).sort((a,b)=>b.total-a.total).slice(0,12);
+    if(!matches.length){container.innerHTML='<div class="legacy-empty">No matching all-time player found.</div>';return;}
+    container.innerHTML=matches.map(p=>{
+      const parts=Object.entries(p.positions).sort((a,b)=>b[1]-a[1]).map(([pos,pts])=>`${pos}: ${formatPoints(pts)}`).join(" · ");
+      return `<div class="legacy-player-result"><div class="legacy-player-result-top"><strong>${esc(p.name)}</strong><strong class="legacy-points">${formatPoints(p.total)} PTS</strong></div><small>${esc(parts||"No position breakdown")}</small></div>`;
+    }).join("");
+  }catch(error){console.error("Legacy search error:",error);container.innerHTML='<div class="legacy-empty">Unable to search all-time players.</div>';}
+}
+
+async function loadLegacyRecordBook(){
+  if(legacyLoaded){ await renderLegacyLeaders(document.getElementById("legacyLeaderPosition")?.value||"overall"); return; }
+  legacyLoaded=true;
+  await renderLegacyLeaders(document.getElementById("legacyLeaderPosition")?.value||"overall");
+}
+
+const legacyLeaderPosition=document.getElementById("legacyLeaderPosition");
+if(legacyLeaderPosition) legacyLeaderPosition.addEventListener("change",()=>renderLegacyLeaders(legacyLeaderPosition.value));
+const legacyPlayerSearch=document.getElementById("legacyPlayerSearch");
+if(legacyPlayerSearch) legacyPlayerSearch.addEventListener("input",()=>searchLegacyPlayers(legacyPlayerSearch.value));
+const legacyNav=document.querySelector('.nav-link[data-page="legacy"]');
+if(legacyNav) legacyNav.addEventListener("click",()=>loadLegacyRecordBook());
+if(window.location.hash==="#legacy") loadLegacyRecordBook();
+
 /*
 ==================================================
 HOME DASHBOARD

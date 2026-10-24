@@ -287,7 +287,45 @@
     .website-stats-table .status-cell {
       color: #9dbbd1 !important;
     }
-  </style>
+  
+
+    /* LEGACY RECORD BOOK */
+    .legacy-shell { width:min(1400px, calc(100% - 40px)); margin:0 auto; padding:42px 0 72px; }
+    .legacy-hero { display:grid; grid-template-columns:1.35fr .65fr; gap:24px; align-items:stretch; margin-bottom:26px; }
+    .legacy-hero-copy, .legacy-summary-card, .legacy-panel { background:linear-gradient(180deg, rgba(7,20,42,.92), rgba(4,12,28,.96)); border:1px solid rgba(124,201,255,.18); border-radius:20px; box-shadow:0 20px 45px rgba(0,0,0,.25); }
+    .legacy-hero-copy { padding:34px; position:relative; overflow:hidden; }
+    .legacy-hero-copy::after { content:""; position:absolute; width:320px; height:320px; right:-90px; top:-120px; border-radius:50%; background:radial-gradient(circle, rgba(80,177,255,.18), transparent 68%); pointer-events:none; }
+    .legacy-kicker { display:inline-flex; align-items:center; gap:8px; font-size:11px; letter-spacing:2px; font-weight:900; color:#a9dcff; text-transform:uppercase; }
+    .legacy-hero h2 { margin:10px 0 10px; font-size:clamp(34px,5vw,64px); line-height:.95; letter-spacing:-2px; }
+    .legacy-hero p { margin:0; max-width:760px; color:#a9bdd2; font-weight:650; line-height:1.6; }
+    .legacy-summary-card { padding:26px; display:grid; gap:12px; }
+    .legacy-summary-stat { display:flex; justify-content:space-between; gap:18px; align-items:end; padding:16px 0; border-bottom:1px solid rgba(255,255,255,.08); }
+    .legacy-summary-stat:last-child{border-bottom:0}.legacy-summary-stat span{color:#8fa8bf;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px}.legacy-summary-stat strong{font-size:28px;color:#eaf7ff}
+    .legacy-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:24px; }
+    .legacy-panel { padding:24px; min-width:0; }
+    .legacy-panel.full { grid-column:1/-1; }
+    .legacy-panel-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .legacy-panel-head h3 { margin:4px 0 0; font-size:24px; }
+    .legacy-panel-head p { margin:4px 0 0; color:#8fa8bf; font-size:13px; }
+    .legacy-select, .legacy-search { background:#071326; color:#eef8ff; border:1px solid rgba(124,201,255,.22); border-radius:10px; min-height:42px; padding:0 13px; font-weight:800; outline:none; }
+    .legacy-search { width:100%; min-height:46px; margin-bottom:14px; }
+    .legacy-leader-list { display:grid; gap:8px; }
+    .legacy-leader-row { display:grid; grid-template-columns:42px 1fr auto auto; gap:12px; align-items:center; padding:12px 14px; background:rgba(255,255,255,.025); border:1px solid rgba(255,255,255,.06); border-radius:12px; }
+    .legacy-rank { color:#75c9ff; font-weight:950; text-align:center; }
+    .legacy-player-main { min-width:0; display:flex; align-items:center; gap:10px; }
+    .legacy-player-main img { width:30px; height:30px; object-fit:contain; }
+    .legacy-player-main strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .legacy-pos-pill { padding:5px 8px; border-radius:8px; background:rgba(66,157,255,.13); color:#a9dcff; font-size:11px; font-weight:900; }
+    .legacy-points { color:#e9f7ff; font-weight:950; min-width:62px; text-align:right; }
+    .legacy-search-results { display:grid; gap:8px; max-height:420px; overflow:auto; }
+    .legacy-player-result { padding:14px; border:1px solid rgba(255,255,255,.07); border-radius:12px; background:rgba(255,255,255,.025); }
+    .legacy-player-result-top { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .legacy-player-result small { display:block; margin-top:6px; color:#8fa8bf; }
+    .legacy-record-placeholder { border:1px dashed rgba(124,201,255,.22); border-radius:14px; padding:26px; color:#9db6ca; line-height:1.6; background:rgba(41,123,201,.04); }
+    .legacy-record-placeholder strong { color:#eaf7ff; }
+    .legacy-empty { padding:24px; text-align:center; color:#8fa8bf; }
+    @media (max-width:900px){.legacy-hero,.legacy-grid{grid-template-columns:1fr}.legacy-panel.full{grid-column:auto}.legacy-shell{width:min(100% - 24px,1400px)}.legacy-panel-head{align-items:flex-start;flex-direction:column}.legacy-leader-row{grid-template-columns:34px 1fr auto}.legacy-pos-pill{display:none}}
+</style>
 
 </head>
 <body>
@@ -309,6 +347,7 @@
       <button class="nav-link" data-page="teams">Teams</button>
       <button class="nav-link" data-page="stats">Stats</button>
       <button class="nav-link" data-page="schedule">Scores</button>
+      <button class="nav-link" data-page="legacy">Legacy</button>
       <button class="nav-link" data-page="history">History</button>
       <button class="nav-link" data-page="rulebook">Rulebook</button>
     </nav>
@@ -678,6 +717,58 @@
 
         <div class="schedule-grid" id="scheduleGrid">
           <div class="loading-card">Loading scores...</div>
+        </div>
+      </div>
+    </section>
+
+
+
+
+    <!-- LEGACY / RECORD BOOK -->
+    <section class="page" id="legacy">
+      <div class="legacy-shell">
+        <section class="legacy-hero">
+          <div class="legacy-hero-copy">
+            <span class="legacy-kicker">EFF LEGACY · RECORD BOOK</span>
+            <h2>EFF LEGACY</h2>
+            <p>Career leaders, all-time player search, records, and long-term league milestones. History remains the locked season archive; Legacy is the statistical record book.</p>
+          </div>
+          <div class="legacy-summary-card">
+            <div class="legacy-summary-stat"><span>Completed Seasons</span><strong>03</strong></div>
+            <div class="legacy-summary-stat"><span>Champions Crowned</span><strong>03</strong></div>
+            <div class="legacy-summary-stat"><span>Record Book</span><strong>LIVE</strong></div>
+          </div>
+        </section>
+
+        <div class="legacy-grid">
+          <section class="legacy-panel">
+            <div class="legacy-panel-head">
+              <div><span class="legacy-kicker">ALL-TIME LEADERS</span><h3>Career Points Leaders</h3><p>Uses the connected All-Time Stats workbook.</p></div>
+              <select id="legacyLeaderPosition" class="legacy-select">
+                <option value="overall">Overall</option>
+                <option value="quarterback">QB</option>
+                <option value="runningback">RB</option>
+                <option value="center">C</option>
+                <option value="tight end">TE</option>
+                <option value="wide receiver">WR</option>
+                <option value="defensive end">DE</option>
+                <option value="defensive back">DB</option>
+                <option value="kicker">K</option>
+              </select>
+            </div>
+            <div id="legacyLeaderList" class="legacy-leader-list"><div class="legacy-empty">Open Legacy to load career leaders.</div></div>
+          </section>
+
+          <section class="legacy-panel">
+            <div class="legacy-panel-head"><div><span class="legacy-kicker">PLAYER SEARCH</span><h3>Career Lookup</h3><p>Search a Roblox username across all-time position sheets.</p></div></div>
+            <input id="legacyPlayerSearch" class="legacy-search" type="text" placeholder="Search player..." autocomplete="off">
+            <div id="legacyPlayerSearchResults" class="legacy-search-results"><div class="legacy-empty">Start typing a player name.</div></div>
+          </section>
+
+          <section class="legacy-panel full">
+            <div class="legacy-panel-head"><div><span class="legacy-kicker">SINGLE-SEASON RECORDS</span><h3>Season Record Book</h3><p>Best performances from archived EFF seasons.</p></div></div>
+            <div class="legacy-record-placeholder"><strong>Record framework added.</strong> Your connected data currently supports career/all-time totals and the live season. We’ll populate true single-season records as the Season 1–3 stat archives are linked or entered, rather than guessing historical numbers.</div>
+          </section>
         </div>
       </div>
     </section>
