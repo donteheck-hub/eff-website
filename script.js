@@ -209,6 +209,7 @@ function showPage(pageId) {
 
   pages.forEach((page) => {
     page.classList.remove("active-page");
+    page.hidden = true;
   });
 
 
@@ -221,6 +222,7 @@ function showPage(pageId) {
   }
 
 
+  selected.hidden = false;
   selected.classList.add("active-page");
 
 
@@ -7280,3 +7282,18 @@ async function initializeWebsiteData() {
 
 
 initializeWebsiteData();
+
+// Prevent accidental duplicate app shells from rendering below the site.
+document.addEventListener("DOMContentLoaded", () => {
+  const topbars = [...document.querySelectorAll("body > .topbar")];
+  topbars.slice(1).forEach(el => el.remove());
+
+  const mains = [...document.querySelectorAll("body > main")];
+  mains.slice(1).forEach(el => el.remove());
+
+  const footers = [...document.querySelectorAll("body > footer")];
+  footers.slice(1).forEach(el => el.remove());
+
+  const initial = location.hash.replace("#", "") || "home";
+  if (document.getElementById(initial)) showPage(initial);
+});
