@@ -5993,6 +5993,35 @@ function createGameCard(game) {
   const series =
     game.Series || "";
 
+  const awayScoreText =
+    String(awayScore).trim();
+
+  const homeScoreText =
+    String(homeScore).trim();
+
+  const awayScoreNumber =
+    Number(awayScoreText);
+
+  const homeScoreNumber =
+    Number(homeScoreText);
+
+  const hasFinalScores =
+    awayScoreText !== "" &&
+    homeScoreText !== "" &&
+    Number.isFinite(awayScoreNumber) &&
+    Number.isFinite(homeScoreNumber);
+
+  const awayWinner =
+    hasFinalScores &&
+    awayScoreNumber > homeScoreNumber;
+
+  const homeWinner =
+    hasFinalScores &&
+    homeScoreNumber > awayScoreNumber;
+
+  const winnerTextStyle =
+    'font-weight:900;color:#7dd3fc;text-shadow:0 0 12px rgba(125,211,252,.35);';
+
 
   return `
     <article class="game-card">
@@ -6025,14 +6054,14 @@ function createGameCard(game) {
               : ""
           }
 
-          <strong>
+          <strong${awayWinner ? ` style="${winnerTextStyle}"` : ""}>
             ${esc(awayTeam)}
           </strong>
 
           ${
             String(awayScore).trim() !== ""
               ? `
-                <span class="score">
+                <span class="score"${awayWinner ? ` style="${winnerTextStyle}"` : ""}>
                   ${esc(awayScore)}
                 </span>
               `
@@ -6059,14 +6088,14 @@ function createGameCard(game) {
               : ""
           }
 
-          <strong>
+          <strong${homeWinner ? ` style="${winnerTextStyle}"` : ""}>
             ${esc(homeTeam)}
           </strong>
 
           ${
             String(homeScore).trim() !== ""
               ? `
-                <span class="score">
+                <span class="score"${homeWinner ? ` style="${winnerTextStyle}"` : ""}>
                   ${esc(homeScore)}
                 </span>
               `
