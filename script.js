@@ -6301,8 +6301,7 @@ async function buildMatchupKeyPlayers(teamName) {
     "defensive back": { label: "DB", side: "defense" }
   };
 
-  let offense = null;
-  let defense = null;
+  const players = new Map();
 
   for (const sheetName of STAT_SHEETS) {
     const meta = positionMeta[sheetName];
@@ -6322,24 +6321,49 @@ async function buildMatchupKeyPlayers(teamName) {
       const pts = getStatsPointsValue(row);
       if (!Number.isFinite(pts) || pts <= 0) continue;
 
-      const candidate = {
-        name,
-        pts,
-        position: meta.label,
-        side: meta.side
-      };
+      const key = normalizePlayerName(name);
+      if (!key) continue;
 
-      if (meta.side === "offense") {
-        if (!offense || candidate.pts > offense.pts || (candidate.pts === offense.pts && candidate.name.localeCompare(offense.name) < 0)) {
-          offense = candidate;
-        }
-      } else if (!defense || candidate.pts > defense.pts || (candidate.pts === defense.pts && candidate.name.localeCompare(defense.name) < 0)) {
-        defense = candidate;
+      if (!players.has(key)) {
+        players.set(key, {
+          name,
+          totalPts: 0,
+          bestOffense: null,
+          bestDefense: null
+        });
+      }
+
+      const player = players.get(key);
+      player.totalPts += pts;
+
+      const bestKey = meta.side === "offense" ? "bestOffense" : "bestDefense";
+      const currentBest = player[bestKey];
+
+      if (!currentBest || pts > currentBest.pts) {
+        player[bestKey] = {
+          position: meta.label,
+          pts
+        };
       }
     }
   }
 
-  return [offense, defense].filter(Boolean);
+  return [...players.values()]
+    .map(player => ({
+      name: player.name,
+      pts: player.totalPts,
+      position: [
+        player.bestOffense?.position || "",
+        player.bestDefense?.position || ""
+      ].filter(Boolean).join("/"),
+      bestOffense: player.bestOffense,
+      bestDefense: player.bestDefense
+    }))
+    .sort((a, b) =>
+      b.pts - a.pts ||
+      a.name.localeCompare(b.name)
+    )
+    .slice(0, 3);
 }
 
 function renderMatchupLeaders(title, teamName, leaders) {
@@ -6348,10 +6372,10 @@ function renderMatchupLeaders(title, teamName, leaders) {
       <h3>${esc(title)} — ${esc(teamName)}</h3>
       ${leaders.length ? leaders.map((leader,index) => `
         <div class="h2h-leader-row">
-          <span class="rank">${leader.side === "offense" ? "OFF" : "DEF"}</span>
-          <div><strong>${esc(leader.name)}</strong><div style="font-size:11px;color:#8ca6bb">${esc(leader.position)}</div></div>
+          <span class="rank">#${index + 1}</span>
+          <div><strong>${esc(leader.name)}</strong><div style="font-size:11px;color:#8ca6bb">${esc(leader.position || "—")}</div></div>
           <div class="h2h-leader-meta"><strong>${formatPoints(leader.pts)}</strong><span>PTS</span></div>
-        </div>`).join("") : '<div class="loading-card">No offensive or defensive player points recorded yet.</div>'}
+        </div>`).join("") : '<div class="loading-card">No player points recorded yet.</div>'}
     </section>`;
 }
 
