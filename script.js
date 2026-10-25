@@ -2487,12 +2487,6 @@ async function openTeamDetail(
       "teamSeasonSchedule"
     );
 
-
-  const recentFormElement =
-    document.getElementById(
-      "teamRecentForm"
-    );
-
   const leadersElement =
     document.getElementById(
       "teamLeadersList"
@@ -2518,15 +2512,6 @@ async function openTeamDetail(
     scheduleElement.innerHTML = `
       <div class="loading-card">
         Loading schedule...
-      </div>
-    `;
-  }
-
-
-  if (recentFormElement) {
-    recentFormElement.innerHTML = `
-      <div class="loading-card">
-        Loading recent results...
       </div>
     `;
   }
@@ -2663,8 +2648,6 @@ async function openTeamDetail(
           )
       );
 
-    renderTeamRecentForm(recentFormElement, games, teamName);
-
     buildTeamSeasonLeaders(teamName)
       .then(leaders => renderTeamLeaders(leadersElement, leaders))
       .catch(error => {
@@ -2766,24 +2749,6 @@ function getTeamGameResult(game, teamName) {
   if (!ready || !Number.isFinite(Number(teamScore)) || !Number.isFinite(Number(opponentScore))) return null;
   const result = Number(teamScore) > Number(opponentScore) ? "W" : Number(teamScore) < Number(opponentScore) ? "L" : "T";
   return { result, teamScore: Number(teamScore), opponentScore: Number(opponentScore), opponent, week: game.Week || "" };
-}
-
-function renderTeamRecentForm(container, games, teamName) {
-  if (!container) return;
-  const completed = [...games]
-    .map(game => getTeamGameResult(game, teamName))
-    .filter(Boolean)
-    .sort((a,b) => getWeekNumber(b.week) - getWeekNumber(a.week))
-    .slice(0,5);
-
-  if (!completed.length) {
-    container.innerHTML = `<div class="loading-card">No completed games yet.</div>`;
-    return;
-  }
-
-  container.innerHTML = completed.map(item => `
-    <div class="team-form-pill ${item.result === "W" ? "win" : item.result === "L" ? "loss" : "tie"}" title="${esc(item.week)} vs ${esc(item.opponent)}: ${item.teamScore}-${item.opponentScore}">${item.result}</div>
-  `).join("") + `<span class="team-form-detail">Last ${completed.length} completed game${completed.length === 1 ? "" : "s"}</span>`;
 }
 
 async function buildTeamSeasonLeaders(teamName) {
