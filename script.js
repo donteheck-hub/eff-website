@@ -3513,7 +3513,7 @@ function calculatePlayerPoints(
 
   /*
     CENTER:
-    (SNAP × 0.5 + RYDS × 0.08 - SCKA × 1.5 - PRSA × 0.10) / 2
+    (SNAP × 0.6 + RYDS × 0.03 - SCKA × 2.0 - PRSA × 0.12) / 2
   */
 
   if (
@@ -3561,10 +3561,10 @@ function calculatePlayerPoints(
 
     return (
       (
-        snaps * 0.5 +
-        rushingYards * 0.08 -
-        sacksAllowed * 1.5 -
-        pressuresAllowed * 0.10
+        snaps * 0.6 +
+        rushingYards * 0.03 -
+        sacksAllowed * 2.0 -
+        pressuresAllowed * 0.12
       ) / 2
     );
 
