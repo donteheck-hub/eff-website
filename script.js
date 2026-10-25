@@ -3341,14 +3341,16 @@ function calculatePlayerPoints(
 
 
   /*
-    WR:
+    WR / TE:
     (Receiving Yards × 0.10 + TDs × 5 + Rec × 0.5 + YAC × 0.05) / 2
   */
 
   if (
     position.includes("wide receiver") ||
     position.includes("receiver") ||
-    position === "wr"
+    position.includes("tight end") ||
+    position === "wr" ||
+    position === "te"
   ) {
 
     const receivingYards =
@@ -3389,6 +3391,66 @@ function calculatePlayerPoints(
         tds * 5 +
         receptions * 0.5 +
         yac * 0.05
+      ) / 2
+    );
+
+  }
+
+
+  /*
+    CENTER:
+    (SNAP × 0.5 + RYDS × 0.08 - SCKA × 1.5 - PRSA × 0.10) / 2
+  */
+
+  if (
+    position.includes("center") ||
+    position === "c"
+  ) {
+
+    const snaps =
+      statNumber(
+        row,
+        ["SNAP", "Snaps", "Offensive Snaps"]
+      );
+
+    const rushingYards =
+      statNumber(
+        row,
+        [
+          "RYDS",
+          "Rushing Yards",
+          "Rush Yards",
+          "RUSH YDS"
+        ]
+      );
+
+    const sacksAllowed =
+      statNumber(
+        row,
+        [
+          "SCKA",
+          "Sacks Allowed",
+          "Sack Allowed"
+        ]
+      );
+
+    const pressuresAllowed =
+      statNumber(
+        row,
+        [
+          "PRSA",
+          "Pressures Allowed",
+          "Pressure Allowed",
+          "PRS Allowed"
+        ]
+      );
+
+    return (
+      (
+        snaps * 0.5 +
+        rushingYards * 0.08 -
+        sacksAllowed * 1.5 -
+        pressuresAllowed * 0.10
       ) / 2
     );
 
