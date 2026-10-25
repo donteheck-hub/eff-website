@@ -6423,13 +6423,34 @@ async function openGameMatchup(awayTeam, homeTeam, week, returnPage = "schedule"
         </div>
       </section>
 
-      <div class="h2h-metric-grid">
-        <div class="h2h-metric"><span>${esc(awayTeam)} POWER</span><strong>${awayPower ? `#${awayPower}` : "—"}</strong></div>
-        <div class="h2h-metric"><span>${esc(homeTeam)} POWER</span><strong>${homePower ? `#${homePower}` : "—"}</strong></div>
-        <div class="h2h-metric"><span>SEASON RECORD</span><strong>${esc(awayRates.record)} / ${esc(homeRates.record)}</strong></div>
-        <div class="h2h-metric"><span>POINT DIFFERENTIAL</span><strong>${awayRates.pd > 0 ? "+" : ""}${awayRates.pd} / ${homeRates.pd > 0 ? "+" : ""}${homeRates.pd}</strong></div>
-        <div class="h2h-metric"><span>STREAK</span><strong>${esc(awayRates.streak)} / ${esc(homeRates.streak)}</strong></div>
-        <div class="h2h-metric"><span>SEASON H2H</span><strong>${awayWins}-${homeWins}</strong></div>
+      <div class="h2h-team-summary-grid">
+        <section class="h2h-team-summary away">
+          <div class="h2h-team-summary-head">
+            ${awayLogo ? `<img src="${esc(awayLogo)}" alt="${esc(awayTeam)}">` : ""}
+            <div class="h2h-team-summary-title"><span>AWAY TEAM</span><h3>${esc(awayTeam)}</h3></div>
+          </div>
+          <div class="h2h-team-summary-stats">
+            <div class="h2h-team-summary-stat"><span>POWER</span><strong>${awayPower ? `#${awayPower}` : "—"}</strong></div>
+            <div class="h2h-team-summary-stat"><span>RECORD</span><strong>${esc(awayRates.record)}</strong></div>
+            <div class="h2h-team-summary-stat"><span>POINT DIFF</span><strong>${awayRates.pd > 0 ? "+" : ""}${awayRates.pd}</strong></div>
+            <div class="h2h-team-summary-stat"><span>STREAK</span><strong>${esc(awayRates.streak)}</strong></div>
+            <div class="h2h-team-summary-stat"><span>SEASON H2H</span><strong>${awayWins}-${homeWins}</strong></div>
+          </div>
+        </section>
+
+        <section class="h2h-team-summary home">
+          <div class="h2h-team-summary-head">
+            <div class="h2h-team-summary-title"><span>HOME TEAM</span><h3>${esc(homeTeam)}</h3></div>
+            ${homeLogo ? `<img src="${esc(homeLogo)}" alt="${esc(homeTeam)}">` : ""}
+          </div>
+          <div class="h2h-team-summary-stats">
+            <div class="h2h-team-summary-stat"><span>POWER</span><strong>${homePower ? `#${homePower}` : "—"}</strong></div>
+            <div class="h2h-team-summary-stat"><span>RECORD</span><strong>${esc(homeRates.record)}</strong></div>
+            <div class="h2h-team-summary-stat"><span>POINT DIFF</span><strong>${homeRates.pd > 0 ? "+" : ""}${homeRates.pd}</strong></div>
+            <div class="h2h-team-summary-stat"><span>STREAK</span><strong>${esc(homeRates.streak)}</strong></div>
+            <div class="h2h-team-summary-stat"><span>SEASON H2H</span><strong>${homeWins}-${awayWins}</strong></div>
+          </div>
+        </section>
       </div>
 
       <div class="h2h-two-col">
