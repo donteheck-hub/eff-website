@@ -7372,6 +7372,100 @@ function legacyAccoladeFromRole(role){
   return null;
 }
 
+
+
+function legacySeasonNumbersFromRoleNames(item){
+  const values=[item?.roleName,...(Array.isArray(item?.roleNames)?item.roleNames:[])].filter(Boolean);
+  const seasons=[];
+  for(const value of values){
+    const matches=String(value).matchAll(/(?:^|\s)S(?:eason\s*)?(\d+)\b/gi);
+    for(const match of matches){
+      const season=Number(match[1]);
+      if(Number.isFinite(season)&&season>0&&!seasons.includes(season)) seasons.push(season);
+    }
+  }
+  return seasons.sort((a,b)=>a-b);
+}
+
+function legacyHistoryPanelSeason(panel){
+  const attr=Number(panel?.dataset?.seasonDetail||0);
+  if(attr) return attr;
+  const text=panel?.querySelector('.history-detail-header h2')?.textContent||'';
+  const match=text.match(/SEASON\s+(\d+)/i);
+  return match?Number(match[1]):0;
+}
+
+function legacyHistoryPlayerMatches(node,playerName){
+  return normalizePlayerName(node?.textContent||'')===normalizePlayerName(playerName);
+}
+
+function legacyHistorySeasonsForAccolade(playerName,item){
+  const direct=legacySeasonNumbersFromRoleNames(item);
+  if(direct.length) return direct;
+
+  const panels=[...document.querySelectorAll('.history-season-detail[data-season-detail]')];
+  const found=[];
+  const add=panel=>{
+    const season=legacyHistoryPanelSeason(panel);
+    if(season&&!found.includes(season)) found.push(season);
+  };
+
+  for(const panel of panels){
+    if(item.key==='firstTeam'||item.key==='secondTeam'||item.key==='thirdTeam'){
+      const wanted=item.key==='firstTeam'?'1ST TEAM':item.key==='secondTeam'?'2ND TEAM':'3RD TEAM';
+      for(const card of panel.querySelectorAll('.history-list-card')){
+        const label=(card.querySelector('.mini-label')?.textContent||'').trim().toUpperCase();
+        if(label!==wanted) continue;
+        if([...card.querySelectorAll('strong')].some(node=>legacyHistoryPlayerMatches(node,playerName))) add(panel);
+      }
+    }else if(item.key==='poty'||item.key==='mvp'){
+      const wanted=String(item.label||'').trim().toUpperCase();
+      for(const row of panel.querySelectorAll('.award-list li')){
+        const code=(row.querySelector('span')?.textContent||'').trim().toUpperCase();
+        const name=row.querySelector('strong');
+        if(!legacyHistoryPlayerMatches(name,playerName)) continue;
+        if(item.key==='mvp'){
+          if(/MVP/.test(code)) add(panel);
+        }else if(code===wanted || (/OTY$/.test(code)&&/OTY$/.test(wanted)&&code===wanted)) add(panel);
+      }
+    }else if(item.key==='standout'){
+      const position=String(item.label||'').trim().split(/\s+/)[0].toUpperCase();
+      for(const section of panel.querySelectorAll('.season-history-block')){
+        const heading=(section.querySelector('.season-history-block-header h3')?.textContent||'').toLowerCase();
+        if(!heading.includes('standout')) continue;
+        for(const row of section.querySelectorAll('.award-list li')){
+          const pos=(row.querySelector('span')?.textContent||'').trim().toUpperCase();
+          if(pos===position && legacyHistoryPlayerMatches(row.querySelector('strong'),playerName)) add(panel);
+        }
+      }
+    }
+  }
+
+  return found.sort((a,b)=>a-b);
+}
+
+function legacyHistoricalHonorDetails(playerName,item){
+  const seasons=legacyHistorySeasonsForAccolade(playerName,item);
+  return seasons.map(season=>{
+    const team=getHistoricalTeamName(playerName,season);
+    return {season,team};
+  });
+}
+
+function legacyCareerHonorDisplayLabel(item){
+  if(item?.key==='superBowlRing') return 'Super Bowl Champion';
+  if(item?.key==='conferenceChampion') return 'Conference Champion';
+  if(item?.key==='divisionChampion') return 'Division Champion';
+  if(item?.key==='eventRing') return String(item.label||'Event Champion').replace(/\s*S\d+\b/ig,'').trim()||'Event Champion';
+  return item?.label||'';
+}
+
+function legacyCareerHonorHistoryHtml(playerName,item){
+  const details=legacyHistoricalHonorDetails(playerName,item);
+  if(!details.length) return '';
+  return `<div class="legacy-trophy-history">${details.map(detail=>`<small>${esc(detail.team?`${detail.team} · Season ${detail.season}`:`Season ${detail.season}`)}</small>`).join('')}</div>`;
+}
+
 function scoreLegacyRoles(roles){
   const normal=[];
   const badgeBest=new Map();
@@ -7518,7 +7612,7 @@ async function openLegacyPlayerShowcase(playerName){
   }
   if(trophiesEl){
     const honors=player.accolades.filter(item=>!item.isBadge);
-    trophiesEl.innerHTML=honors.length?honors.map(item=>`<div class="legacy-trophy-card"><div class="legacy-trophy-icon">${esc(item.emoji)}</div><div><span>${item.count>1?`${item.count}× · `:""}${Number(item.xp).toLocaleString()} XP</span><strong>${esc(item.label)}</strong></div></div>`).join(''):'<div class="legacy-trophy-empty">No trophy-room accolades found yet.</div>';
+    trophiesEl.innerHTML=honors.length?honors.map(item=>`<div class="legacy-trophy-card"><div class="legacy-trophy-icon">${esc(item.emoji)}</div><div><span>${item.count>1?`${item.count}× · `:""}${Number(item.xp).toLocaleString()} XP</span><strong>${esc(legacyCareerHonorDisplayLabel(item))}</strong>${legacyCareerHonorHistoryHtml(player.name,item)}</div></div>`).join(''):'<div class="legacy-trophy-empty">No trophy-room accolades found yet.</div>';
   }
   if(statContextEl){
     const maxPts=Math.max(1,...positionEntries.map(([,pts])=>Number(pts)||0));
