@@ -207,6 +207,123 @@
       .home-award-row { grid-template-columns: 30px minmax(0,1fr) auto; }
       .home-award-position { display: none; }
     }
+
+
+    /* POWER RANKINGS */
+    .power-rankings-container { width:min(1180px, calc(100% - 40px)); margin:0 auto; }
+    .power-rankings-key { display:flex; flex-wrap:wrap; gap:9px; margin:0 0 18px; padding:14px 16px; border:1px solid rgba(124,201,255,.16); border-radius:14px; background:rgba(4,14,29,.72); }
+    .power-rankings-key span { padding:7px 10px; border-radius:999px; background:rgba(44,150,255,.09); border:1px solid rgba(124,201,255,.13); color:#b7d8ef; font-size:.76rem; font-weight:800; }
+    .power-rankings-key b { color:#f3fbff; }
+    .power-rankings-key .power-rankings-note { margin-left:auto; background:transparent; border-style:dashed; color:#7f9db7; }
+    .power-rankings-list { display:grid; gap:10px; }
+    .power-ranking-row { display:grid; grid-template-columns:56px 48px minmax(220px,1.5fr) 100px 120px 110px minmax(230px,1fr); align-items:center; gap:12px; min-height:78px; padding:12px 16px; border-radius:16px; border:1px solid rgba(124,201,255,.13); background:linear-gradient(135deg,rgba(9,25,47,.88),rgba(5,14,28,.94)); box-shadow:0 12px 28px rgba(0,0,0,.18); }
+    .power-ranking-row.top-three { border-color:rgba(111,194,255,.34); background:linear-gradient(135deg,rgba(20,54,88,.9),rgba(6,18,34,.96)); }
+    .power-rank { font-size:1.35rem; font-weight:950; text-align:center; color:#f4fbff; }
+    .power-rank-movement { display:flex; justify-content:center; align-items:center; width:34px; height:28px; border-radius:9px; background:rgba(255,255,255,.05); color:#7897b1; font-weight:950; font-size:.78rem; }
+    .power-team { display:flex; align-items:center; gap:12px; min-width:0; }
+    .power-team img,.power-team-logo-empty { width:44px; height:44px; flex:0 0 44px; object-fit:contain; border-radius:10px; }
+    .power-team-logo-empty { display:grid; place-items:center; background:rgba(255,255,255,.05); color:#6e8da7; }
+    .power-team-copy { min-width:0; }
+    .power-team-copy strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#f5fbff; }
+    .power-team-copy span { display:block; margin-top:4px; color:#7898b3; font-size:.75rem; font-weight:800; }
+    .power-record,.power-score { font-weight:950; color:#e8f7ff; text-align:center; }
+    .power-score { color:#82ceff; }
+    .power-form { display:flex; justify-content:center; gap:4px; flex-wrap:wrap; }
+    .power-form span { width:24px; height:24px; display:grid; place-items:center; border-radius:7px; font-size:.68rem; font-weight:950; }
+    .power-form .w { background:rgba(32,176,108,.18); color:#6ef0ad; border:1px solid rgba(60,214,136,.22); }
+    .power-form .l { background:rgba(230,67,85,.15); color:#ff8895; border:1px solid rgba(255,96,111,.18); }
+    .power-form .t { background:rgba(255,194,72,.13); color:#ffd179; border:1px solid rgba(255,203,97,.18); }
+    .power-form .none { color:#607f98; background:rgba(255,255,255,.04); }
+    .power-pd { text-align:center; font-weight:900; color:#abc8dd; }
+    .power-reason { color:#9eb7cb; font-size:.8rem; line-height:1.35; }
+
+    /* MOBILE-FIRST CLEANUP */
+    @media (max-width: 900px) {
+      body { overflow-x:hidden; }
+      .topbar { position:sticky; top:0; z-index:1000; padding:10px 12px; gap:10px; align-items:center; flex-wrap:wrap; }
+      .brand { min-width:0; flex:1 1 auto; }
+      .brand-logo { width:38px!important; height:38px!important; }
+      .brand-copy strong { font-size:.83rem; white-space:nowrap; }
+      .brand-copy span { font-size:.62rem; }
+      .discord-button { padding:8px 10px!important; font-size:.72rem!important; white-space:nowrap; }
+      .desktop-nav { order:3; width:100%; display:flex!important; gap:7px; overflow-x:auto; padding:3px 1px 5px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+      .desktop-nav::-webkit-scrollbar { display:none; }
+      .nav-link { flex:0 0 auto; min-height:38px; padding:8px 12px!important; font-size:.75rem!important; border-radius:10px!important; }
+      main { width:100%; overflow:hidden; }
+      .page-container,.content-section,.playoffs-container,.legacy-shell,.power-rankings-container { width:min(100% - 24px, 1400px)!important; }
+      .hero { margin-left:12px!important; margin-right:12px!important; padding:28px 18px!important; min-height:auto!important; }
+      .hero-logo { width:min(210px,72%)!important; }
+      .hero h1 { font-size:clamp(1.9rem,9vw,3.1rem)!important; line-height:.95!important; }
+      .hero p { font-size:.9rem!important; }
+      .hero-actions { display:grid!important; grid-template-columns:1fr 1fr; width:100%; gap:9px!important; }
+      .hero-actions button { width:100%; min-width:0; }
+      .section-heading,.page-title,.playoffs-hero-row { align-items:flex-start!important; gap:10px!important; flex-direction:column!important; }
+      .section-heading h2,.page-title h2 { font-size:clamp(1.6rem,7vw,2.2rem)!important; }
+      .conference-grid,.team-grid,.standings-grid,.team-detail-grid,.team-detail-feature-grid { grid-template-columns:1fr!important; }
+      .table-wrap { overflow-x:auto!important; -webkit-overflow-scrolling:touch; border-radius:12px; }
+      .table-wrap table { min-width:760px; }
+      .standings-card { overflow:hidden; }
+      .standings-header { padding:14px!important; }
+      .team-card { min-height:auto!important; }
+      .team-detail-hero { grid-template-columns:82px minmax(0,1fr)!important; gap:14px!important; padding:16px!important; }
+      .team-detail-hero img { width:82px!important; height:82px!important; }
+      .team-detail-hero h2 { font-size:1.8rem!important; }
+      .team-detail-snapshot { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+      .team-snapshot-stat { min-width:0; padding:12px!important; }
+      .team-detail-grid,.team-detail-feature-grid { gap:12px!important; }
+      .team-detail-card { padding:15px!important; }
+      .team-season-game { grid-template-columns:60px minmax(0,1fr) auto!important; gap:8px!important; }
+      .website-stats-table { min-width:760px; }
+      .stats-table-wrap { overflow-x:auto!important; -webkit-overflow-scrolling:touch; }
+      .stats-position-tabs { display:flex!important; overflow-x:auto; flex-wrap:nowrap!important; padding-bottom:6px; scrollbar-width:none; }
+      .stats-position-tabs::-webkit-scrollbar { display:none; }
+      .stats-position-tabs button { flex:0 0 auto; }
+      .stats-tools-row,.stats-mode-controls { width:100%; }
+      .player-search { width:100%; }
+      .player-search input { width:100%; box-sizing:border-box; }
+      .schedule-grid { grid-template-columns:1fr!important; }
+      .schedule-card { min-width:0!important; }
+      .playoff-key { overflow-x:auto; flex-wrap:nowrap!important; justify-content:flex-start!important; }
+      .playoff-key span { flex:0 0 auto; }
+      .live-playoff-bracket { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+      .history-v2-hero,.history-list-grid,.history-v2-stats { grid-template-columns:1fr!important; }
+      .history-v2-season-card { grid-template-columns:60px minmax(0,1fr)!important; }
+      .history-v2-season-meta,.history-v2-open { grid-column:2!important; }
+      .rulebook-grid { grid-template-columns:1fr!important; }
+      .home-award-watch { padding:16px!important; }
+      .home-award-watch-top { align-items:stretch!important; }
+      .home-award-select { width:100%!important; min-width:0!important; }
+      .home-award-row { grid-template-columns:30px minmax(0,1fr) auto!important; gap:8px!important; }
+      .home-award-position { display:none!important; }
+      .home-activity-item { padding:12px!important; }
+      .power-rankings-key .power-rankings-note { margin-left:0; width:100%; border-radius:10px; }
+      .power-ranking-row { grid-template-columns:36px 32px minmax(0,1fr) auto; gap:8px; padding:11px 10px; }
+      .power-team img,.power-team-logo-empty { width:38px; height:38px; flex-basis:38px; }
+      .power-record { text-align:right; }
+      .power-score,.power-form,.power-pd,.power-reason { grid-column:3 / -1; text-align:left; justify-content:flex-start; }
+      .power-score::before { content:"Power "; color:#6f8fa9; font-weight:800; }
+      .power-pd::before { content:"PD "; color:#6f8fa9; }
+      .power-reason { margin-top:2px; }
+    }
+    @media (max-width: 560px) {
+      .topbar { padding:8px 10px; }
+      .brand-copy strong { max-width:170px; overflow:hidden; text-overflow:ellipsis; }
+      .discord-button { display:none!important; }
+      .page-container,.content-section,.playoffs-container,.legacy-shell,.power-rankings-container { width:min(100% - 16px, 1400px)!important; }
+      .hero { margin-left:8px!important; margin-right:8px!important; border-radius:16px!important; }
+      .hero-actions { grid-template-columns:1fr; }
+      .team-detail-snapshot { grid-template-columns:1fr 1fr!important; gap:8px!important; }
+      .team-snapshot-stat strong { font-size:1rem!important; }
+      .home-award-row { grid-template-columns:26px minmax(0,1fr) auto!important; }
+      .home-award-player img,.home-award-logo-empty { width:26px!important; height:26px!important; flex-basis:26px!important; }
+      .power-ranking-row { grid-template-columns:30px 28px minmax(0,1fr) auto; }
+      .power-rank { font-size:1.05rem; }
+      .power-rank-movement { width:28px; height:24px; }
+      .power-team-copy span { display:none; }
+      .power-score,.power-form,.power-pd,.power-reason { grid-column:3 / -1; }
+      .power-reason { font-size:.74rem; }
+    }
+
 </style>
 
   <style id="season4-stats-theme-fix">
@@ -437,6 +554,7 @@
     <nav class="desktop-nav">
       <button class="nav-link active" data-page="home">Home</button>
       <button class="nav-link" data-page="standings">Standings</button>
+      <button class="nav-link" data-page="power-rankings">Power</button>
       <button class="nav-link" data-page="playoffs">Playoffs</button>
       <button class="nav-link" data-page="teams">Teams</button>
       <button class="nav-link" data-page="stats">Stats</button>
@@ -628,6 +746,29 @@
               </table>
             </div>
           </section>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- POWER RANKINGS -->
+    <section class="page power-rankings-page" id="power-rankings" hidden>
+      <div class="page-container power-rankings-container">
+        <div class="page-title power-rankings-title">
+          <span>EFF MEDIA RANKINGS</span>
+          <h2>Power Rankings</h2>
+          <p>Formula-driven weekly rankings using record, point differential, and recent results. These are separate from the official standings.</p>
+        </div>
+
+        <div class="power-rankings-key">
+          <span><b>Record</b> 55%</span>
+          <span><b>Point Differential</b> 25%</span>
+          <span><b>Recent Form</b> 20%</span>
+          <span class="power-rankings-note">Movement begins once a previous ranking snapshot exists.</span>
+        </div>
+
+        <div class="power-rankings-list" id="powerRankingsList">
+          <div class="loading-card">Loading power rankings...</div>
         </div>
       </div>
     </section>

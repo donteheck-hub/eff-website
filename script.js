@@ -7964,6 +7964,119 @@ const homeAwardPosition=document.getElementById("homeAwardPosition");
 if(homeAwardPosition){homeAwardPosition.addEventListener("change",()=>renderHomeAwardWatch(homeAwardPosition.value));}
 async function loadHomeDashboard(){await Promise.all([renderHomeAwardWatch(homeAwardPosition?.value||"mvp"),renderHomeStandingsPreview(),renderHomeActivityFeed()]);}
 
+
+/*
+==================================================
+POWER RANKINGS
+==================================================
+*/
+
+function getCompletedTeamGames(schedule, teamName) {
+  return (Array.isArray(schedule) ? schedule : [])
+    .filter(game =>
+      teamNamesMatch(game["Away Team"], teamName) ||
+      teamNamesMatch(game["Home Team"], teamName)
+    )
+    .map(game => {
+      const awayText = String(game["Away Final Score"] ?? "").trim();
+      const homeText = String(game["Home Final Score"] ?? "").trim();
+      if (awayText === "" || homeText === "") return null;
+      const away = Number(awayText);
+      const home = Number(homeText);
+      if (!Number.isFinite(away) || !Number.isFinite(home)) return null;
+      const isAway = teamNamesMatch(game["Away Team"], teamName);
+      const teamScore = isAway ? away : home;
+      const oppScore = isAway ? home : away;
+      return {
+        week: getWeekNumber(game.Week),
+        result: teamScore > oppScore ? "W" : teamScore < oppScore ? "L" : "T",
+        margin: teamScore - oppScore
+      };
+    })
+    .filter(Boolean)
+    .sort((a,b) => a.week - b.week);
+}
+
+function calculatePowerRanking(team, schedule) {
+  const rec = parseDivisionRecord(team?.Rec);
+  const completed = getCompletedTeamGames(schedule, team?.Team);
+  const recent = completed.slice(-3);
+  const recentPoints = recent.reduce((total, game) => total + (game.result === "W" ? 1 : game.result === "T" ? .5 : 0), 0);
+  const recentPct = recent.length ? recentPoints / recent.length : .5;
+  const games = Math.max(1, rec.wins + rec.losses);
+  const pd = Number(team?.PD || 0);
+  const pdPerGame = pd / games;
+
+  // 55% record, 25% point differential, 20% recent form.
+  // PD component is capped so one blowout cannot dominate the rankings.
+  const recordScore = rec.pct * 55;
+  const pdScore = Math.max(0, Math.min(25, 12.5 + (pdPerGame * .75)));
+  const formScore = recentPct * 20;
+  const score = recordScore + pdScore + formScore;
+
+  let reason = "Early-season profile";
+  if (rec.pct >= .75 && pd > 0) reason = "Strong record with positive scoring margin";
+  else if (recentPct >= .67 && pd > 0) reason = "Trending up with strong recent form";
+  else if (pd >= 15) reason = "Point differential is carrying the profile";
+  else if (rec.pct >= .5) reason = "Solid results with room to climb";
+  else if (recentPct >= .67) reason = "Recent results are improving the outlook";
+  else if (pd < 0) reason = "Needs stronger results and point differential";
+
+  return {
+    ...team,
+    powerScore: score,
+    recentForm: recent.map(game => game.result),
+    reason
+  };
+}
+
+function renderPowerRankings(container, teams) {
+  if (!container) return;
+  if (!teams.length) {
+    container.innerHTML = '<div class="loading-card">No teams found.</div>';
+    return;
+  }
+
+  container.innerHTML = teams.map((team, index) => {
+    const form = team.recentForm.length
+      ? team.recentForm.map(result => `<span class="${result.toLowerCase()}">${result}</span>`).join("")
+      : '<span class="none">—</span>';
+    const logo = team.Logo || "";
+    const division = getDivisionForTeam(team.Team)?.name || team.Conference || "";
+    return `
+      <article class="power-ranking-row ${index < 3 ? "top-three" : ""}">
+        <div class="power-rank">${index + 1}</div>
+        <div class="power-rank-movement" title="Movement begins after the next saved ranking snapshot">—</div>
+        <div class="power-team">
+          ${logo ? `<img src="${esc(getDisplayImageUrl(logo))}" alt="${esc(team.Team || "")}" loading="lazy">` : '<span class="power-team-logo-empty">—</span>'}
+          <div class="power-team-copy"><strong>${esc(team.Team || "")}</strong><span>${esc(division)}</span></div>
+        </div>
+        <div class="power-record">${esc(team.Rec || "0-0")}</div>
+        <div class="power-form">${form}</div>
+        <div class="power-pd">${Number(team.PD || 0) > 0 ? "+" : ""}${Number(team.PD || 0)}</div>
+        <div><div class="power-score">${team.powerScore.toFixed(1)}</div><div class="power-reason">${esc(team.reason)}</div></div>
+      </article>`;
+  }).join("");
+}
+
+async function loadPowerRankings() {
+  const container = document.getElementById("powerRankingsList");
+  if (!container) return;
+  try {
+    const data = await getLeagueData();
+    const standings = buildSeason4Standings(data?.[STANDINGS_SHEET]);
+    const schedule = Array.isArray(data?.[SCHEDULE_SHEET]) ? data[SCHEDULE_SHEET] : [];
+    const ranked = (Array.isArray(standings) ? standings : [])
+      .filter(team => isActiveFranchise(team.Team))
+      .map(team => calculatePowerRanking(team, schedule))
+      .sort((a,b) => b.powerScore - a.powerScore || Number(b.PD || 0) - Number(a.PD || 0) || String(a.Team || "").localeCompare(String(b.Team || "")));
+    renderPowerRankings(container, ranked);
+  } catch (error) {
+    console.error("Power rankings error:", error);
+    container.innerHTML = '<div class="loading-card">Unable to load power rankings.</div>';
+  }
+}
+
 /*
 ==================================================
 START LIVE DATA
@@ -7977,6 +8090,7 @@ async function initializeWebsiteData() {
 
   await Promise.allSettled([
     loadStandings(),
+    loadPowerRankings(),
     loadPlayoffs(),
     loadTeams(),
     loadStats(),
