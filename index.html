@@ -337,8 +337,11 @@
 
     /* Legacy career achievements */
     .legacy-achievements-card{margin-top:20px;padding:22px;border:1px solid rgba(124,201,255,.16);border-radius:18px;background:rgba(4,14,29,.82)}
-    .legacy-achievement-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;padding:14px 16px;border:1px solid rgba(124,201,255,.12);border-radius:14px;background:rgba(10,29,52,.72)}
-    .legacy-achievement-summary strong{font-size:22px;color:#f2fbff}.legacy-achievement-summary span{color:#8fb0ca;font-size:12px;font-weight:850;letter-spacing:.8px;text-transform:uppercase}
+    .legacy-achievement-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px;padding:12px;border:1px solid rgba(124,201,255,.12);border-radius:14px;background:rgba(10,29,52,.72)}
+    .legacy-achievement-summary>div{min-width:0;padding:13px 15px;border:1px solid rgba(124,201,255,.08);border-radius:11px;background:rgba(5,18,34,.48)}
+    .legacy-achievement-summary>div:last-child{text-align:right}
+    .legacy-achievement-summary span{display:block;margin-bottom:5px;color:#8fb0ca;font-size:10px;font-weight:900;letter-spacing:1px;line-height:1.2;text-transform:uppercase}
+    .legacy-achievement-summary strong{display:block;color:#f2fbff;font-size:19px;font-weight:900;line-height:1.2;letter-spacing:-.2px}
     .legacy-achievement-groups{display:grid;gap:18px}.legacy-achievement-group[hidden]{display:none!important}
     .legacy-achievement-group-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.07)}
     .legacy-achievement-group-head strong{font-size:16px}.legacy-achievement-group-head span{color:#78caff;font-size:11px;font-weight:950;letter-spacing:1.1px;text-transform:uppercase}
@@ -353,7 +356,7 @@
     .legacy-achievement-bar{height:7px;margin-top:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}.legacy-achievement-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#3b9fff,#98e0ff)}
     .legacy-achievement-next{margin-top:8px;color:#7797b2;font-size:10px;line-height:1.45}.legacy-achievement-next strong{color:#a9dcff}
     .legacy-achievement-empty{padding:20px;text-align:center;border:1px dashed rgba(124,201,255,.2);border-radius:13px;color:#89a7bf}
-    @media(max-width:760px){.legacy-achievement-grid{grid-template-columns:1fr}.legacy-achievement-summary{align-items:flex-start;flex-direction:column}}
+    @media(max-width:760px){.legacy-achievement-grid{grid-template-columns:1fr}.legacy-achievement-summary{grid-template-columns:1fr}.legacy-achievement-summary>div:last-child{text-align:left}}
 
     /* Legacy page isolation safeguard */
     main > .page { display: none !important; }
