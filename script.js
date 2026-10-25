@@ -3132,7 +3132,7 @@ function renderTeamSeasonSchedule(
 
 
           return `
-            <div class="team-schedule-row">
+            <div class="team-schedule-row" data-game-away="${esc(game["Away Team"] || "")}" data-game-home="${esc(game["Home Team"] || "")}" data-game-week="${esc(game.Week || "")}">
 
               <div class="team-schedule-week">
                 ${esc(game.Week || "")}
@@ -6138,7 +6138,7 @@ function createGameCard(game) {
 
 
   return `
-    <article class="game-card">
+    <article class="game-card" data-game-away="${esc(awayTeam)}" data-game-home="${esc(homeTeam)}" data-game-week="${esc(week)}">
 
       <div class="game-topline">
 
@@ -6225,6 +6225,196 @@ function createGameCard(game) {
 
 }
 
+
+
+/*
+==================================================
+GAME MATCHUP / HEAD TO HEAD
+==================================================
+*/
+
+let matchupReturnPage = "schedule";
+
+function getTeamPowerPosition(standings, schedule, teamName) {
+  const ranked = (Array.isArray(standings) ? standings : [])
+    .filter(team => isActiveFranchise(team.Team))
+    .map(team => calculatePowerRanking(team, schedule))
+    .sort((a,b) => b.powerScore - a.powerScore || Number(b.PD || 0) - Number(a.PD || 0));
+  const index = ranked.findIndex(team => teamNamesMatch(team.Team, teamName));
+  return index >= 0 ? index + 1 : null;
+}
+
+function getRecentTeamForm(schedule, teamName, count = 5) {
+  const games = (Array.isArray(schedule) ? schedule : [])
+    .filter(game => teamNamesMatch(game["Away Team"], teamName) || teamNamesMatch(game["Home Team"], teamName))
+    .map(game => ({ game, result: getTeamGameResult(game, teamName) }))
+    .filter(item => item.result)
+    .sort((a,b) => getWeekNumber(a.game.Week) - getWeekNumber(b.game.Week));
+  return games.slice(-count).map(item => item.result.result);
+}
+
+function renderFormBadges(form) {
+  if (!form.length) return '<span class="h2h-form-badge t">—</span>';
+  return form.map(result => `<span class="h2h-form-badge ${result.toLowerCase()}">${result}</span>`).join("");
+}
+
+function getSeasonMeetingRows(schedule, awayTeam, homeTeam, selectedWeek) {
+  return (Array.isArray(schedule) ? schedule : [])
+    .filter(game => {
+      const samePair =
+        (teamNamesMatch(game["Away Team"], awayTeam) && teamNamesMatch(game["Home Team"], homeTeam)) ||
+        (teamNamesMatch(game["Away Team"], homeTeam) && teamNamesMatch(game["Home Team"], awayTeam));
+      if (!samePair) return false;
+      const a = String(game["Away Final Score"] ?? "").trim();
+      const h = String(game["Home Final Score"] ?? "").trim();
+      return a !== "" && h !== "" && Number.isFinite(Number(a)) && Number.isFinite(Number(h)) && getWeekNumber(game.Week) <= getWeekNumber(selectedWeek);
+    })
+    .sort((a,b) => getWeekNumber(b.Week) - getWeekNumber(a.Week));
+}
+
+function getTeamSeasonRates(team) {
+  const rec = parseDivisionRecord(team?.Rec);
+  const games = Math.max(1, rec.wins + rec.losses);
+  const pf = Number(team?.PF || 0);
+  const pa = Number(team?.PA || 0);
+  return {
+    record: team?.Rec || "0-0",
+    pfPerGame: pf / games,
+    paPerGame: pa / games,
+    pd: Number(team?.PD || 0),
+    streak: team?.Streak || "—",
+    conference: team?.Conference || ""
+  };
+}
+
+function renderMatchupLeaders(title, teamName, leaders) {
+  return `
+    <section class="h2h-card">
+      <h3>${esc(title)} — ${esc(teamName)}</h3>
+      ${leaders.length ? leaders.slice(0,3).map((leader,index) => `
+        <div class="h2h-leader-row">
+          <span class="rank">#${index + 1}</span>
+          <div><strong>${esc(leader.name)}</strong><div style="font-size:11px;color:#8ca6bb">${esc(leader.positions.join("/"))}</div></div>
+          <div class="h2h-leader-meta"><strong>${formatPoints(leader.pts)}</strong><span>PTS</span></div>
+        </div>`).join("") : '<div class="loading-card">No player points recorded yet.</div>'}
+    </section>`;
+}
+
+async function openGameMatchup(awayTeam, homeTeam, week, returnPage = "schedule") {
+  matchupReturnPage = returnPage || "schedule";
+  showPage("matchup");
+  const shell = document.getElementById("matchupDetailShell");
+  if (!shell) return;
+  shell.innerHTML = '<div class="loading-card">Loading matchup...</div>';
+
+  try {
+    const data = await getLeagueData();
+    const standings = buildSeason4Standings(data?.[STANDINGS_SHEET]);
+    const schedule = Array.isArray(data?.[SCHEDULE_SHEET]) ? data[SCHEDULE_SHEET] : [];
+    const selected = schedule.find(game =>
+      teamNamesMatch(game["Away Team"], awayTeam) &&
+      teamNamesMatch(game["Home Team"], homeTeam) &&
+      String(game.Week || "").trim() === String(week || "").trim()
+    ) || schedule.find(game =>
+      teamNamesMatch(game["Away Team"], awayTeam) && teamNamesMatch(game["Home Team"], homeTeam)
+    );
+
+    if (!selected) throw new Error("Matchup not found in Schedule.");
+
+    const awayStanding = standings.find(team => teamNamesMatch(team.Team, awayTeam)) || {};
+    const homeStanding = standings.find(team => teamNamesMatch(team.Team, homeTeam)) || {};
+    const awayLogo = getTeamLogoByName(awayTeam, selected["Away Logo"] || awayStanding.Logo || "");
+    const homeLogo = getTeamLogoByName(homeTeam, selected["Home Logo"] || homeStanding.Logo || "");
+    const awayPower = getTeamPowerPosition(standings, schedule, awayTeam);
+    const homePower = getTeamPowerPosition(standings, schedule, homeTeam);
+    const awayForm = getRecentTeamForm(schedule, awayTeam, 5);
+    const homeForm = getRecentTeamForm(schedule, homeTeam, 5);
+    const awayRates = getTeamSeasonRates(awayStanding);
+    const homeRates = getTeamSeasonRates(homeStanding);
+    const meetings = getSeasonMeetingRows(schedule, awayTeam, homeTeam, selected.Week);
+    const awayWins = meetings.filter(game => {
+      const a=Number(game["Away Final Score"]), h=Number(game["Home Final Score"]);
+      const winner = a > h ? game["Away Team"] : h > a ? game["Home Team"] : "";
+      return teamNamesMatch(winner, awayTeam);
+    }).length;
+    const homeWins = meetings.filter(game => {
+      const a=Number(game["Away Final Score"]), h=Number(game["Home Final Score"]);
+      const winner = a > h ? game["Away Team"] : h > a ? game["Home Team"] : "";
+      return teamNamesMatch(winner, homeTeam);
+    }).length;
+
+    const [awayLeaders, homeLeaders] = await Promise.all([
+      buildTeamSeasonLeaders(awayTeam).catch(() => []),
+      buildTeamSeasonLeaders(homeTeam).catch(() => [])
+    ]);
+
+    const awayScoreText = String(selected["Away Final Score"] ?? "").trim();
+    const homeScoreText = String(selected["Home Final Score"] ?? "").trim();
+    const isFinal = awayScoreText !== "" && homeScoreText !== "";
+    const gameStatus = isFinal ? `Final · ${awayScoreText}-${homeScoreText}` : "Upcoming";
+
+    shell.innerHTML = `
+      <section class="h2h-hero">
+        <div class="h2h-hero-grid">
+          <div class="h2h-team away">
+            ${awayLogo ? `<img src="${esc(awayLogo)}" alt="${esc(awayTeam)}">` : ""}
+            <div class="h2h-team-copy"><span>AWAY</span><h2>${esc(awayTeam)}</h2><strong>${esc(awayRates.record)}</strong></div>
+          </div>
+          <div class="h2h-center"><div class="h2h-week">${esc(selected.Week || week || "MATCHUP")}</div><div class="h2h-vs">VS</div><div class="h2h-status">${esc(selected.Type || selected.Series || "EFF Game")}</div><div class="h2h-score-final">${esc(gameStatus)}</div></div>
+          <div class="h2h-team home">
+            <div class="h2h-team-copy"><span>HOME</span><h2>${esc(homeTeam)}</h2><strong>${esc(homeRates.record)}</strong></div>
+            ${homeLogo ? `<img src="${esc(homeLogo)}" alt="${esc(homeTeam)}">` : ""}
+          </div>
+        </div>
+      </section>
+
+      <div class="h2h-metric-grid">
+        <div class="h2h-metric"><span>${esc(awayTeam)} POWER</span><strong>${awayPower ? `#${awayPower}` : "—"}</strong></div>
+        <div class="h2h-metric"><span>${esc(homeTeam)} POWER</span><strong>${homePower ? `#${homePower}` : "—"}</strong></div>
+        <div class="h2h-metric"><span>SEASON RECORD</span><strong>${esc(awayRates.record)} / ${esc(homeRates.record)}</strong></div>
+        <div class="h2h-metric"><span>POINT DIFFERENTIAL</span><strong>${awayRates.pd > 0 ? "+" : ""}${awayRates.pd} / ${homeRates.pd > 0 ? "+" : ""}${homeRates.pd}</strong></div>
+        <div class="h2h-metric"><span>STREAK</span><strong>${esc(awayRates.streak)} / ${esc(homeRates.streak)}</strong></div>
+        <div class="h2h-metric"><span>SEASON H2H</span><strong>${awayWins}-${homeWins}</strong></div>
+      </div>
+
+      <div class="h2h-two-col">
+        <section class="h2h-card"><h3>RECENT FORM</h3><div class="h2h-form-team"><strong>${esc(awayTeam)}</strong><div class="h2h-form-badges">${renderFormBadges(awayForm)}</div></div><div class="h2h-form-team"><strong>${esc(homeTeam)}</strong><div class="h2h-form-badges">${renderFormBadges(homeForm)}</div></div></section>
+        <section class="h2h-card"><h3>TEAM COMPARISON — SEASON</h3>
+          <div class="h2h-compare-row"><b>${awayRates.pfPerGame.toFixed(1)}</b><span>Points For / Game</span><b>${homeRates.pfPerGame.toFixed(1)}</b></div>
+          <div class="h2h-compare-row"><b>${awayRates.paPerGame.toFixed(1)}</b><span>Points Against / Game</span><b>${homeRates.paPerGame.toFixed(1)}</b></div>
+          <div class="h2h-compare-row"><b>${awayRates.pd > 0 ? "+" : ""}${awayRates.pd}</b><span>Point Differential</span><b>${homeRates.pd > 0 ? "+" : ""}${homeRates.pd}</b></div>
+          <div class="h2h-compare-row"><b>${awayPower ? `#${awayPower}` : "—"}</b><span>Power Ranking</span><b>${homePower ? `#${homePower}` : "—"}</b></div>
+        </section>
+      </div>
+
+      <section class="h2h-card"><h3>PREVIOUS MEETINGS — CURRENT SEASON</h3>
+        ${meetings.length ? meetings.map(game => `<div class="h2h-meeting-row"><span>${esc(game.Week || "")}</span><strong>${esc(game["Away Team"])} ${esc(game["Away Final Score"])} - ${esc(game["Home Final Score"])} ${esc(game["Home Team"])}</strong><span>${esc(game.Type || "")}</span></div>`).join("") : '<div class="loading-card">No completed meetings recorded this season.</div>'}
+      </section>
+
+      <div class="h2h-leaders-grid">
+        ${renderMatchupLeaders("KEY PLAYERS", awayTeam, awayLeaders)}
+        ${renderMatchupLeaders("KEY PLAYERS", homeTeam, homeLeaders)}
+      </div>
+    `;
+  } catch (error) {
+    console.error("Matchup page error:", error);
+    shell.innerHTML = `<div class="loading-card">Unable to load this matchup.</div>`;
+  }
+}
+
+const matchupBackButton = document.getElementById("matchupBackButton");
+if (matchupBackButton) matchupBackButton.addEventListener("click", () => showPage(matchupReturnPage || "schedule"));
+
+document.addEventListener("click", event => {
+  const target = event.target.closest("[data-game-away][data-game-home]");
+  if (!target) return;
+  const away = target.dataset.gameAway || "";
+  const home = target.dataset.gameHome || "";
+  const week = target.dataset.gameWeek || "";
+  if (!away || !home) return;
+  const returnPage = target.closest("#teamDetailPanel") ? "teams" : "schedule";
+  openGameMatchup(away, home, week, returnPage);
+});
 
 
 /*
