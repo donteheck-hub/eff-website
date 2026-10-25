@@ -6287,16 +6287,71 @@ function getTeamSeasonRates(team) {
   };
 }
 
+async function buildMatchupKeyPlayers(teamName) {
+  const data = await getStatsSourceData("season", false);
+  await getDiscordPlayers().catch(() => []);
+
+  const positionMeta = {
+    quarterback: { label: "QB", side: "offense" },
+    runningback: { label: "RB", side: "offense" },
+    center: { label: "C", side: "offense" },
+    "tight end": { label: "TE", side: "offense" },
+    "wide receiver": { label: "WR", side: "offense" },
+    "defensive end": { label: "DE", side: "defense" },
+    "defensive back": { label: "DB", side: "defense" }
+  };
+
+  let offense = null;
+  let defense = null;
+
+  for (const sheetName of STAT_SHEETS) {
+    const meta = positionMeta[sheetName];
+    if (!meta) continue;
+
+    const rawRows = Array.isArray(data?.[sheetName]) ? data[sheetName] : [];
+    const normalizedRows = normalizeStatSheetRows(rawRows);
+    const rows = applyCalculatedPoints(sheetName, normalizedRows.rows);
+
+    for (const row of rows) {
+      const name = getStatsPlayerName(row);
+      if (!name) continue;
+
+      const discordPlayer = findDiscordPlayerByLooseName(name);
+      if (!discordPlayer || !teamNamesMatch(discordPlayer.team, teamName)) continue;
+
+      const pts = getStatsPointsValue(row);
+      if (!Number.isFinite(pts) || pts <= 0) continue;
+
+      const candidate = {
+        name,
+        pts,
+        position: meta.label,
+        side: meta.side
+      };
+
+      if (meta.side === "offense") {
+        if (!offense || candidate.pts > offense.pts || (candidate.pts === offense.pts && candidate.name.localeCompare(offense.name) < 0)) {
+          offense = candidate;
+        }
+      } else if (!defense || candidate.pts > defense.pts || (candidate.pts === defense.pts && candidate.name.localeCompare(defense.name) < 0)) {
+        defense = candidate;
+      }
+    }
+  }
+
+  return [offense, defense].filter(Boolean);
+}
+
 function renderMatchupLeaders(title, teamName, leaders) {
   return `
     <section class="h2h-card">
       <h3>${esc(title)} — ${esc(teamName)}</h3>
-      ${leaders.length ? leaders.slice(0,3).map((leader,index) => `
+      ${leaders.length ? leaders.map((leader,index) => `
         <div class="h2h-leader-row">
-          <span class="rank">#${index + 1}</span>
-          <div><strong>${esc(leader.name)}</strong><div style="font-size:11px;color:#8ca6bb">${esc(leader.positions.join("/"))}</div></div>
+          <span class="rank">${leader.side === "offense" ? "OFF" : "DEF"}</span>
+          <div><strong>${esc(leader.name)}</strong><div style="font-size:11px;color:#8ca6bb">${esc(leader.position)}</div></div>
           <div class="h2h-leader-meta"><strong>${formatPoints(leader.pts)}</strong><span>PTS</span></div>
-        </div>`).join("") : '<div class="loading-card">No player points recorded yet.</div>'}
+        </div>`).join("") : '<div class="loading-card">No offensive or defensive player points recorded yet.</div>'}
     </section>`;
 }
 
@@ -6344,8 +6399,8 @@ async function openGameMatchup(awayTeam, homeTeam, week, returnPage = "schedule"
     }).length;
 
     const [awayLeaders, homeLeaders] = await Promise.all([
-      buildTeamSeasonLeaders(awayTeam).catch(() => []),
-      buildTeamSeasonLeaders(homeTeam).catch(() => [])
+      buildMatchupKeyPlayers(awayTeam).catch(() => []),
+      buildMatchupKeyPlayers(homeTeam).catch(() => [])
     ]);
 
     const awayScoreText = String(selected["Away Final Score"] ?? "").trim();
