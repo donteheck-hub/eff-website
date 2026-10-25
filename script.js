@@ -6987,16 +6987,128 @@ const LEGACY_POSITION_LABELS = {
   "quarterback":"QB","runningback":"RB","center":"C","tight end":"TE",
   "wide receiver":"WR","defensive end":"DE","defensive back":"DB","kicker":"K"
 };
+
+const LEGACY_BADGES = [
+  {group:"QB",name:"Air Commander",emoji:"🚀",metric:"passYards",unit:"passing yards",tiers:[2500,6500,13000,25000]},
+  {group:"QB",name:"Touchdown Dealer",emoji:"🎯",metric:"passTD",unit:"passing TD",tiers:[30,80,170,350]},
+  {group:"QB",name:"Precision Passer",emoji:"🧭",type:"highPctVolume",pctMetric:"completionPct",volumeMetric:"passAttempts",pctUnit:"C%",volumeUnit:"ATT",tiers:[[55,150],[60,350],[65,700],[70,1250]]},
+  {group:"QB",name:"Clutch QB",emoji:"⏱️",metric:"clutchConversions",unit:"3rd/4th conversions",tiers:[25,65,140,275]},
+  {group:"RB",name:"Ground Force",emoji:"🌪️",metric:"rushYards",unit:"rushing yards",tiers:[1000,3000,7500,15000]},
+  {group:"RB",name:"End Zone Runner",emoji:"🏁",metric:"rushTD",unit:"rushing TD",tiers:[20,50,110,225]},
+  {group:"REC",name:"Deep Threat",emoji:"⚡",metric:"recYards",unit:"receiving yards",tiers:[1500,5000,12500,25000]},
+  {group:"REC",name:"Hands Team",emoji:"🧤",metric:"receptions",unit:"receptions",tiers:[50,150,350,600]},
+  {group:"REC",name:"YAC Monster",emoji:"🐲",metric:"yac",unit:"YAC",tiers:[750,2000,5000,10000]},
+  {group:"REC",name:"Touchdown Machine",emoji:"🔥",metric:"recTD",unit:"receiving TD",tiers:[20,75,150,325]},
+  {group:"C",name:"Iron Wall",emoji:"🧱",metric:"snaps",unit:"snaps",tiers:[500,1250,2500,5000]},
+  {group:"C",name:"Pressure Proof",emoji:"🛡️",type:"lowPctVolume",pctMetric:"pressurePct",volumeMetric:"snaps",pctUnit:"pressure rate",volumeUnit:"snaps",tiers:[[10,500],[8,1250],[6,2500],[4,5000]]},
+  {group:"DE",name:"Sack Artist",emoji:"💥",metric:"sacks",unit:"sacks",tiers:[20,50,100,175]},
+  {group:"DE",name:"Backfield Menace",emoji:"😈",metric:"pressures",unit:"pressures",tiers:[100,250,500,1000]},
+  {group:"DE",name:"QB Hunter",emoji:"🐺",metric:"qbHits",unit:"QB hits",tiers:[25,75,125,200]},
+  {group:"DB",name:"Ball Hawk",emoji:"🦅",metric:"interceptions",unit:"INT",tiers:[10,25,50,100]},
+  {group:"DB",name:"Shutdown",emoji:"🔒",type:"lowPctVolume",pctMetric:"completionAllowedPct",volumeMetric:"targets",pctUnit:"CA",volumeUnit:"targets",tiers:[[55,50],[50,125],[45,200],[40,350]]},
+  {group:"DB",name:"Pick Six",emoji:"6️⃣",metric:"pickSix",unit:"pick-sixes",tiers:[2,5,10,20]},
+  {group:"K",name:"Automatic",emoji:"✅",metric:"fgMade",unit:"made FG",tiers:[25,60,125,250]},
+  {group:"K",name:"Sniper",emoji:"🏹",type:"highPctVolume",pctMetric:"fgPct",volumeMetric:"fgAttempts",pctUnit:"FG",volumeUnit:"attempts",tiers:[[75,25],[80,60],[85,125],[90,250]]}
+];
+
+const LEGACY_TIER_NAMES = ["Bronze","Silver","Gold","Diamond"];
 let legacyCareerPlayers = null;
 let legacyLoaded = false;
+
+function addLegacyStat(target,key,value){
+  const n=Number(value);
+  if(!Number.isFinite(n) || n===0) return;
+  target[key]=(Number(target[key])||0)+n;
+}
+
+function getLegacyPositionStats(row,label){
+  const out={};
+  const n=(aliases)=>statNumber(row,aliases);
+  if(label==="QB"){
+    out.passYards=n(["YDS","Yards","Passing Yards","Pass Yards"]);
+    out.passTD=n(["TDS","TD","Touchdowns","Passing TD","Passing TDs","Pass TD"]);
+    out.passAttempts=n(["ATT","Attempts","Pass Attempts","Passing Attempts"]);
+    out.completions=n(["CMP","COMP","Completions","Completed","C"]);
+    out.completionPct=n(["C%","CMP%","COMP%","Completion %","Completion Percentage"]);
+    out.clutchConversions=n(["3RD","3rd Conv","3rd Conversions","3rd Down Conversions","3DC"])+n(["4TH","4th Conv","4th Conversions","4th Down Conversions","4DC"]);
+  }else if(label==="RB"){
+    out.rushYards=n(["Rushing Yards","Rush Yards","RUSH YDS","RYDS","YDS"]);
+    out.rushTD=n(["TDS","TD","Touchdowns","Rush TD","Rushing TD","Rushing TDs"]);
+  }else if(label==="WR" || label==="TE"){
+    out.recYards=n(["Receiving Yards","REC YDS","YDS","Yards"]);
+    out.receptions=n(["REC","Receptions"]);
+    out.yac=n(["YAC","Yards After Catch"]);
+    out.recTD=n(["TDS","TD","Touchdowns","Receiving TD","Receiving TDs"]);
+  }else if(label==="C"){
+    out.snaps=n(["SNAP","SNAPS","Snaps"]);
+    out.pressuresAllowed=n(["PRS","Pressures","Pressures Allowed","Pressure Allowed"]);
+  }else if(label==="DE"){
+    out.sacks=n(["SCK","SACK","SACKS","Sacks"]);
+    out.pressures=n(["PRS","Pressures"]);
+    out.qbHits=n(["QBH","QB Hits","QB Hit","Hits"]);
+  }else if(label==="DB"){
+    out.interceptions=n(["INT","INTS","Interceptions"]);
+    out.targets=n(["TRGT","Targets","Target","TGTS"]);
+    out.completionsAllowed=n(["CA","Completions Allowed","Catches Allowed"]);
+    out.completionAllowedPct=n(["CA%","Completion Allowed %","Completions Allowed %","Catch Allowed %"]);
+    out.pickSix=n(["PK6","PICK 6","PICK6","Pick Six","Pick Sixes"]);
+  }else if(label==="K"){
+    out.fgMade=n(["Made","MADE","FGM","Field Goals Made","Makes"]);
+    out.fgAttempts=n(["ATT","Attempts","FGA","Field Goal Attempts"]);
+    out.fgPct=n(["FG%","FG %","Field Goal %","Field Goal Percentage"]);
+  }
+  return out;
+}
+
+function mergeLegacyPositionStats(target,source,label){
+  target[label]=target[label]||{};
+  const t=target[label];
+  for(const [key,value] of Object.entries(source)){
+    if(key.endsWith("Pct")){
+      const volumeKey=label==="QB"?"passAttempts":label==="DB"?"targets":label==="K"?"fgAttempts":"";
+      const volume=Number(source[volumeKey])||0;
+      if(value>0 && volume>0){
+        t[key+"Weighted"]=(Number(t[key+"Weighted"])||0)+value*volume;
+        t[key+"Volume"]=(Number(t[key+"Volume"])||0)+volume;
+      }else if(value>0 && !t[key]) t[key]=value;
+    }else addLegacyStat(t,key,value);
+  }
+}
+
+function finalizeLegacyStats(stats){
+  for(const [label,t] of Object.entries(stats||{})){
+    if(label==="QB"){
+      if((t.completions||0)>0 && (t.passAttempts||0)>0) t.completionPct=(t.completions/t.passAttempts)*100;
+      else if((t.completionPctVolume||0)>0) t.completionPct=t.completionPctWeighted/t.completionPctVolume;
+    }
+    if(label==="C" && (t.snaps||0)>0) t.pressurePct=((t.pressuresAllowed||0)/t.snaps)*100;
+    if(label==="DB"){
+      if((t.completionsAllowed||0)>0 && (t.targets||0)>0) t.completionAllowedPct=(t.completionsAllowed/t.targets)*100;
+      else if((t.completionAllowedPctVolume||0)>0) t.completionAllowedPct=t.completionAllowedPctWeighted/t.completionAllowedPctVolume;
+    }
+    if(label==="K"){
+      if(Object.prototype.hasOwnProperty.call(t,"fgMade") && (t.fgAttempts||0)>0) t.fgPct=((t.fgMade||0)/t.fgAttempts)*100;
+      else if((t.fgPctVolume||0)>0) t.fgPct=t.fgPctWeighted/t.fgPctVolume;
+    }
+  }
+  const rec={};
+  for(const label of ["WR","TE"]){
+    for(const [key,value] of Object.entries(stats?.[label]||{})){
+      if(!key.endsWith("Weighted") && !key.endsWith("Volume") && key!=="completionPct") addLegacyStat(rec,key,value);
+    }
+  }
+  stats.REC=rec;
+  return stats;
+}
 
 async function buildLegacyCareerPlayers(forceRefresh=false){
   if(legacyCareerPlayers && !forceRefresh) return legacyCareerPlayers;
   const data = await getStatsSourceData("alltime", forceRefresh);
   const combined = new Map();
   for(const sheetName of Object.keys(LEGACY_POSITION_LABELS)){
+    const label=LEGACY_POSITION_LABELS[sheetName];
     const rawRows = Array.isArray(data?.[sheetName]) ? data[sheetName] : [];
-    const normalized = normalizeStatSheetRows(rawRows);
+    const normalized = normalizeStatSheetRows(rawRows,sheetName);
     const rows = applyCalculatedPoints(sheetName, normalized.rows);
     for(const row of rows){
       const name = getStatsPlayerName(row);
@@ -7005,14 +7117,113 @@ async function buildLegacyCareerPlayers(forceRefresh=false){
       if(!Number.isFinite(pts)) continue;
       const key = getAwardPlayerKey(name);
       if(!key) continue;
-      const current = combined.get(key) || {name, total:0, positions:{}};
+      const current = combined.get(key) || {name, total:0, positions:{}, stats:{}};
       current.total += pts;
-      current.positions[LEGACY_POSITION_LABELS[sheetName]] = (current.positions[LEGACY_POSITION_LABELS[sheetName]] || 0) + pts;
+      current.positions[label] = (current.positions[label] || 0) + pts;
+      mergeLegacyPositionStats(current.stats,getLegacyPositionStats(row,label),label);
       combined.set(key,current);
     }
   }
-  legacyCareerPlayers = [...combined.values()];
+  legacyCareerPlayers = [...combined.values()].map(player=>({...player,stats:finalizeLegacyStats(player.stats||{})}));
   return legacyCareerPlayers;
+}
+
+function getLegacyBadgeStats(player,badge){
+  return player?.stats?.[badge.group]||{};
+}
+
+function legacyBadgeMeets(stats,badge,tierIndex){
+  if(badge.type==="highPctVolume"){
+    const [pct,volume]=badge.tiers[tierIndex];
+    return Number(stats[badge.pctMetric]||0)>=pct && Number(stats[badge.volumeMetric]||0)>=volume;
+  }
+  if(badge.type==="lowPctVolume"){
+    const [pct,volume]=badge.tiers[tierIndex];
+    const currentPct=Number(stats[badge.pctMetric]);
+    const currentVolume=Number(stats[badge.volumeMetric]||0);
+    return Number.isFinite(currentPct) && currentVolume>0 && currentPct<=pct && currentVolume>=volume;
+  }
+  return Number(stats[badge.metric]||0)>=Number(badge.tiers[tierIndex]);
+}
+
+function getLegacyBadgeTier(stats,badge){
+  for(let i=3;i>=0;i--) if(legacyBadgeMeets(stats,badge,i)) return i;
+  return -1;
+}
+
+function formatLegacyAchievementValue(value,percent=false){
+  const n=Number(value)||0;
+  if(percent) return `${n.toFixed(1)}%`;
+  return Math.round(n).toLocaleString();
+}
+
+function getLegacyBadgeProgress(stats,badge,nextTier){
+  if(nextTier<0) return 100;
+  if(badge.type==="highPctVolume"){
+    const [pct,volume]=badge.tiers[nextTier];
+    return Math.max(0,Math.min(100,Math.min((Number(stats[badge.pctMetric]||0)/pct)*100,(Number(stats[badge.volumeMetric]||0)/volume)*100)));
+  }
+  if(badge.type==="lowPctVolume"){
+    const [pct,volume]=badge.tiers[nextTier];
+    const currentPct=Number(stats[badge.pctMetric]||0);
+    const currentVolume=Number(stats[badge.volumeMetric]||0);
+    const quality=currentVolume>0?(currentPct<=pct?1:Math.min(1,pct/currentPct)):0;
+    const volumeProgress=Math.min(1,currentVolume/volume);
+    return Math.max(0,Math.min(100,Math.min(quality,volumeProgress)*100));
+  }
+  return Math.max(0,Math.min(100,(Number(stats[badge.metric]||0)/Number(badge.tiers[nextTier]))*100));
+}
+
+function getLegacyBadgeText(stats,badge,tierIndex){
+  const next=tierIndex>=3?-1:tierIndex+1;
+  if(badge.type==="highPctVolume" || badge.type==="lowPctVolume"){
+    const currentPct=Number(stats[badge.pctMetric]||0);
+    const currentVolume=Number(stats[badge.volumeMetric]||0);
+    const current=`${formatLegacyAchievementValue(currentPct,true)} · ${formatLegacyAchievementValue(currentVolume)} ${badge.volumeUnit}`;
+    if(next<0) return {current,next:"Maximum tier unlocked"};
+    const [pct,volume]=badge.tiers[next];
+    const comparator=badge.type==="lowPctVolume"?"or lower":"or higher";
+    return {current,next:`${LEGACY_TIER_NAMES[next]}: ${pct}% ${badge.pctUnit} ${comparator} + ${volume.toLocaleString()} ${badge.volumeUnit}`};
+  }
+  const currentValue=Number(stats[badge.metric]||0);
+  if(next<0) return {current:`${formatLegacyAchievementValue(currentValue)} ${badge.unit}`,next:"Maximum tier unlocked"};
+  return {current:`${formatLegacyAchievementValue(currentValue)} ${badge.unit}`,next:`${LEGACY_TIER_NAMES[next]}: ${Number(badge.tiers[next]).toLocaleString()} ${badge.unit}`};
+}
+
+function renderLegacyAchievements(player){
+  const container=document.getElementById("legacyProfileAchievements");
+  const countEl=document.getElementById("legacyBadgeUnlockedCount");
+  const summaryEl=document.getElementById("legacyBadgeTierSummary");
+  if(!container) return;
+  const activeGroups=new Set();
+  for(const group of ["QB","RB","REC","C","DE","DB","K"]){
+    const stats=player?.stats?.[group]||{};
+    if(Object.values(stats).some(v=>Number(v)>0)) activeGroups.add(group);
+  }
+  let unlocked=0;
+  const tierCounts=[0,0,0,0];
+  const cardsByGroup={};
+  for(const badge of LEGACY_BADGES){
+    if(!activeGroups.has(badge.group)) continue;
+    const stats=getLegacyBadgeStats(player,badge);
+    const tier=getLegacyBadgeTier(stats,badge);
+    if(tier>=0){unlocked++;tierCounts[tier]++;}
+    const next=tier>=3?-1:tier+1;
+    const text=getLegacyBadgeText(stats,badge,tier);
+    const progress=getLegacyBadgeProgress(stats,badge,next);
+    const tierName=tier>=0?LEGACY_TIER_NAMES[tier]:"Locked";
+    const tierClass=tier>=0?LEGACY_TIER_NAMES[tier].toLowerCase():"none";
+    const card=`<article class="legacy-achievement"><div class="legacy-achievement-top"><div class="legacy-achievement-emoji">${badge.emoji}</div><div class="legacy-achievement-name"><strong>${esc(badge.name)}</strong><span>${esc(badge.group==="REC"?"WR / TE":badge.group)} Career Badge</span></div><span class="legacy-tier-pill legacy-tier-${tierClass}">${esc(tierName)}</span></div><div class="legacy-achievement-progress-row"><span>Current</span><strong>${esc(text.current)}</strong></div><div class="legacy-achievement-bar"><span style="width:${progress.toFixed(1)}%"></span></div><div class="legacy-achievement-next"><strong>Next:</strong> ${esc(text.next)}</div></article>`;
+    (cardsByGroup[badge.group] ||= []).push(card);
+  }
+  const groupNames={QB:"Quarterback",RB:"Running Back",REC:"Receiver",C:"Center",DE:"Pass Rush",DB:"Coverage",K:"Kicking"};
+  container.innerHTML=Object.keys(cardsByGroup).length?Object.entries(cardsByGroup).map(([group,cards])=>`<section class="legacy-achievement-group"><div class="legacy-achievement-group-head"><span>${esc(group)}</span><strong>${esc(groupNames[group]||group)}</strong></div><div class="legacy-achievement-grid">${cards.join("")}</div></section>`).join(""):'<div class="legacy-achievement-empty">No tracked all-time stats found for this player yet.</div>';
+  if(countEl) countEl.textContent=`${unlocked} / ${LEGACY_BADGES.length}`;
+  if(summaryEl){
+    const pieces=[];
+    for(let i=3;i>=0;i--) if(tierCounts[i]) pieces.push(`${tierCounts[i]} ${LEGACY_TIER_NAMES[i]}`);
+    summaryEl.textContent=pieces.join(" · ")||"No tiers yet";
+  }
 }
 
 async function renderLegacyLeaders(position="overall"){
@@ -7095,6 +7306,7 @@ async function openLegacyPlayerShowcase(playerName){
   const teamLogoEl=document.getElementById('legacyProfileTeamLogo');
   const breakdownEl=document.getElementById('legacyProfileBreakdown');
   const trophiesEl=document.getElementById('legacyProfileTrophies');
+  const achievementsEl=document.getElementById('legacyProfileAchievements');
 
   if(nameEl) nameEl.textContent=player.name;
   if(pointsEl) pointsEl.textContent=formatPoints(player.total);
@@ -7109,6 +7321,7 @@ async function openLegacyPlayerShowcase(playerName){
   if(trophiesEl){
     trophiesEl.innerHTML=honors.length?honors.map(h=>`<div class="legacy-trophy-card"><div class="legacy-trophy-icon">🏆</div><div><span>Season ${esc(h.season)} · ${esc(h.group||h.section)}</span><strong>${esc(h.role)}${h.section&&h.section!==h.group?` · ${esc(h.section)}`:''}</strong></div></div>`).join(''):'<div class="legacy-trophy-empty">No archived Season 1–3 honors found for this player yet.</div>';
   }
+  if(achievementsEl) renderLegacyAchievements(player);
   panel.hidden=false;
   panel.scrollIntoView({behavior:'smooth',block:'start'});
 }

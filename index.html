@@ -333,6 +333,28 @@
 
 
   <style>
+
+
+    /* Legacy career achievements */
+    .legacy-achievements-card{margin-top:20px;padding:22px;border:1px solid rgba(124,201,255,.16);border-radius:18px;background:rgba(4,14,29,.82)}
+    .legacy-achievement-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;padding:14px 16px;border:1px solid rgba(124,201,255,.12);border-radius:14px;background:rgba(10,29,52,.72)}
+    .legacy-achievement-summary strong{font-size:22px;color:#f2fbff}.legacy-achievement-summary span{color:#8fb0ca;font-size:12px;font-weight:850;letter-spacing:.8px;text-transform:uppercase}
+    .legacy-achievement-groups{display:grid;gap:18px}.legacy-achievement-group[hidden]{display:none!important}
+    .legacy-achievement-group-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .legacy-achievement-group-head strong{font-size:16px}.legacy-achievement-group-head span{color:#78caff;font-size:11px;font-weight:950;letter-spacing:1.1px;text-transform:uppercase}
+    .legacy-achievement-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .legacy-achievement{position:relative;overflow:hidden;padding:15px;border:1px solid rgba(124,201,255,.11);border-radius:14px;background:linear-gradient(145deg,rgba(14,38,66,.82),rgba(6,19,36,.9))}
+    .legacy-achievement::after{content:"";position:absolute;inset:auto -35px -50px auto;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(91,183,255,.11),transparent 70%);pointer-events:none}
+    .legacy-achievement-top{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center}.legacy-achievement-emoji{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:23px;background:rgba(99,183,255,.1);border:1px solid rgba(124,201,255,.12)}
+    .legacy-achievement-name strong{display:block;color:#f4fbff}.legacy-achievement-name span{display:block;margin-top:3px;color:#789ab8;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.8px}
+    .legacy-tier-pill{padding:6px 9px;border-radius:999px;font-size:10px;font-weight:950;letter-spacing:.7px;text-transform:uppercase;border:1px solid rgba(255,255,255,.12);white-space:nowrap}
+    .legacy-tier-none{color:#8ba4bb;background:rgba(122,145,166,.08)}.legacy-tier-bronze{color:#e1a46c;background:rgba(160,90,43,.18);border-color:rgba(211,137,82,.28)}.legacy-tier-silver{color:#e3edf4;background:rgba(181,201,215,.15);border-color:rgba(218,232,240,.25)}.legacy-tier-gold{color:#ffd96b;background:rgba(206,157,39,.16);border-color:rgba(255,215,90,.28)}.legacy-tier-diamond{color:#9eeaff;background:rgba(75,201,255,.17);border-color:rgba(124,226,255,.3);box-shadow:0 0 16px rgba(72,195,255,.08)}
+    .legacy-achievement-progress-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;color:#9cb7cc;font-size:11px;font-weight:800}.legacy-achievement-progress-row strong{color:#e7f6ff}
+    .legacy-achievement-bar{height:7px;margin-top:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}.legacy-achievement-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#3b9fff,#98e0ff)}
+    .legacy-achievement-next{margin-top:8px;color:#7797b2;font-size:10px;line-height:1.45}.legacy-achievement-next strong{color:#a9dcff}
+    .legacy-achievement-empty{padding:20px;text-align:center;border:1px dashed rgba(124,201,255,.2);border-radius:13px;color:#89a7bf}
+    @media(max-width:760px){.legacy-achievement-grid{grid-template-columns:1fr}.legacy-achievement-summary{align-items:flex-start;flex-direction:column}}
+
     /* Legacy page isolation safeguard */
     main > .page { display: none !important; }
     main > .page.active-page { display: block !important; }
@@ -815,6 +837,24 @@
                 <div id="legacyProfileTrophies" class="legacy-trophy-grid"></div>
               </section>
             </div>
+
+
+            <section class="legacy-achievements-card" id="legacyAchievementsCard">
+              <div class="legacy-panel-head">
+                <div>
+                  <span class="legacy-kicker">CAREER ACHIEVEMENTS</span>
+                  <h3>Badge Collection</h3>
+                  <p>Bronze → Silver → Gold → Diamond milestones calculated from connected All-Time Stats.</p>
+                </div>
+              </div>
+              <div class="legacy-achievement-summary">
+                <div><span>Unlocked Badges</span><strong id="legacyBadgeUnlockedCount">0 / 20</strong></div>
+                <div><span>Highest Tiers</span><strong id="legacyBadgeTierSummary">—</strong></div>
+              </div>
+              <div id="legacyProfileAchievements" class="legacy-achievement-groups">
+                <div class="legacy-achievement-empty">Open a player profile to view career achievements.</div>
+              </div>
+            </section>
           </section>
         </div>
       </div>
