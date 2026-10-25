@@ -362,7 +362,34 @@
     main > .page { display: none !important; }
     main > .page.active-page { display: block !important; }
     #legacy[hidden], .legacy-player-showcase[hidden] { display: none !important; }
-  </style>
+  
+    /* Legacy accolade-only XP redesign */
+    .legacy-xp-shell{--legacy-gold:#f4c55b;--legacy-gold-soft:#ffdf91;--legacy-bronze:#d99052;--legacy-ink:#120d08}
+    .legacy-xp-hero .legacy-hero-copy,.legacy-xp-hero .legacy-summary-card{border-color:rgba(244,197,91,.26);background:linear-gradient(180deg,rgba(23,16,9,.96),rgba(8,10,16,.98))}
+    .legacy-xp-hero .legacy-kicker,.legacy-xp-guide-title{color:var(--legacy-gold)}
+    .legacy-xp-guide{margin:0 0 24px;padding:18px 20px;border:1px solid rgba(244,197,91,.25);border-radius:18px;background:linear-gradient(110deg,rgba(39,23,9,.94),rgba(15,12,10,.98));box-shadow:0 18px 40px rgba(0,0,0,.25)}
+    .legacy-xp-guide-title{font-size:12px;font-weight:950;letter-spacing:1.4px;margin-bottom:10px}
+    .legacy-xp-guide-chips{display:flex;flex-wrap:wrap;gap:8px}
+    .legacy-xp-chip{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:6px 10px;border-radius:999px;border:1px solid rgba(244,197,91,.22);background:rgba(7,8,10,.76);color:#eadfc9;font-size:12px;font-weight:850}
+    .legacy-xp-chip b{padding:3px 7px;border-radius:999px;background:linear-gradient(180deg,#ffe49b,#efb83f);color:#171006;font-weight:950}
+    .legacy-xp-guide-note{margin:12px 0 0;color:#a99b86;font-size:12px;font-weight:700}
+    .legacy-podium-section,.legacy-rank-panel{padding:22px;border:1px solid rgba(244,197,91,.2);border-radius:20px;background:linear-gradient(180deg,rgba(14,14,18,.98),rgba(9,9,12,.98));box-shadow:0 22px 50px rgba(0,0,0,.28);margin-bottom:24px}
+    .legacy-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:end}
+    .legacy-podium-card{position:relative;min-height:225px;padding:22px 18px 18px;border:1px solid rgba(244,197,91,.25);border-radius:17px;background:linear-gradient(180deg,rgba(36,29,19,.82),rgba(10,10,13,.96));text-align:center;cursor:pointer;overflow:visible}
+    .legacy-podium-card.first{min-height:250px;border-color:rgba(255,211,102,.58);background:linear-gradient(180deg,rgba(79,61,32,.78),rgba(19,15,10,.96));box-shadow:0 0 28px rgba(244,197,91,.12)}
+    .legacy-podium-rank{position:absolute;top:-15px;left:50%;transform:translateX(-50%);display:grid;place-items:center;min-width:38px;height:34px;padding:0 8px;border-radius:999px;background:#d9dee6;color:#15171b;font-weight:950;border:1px solid rgba(255,255,255,.5)}
+    .legacy-podium-card.first .legacy-podium-rank{background:linear-gradient(180deg,#ffe186,#eeb53e)}
+    .legacy-podium-card.third .legacy-podium-rank{background:#d99968}
+    .legacy-podium-avatar{width:90px;height:90px;margin:0 auto 11px;border-radius:50%;object-fit:cover;background:#141414;border:3px solid rgba(244,197,91,.6)}
+    .legacy-podium-card strong{display:block;color:#fff2d2;font-size:15px}.legacy-podium-xp{margin-top:8px;color:#ffd56f;font-size:25px;font-weight:950}.legacy-podium-xp small{font-size:11px;margin-left:4px;color:#cbb788}
+    .legacy-podium-meta{margin-top:9px;color:#b8a98d;font-size:12px;font-weight:800}
+    .legacy-rank-toolbar{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:18px}.legacy-rank-toolbar>div:first-child span{display:block;margin-top:4px;color:#8f887b;font-size:11px}.legacy-rank-controls{display:flex;gap:10px;align-items:center}.legacy-rank-search{margin:0;min-width:240px;border-color:rgba(244,197,91,.25);background:#100d09}.legacy-sort-tabs{display:flex;padding:3px;border:1px solid rgba(244,197,91,.2);border-radius:999px;background:#100d09}.legacy-sort-tab{border:0;background:transparent;color:#a89b83;padding:8px 12px;border-radius:999px;font-weight:900;cursor:pointer}.legacy-sort-tab.active{background:linear-gradient(180deg,#ffdf87,#eab13d);color:#171006}
+    .legacy-xp-leader-list{display:grid;gap:7px;max-height:none}.legacy-xp-row{display:grid;grid-template-columns:42px minmax(0,1fr) 170px 92px;gap:12px;align-items:center;padding:10px 13px;border:1px solid rgba(244,197,91,.13);border-radius:12px;background:rgba(32,23,12,.42);cursor:pointer}.legacy-xp-row:hover{border-color:rgba(244,197,91,.42);background:rgba(55,39,18,.6)}
+    .legacy-xp-player{display:flex;align-items:center;gap:10px;min-width:0}.legacy-xp-player img{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#111;border:1px solid rgba(244,197,91,.35)}.legacy-xp-player-copy{min-width:0}.legacy-xp-player-copy strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#f5ead5}.legacy-xp-awards{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}.legacy-xp-award-mini{padding:3px 6px;border:1px solid rgba(244,197,91,.16);border-radius:999px;background:rgba(9,8,6,.68);color:#c9b997;font-size:10px;font-weight:850}.legacy-xp-bar{height:8px;border-radius:99px;background:#080706;overflow:hidden;border:1px solid rgba(244,197,91,.08)}.legacy-xp-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#e7a92f,#ffe49c)}.legacy-xp-value{text-align:right;color:#ffd76f;font-weight:950}.legacy-xp-value small{font-size:10px;color:#bcae90}.legacy-rank{color:#f1c35b}
+    .legacy-xp-breakdown{display:grid;gap:8px}.legacy-xp-breakdown-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:11px 13px;border-radius:11px;border:1px solid rgba(244,197,91,.13);background:rgba(35,24,12,.38)}.legacy-xp-breakdown-row span{color:#e7dcc5;font-weight:850}.legacy-xp-breakdown-row strong{color:#ffd56f}.legacy-stat-context-card{margin-top:20px}.legacy-xp-profile-hero{border-color:rgba(244,197,91,.24);background:radial-gradient(circle at 18% 0%,rgba(244,197,91,.17),transparent 38%),rgba(13,11,9,.88)}.legacy-xp-profile-hero .legacy-profile-avatar-wrap{background:linear-gradient(135deg,#ffe197,#b67b21)}
+    @media(max-width:900px){.legacy-podium{grid-template-columns:1fr}.legacy-podium-card.first{order:-1}.legacy-rank-toolbar{align-items:flex-start;flex-direction:column}.legacy-rank-controls{width:100%}.legacy-rank-search{min-width:0;flex:1}.legacy-xp-row{grid-template-columns:34px minmax(0,1fr) 90px}.legacy-xp-bar{display:none}}
+    @media(max-width:620px){.legacy-rank-controls{flex-direction:column;align-items:stretch}.legacy-sort-tabs{justify-content:center}.legacy-xp-row{grid-template-columns:30px minmax(0,1fr) auto}.legacy-xp-player img{width:36px;height:36px}.legacy-xp-awards{display:none}}
+</style>
 </head>
 <body>
 
@@ -760,106 +787,125 @@
 
 
 
-    <!-- LEGACY / RECORD BOOK -->
+    <!-- LEGACY / ACCOLADE LEADERBOARD -->
     <section class="page" id="legacy" hidden>
-      <div class="legacy-shell">
-        <section class="legacy-hero">
+      <div class="legacy-shell legacy-xp-shell">
+        <section class="legacy-hero legacy-xp-hero">
           <div class="legacy-hero-copy">
-            <span class="legacy-kicker">EFF LEGACY · RECORD BOOK</span>
+            <span class="legacy-kicker">EFF LEGACY · CAREER RESUME</span>
             <h2>EFF LEGACY</h2>
-            <p>Career leaders, all-time player search, records, and long-term league milestones. History remains the locked season archive; Legacy is the statistical record book.</p>
+            <p>Legacy XP is earned only through EFF accolades, championships, awards, selections, and career achievement badges. Raw stats never add Legacy XP.</p>
           </div>
           <div class="legacy-summary-card">
-            <div class="legacy-summary-stat"><span>Completed Seasons</span><strong>03</strong></div>
-            <div class="legacy-summary-stat"><span>Champions Crowned</span><strong>03</strong></div>
-            <div class="legacy-summary-stat"><span>Record Book</span><strong>LIVE</strong></div>
+            <div class="legacy-summary-stat"><span>Scoring Style</span><strong>ACCOLADES</strong></div>
+            <div class="legacy-summary-stat"><span>Raw Stats XP</span><strong>0</strong></div>
+            <div class="legacy-summary-stat"><span>Career Profiles</span><strong>LIVE</strong></div>
           </div>
         </section>
 
-        <div class="legacy-grid">
-          <section class="legacy-panel">
-            <div class="legacy-panel-head">
-              <div><span class="legacy-kicker">ALL-TIME LEADERS</span><h3>Career Points Leaders</h3><p>Uses the connected All-Time Stats workbook.</p></div>
-              <select id="legacyLeaderPosition" class="legacy-select">
-                <option value="overall">Overall</option>
-                <option value="quarterback">QB</option>
-                <option value="runningback">RB</option>
-                <option value="center">C</option>
-                <option value="tight end">TE</option>
-                <option value="wide receiver">WR</option>
-                <option value="defensive end">DE</option>
-                <option value="defensive back">DB</option>
-                <option value="kicker">K</option>
-              </select>
-            </div>
-            <div id="legacyLeaderList" class="legacy-leader-list"><div class="legacy-empty">Open Legacy to load career leaders.</div></div>
-          </section>
+        <section class="legacy-xp-guide">
+          <div class="legacy-xp-guide-title">HOW LEGACY XP IS SCORED</div>
+          <div class="legacy-xp-guide-chips">
+            <span class="legacy-xp-chip">🏆 Super Bowl Ring <b>1,250</b></span>
+            <span class="legacy-xp-chip">👑 League MVP <b>1,000</b></span>
+            <span class="legacy-xp-chip">🏅 Player of the Year <b>750</b></span>
+            <span class="legacy-xp-chip">⭐ 1st Team <b>500</b></span>
+            <span class="legacy-xp-chip">🏆 Conference Champion <b>500</b></span>
+            <span class="legacy-xp-chip">🎃 Event Ring <b>500</b></span>
+            <span class="legacy-xp-chip">🏆 Division Champion <b>250</b></span>
+            <span class="legacy-xp-chip">🌟 Standout <b>250</b></span>
+            <span class="legacy-xp-chip">⭐ 2nd Team <b>250</b></span>
+            <span class="legacy-xp-chip">⭐ 3rd Team <b>150</b></span>
+            <span class="legacy-xp-chip">🟡 POTW <b>100</b></span>
+            <span class="legacy-xp-chip">🎖 Achievement Badge <b>50–500</b></span>
+          </div>
+          <p class="legacy-xp-guide-note">Repeat accolades stack. Achievement tiers do not stack within the same badge — only the highest unlocked tier counts.</p>
+        </section>
 
-          <section class="legacy-panel">
-            <div class="legacy-panel-head"><div><span class="legacy-kicker">PLAYER SEARCH</span><h3>Career Lookup</h3><p>Search a Roblox username across all-time position sheets.</p></div></div>
-            <input id="legacyPlayerSearch" class="legacy-search" type="text" placeholder="Search player..." autocomplete="off">
-            <div id="legacyPlayerSearchResults" class="legacy-search-results"><div class="legacy-empty">Start typing a player name.</div></div>
-          </section>
+        <section class="legacy-podium-section">
+          <div class="legacy-panel-head">
+            <div><span class="legacy-kicker">ALL-TIME PODIUM</span><h3>Top Legacy Resumes</h3><p>The top three players by accolade-only Legacy XP.</p></div>
+          </div>
+          <div id="legacyPodium" class="legacy-podium"><div class="legacy-empty">Open Legacy to load the podium.</div></div>
+        </section>
 
-          <section class="legacy-player-showcase" id="legacyPlayerShowcase" hidden>
-            <div class="legacy-showcase-topbar">
-              <div>
-                <span class="legacy-kicker">PLAYER SHOWCASE</span>
-                <h3>EFF Career Profile</h3>
-              </div>
-              <button class="legacy-showcase-close" id="legacyShowcaseClose" type="button">Close</button>
-            </div>
-
-            <div class="legacy-profile-hero">
-              <div class="legacy-profile-avatar-wrap">
-                <img id="legacyProfileAvatar" class="legacy-profile-avatar" alt="Player Roblox avatar">
-              </div>
-              <div class="legacy-profile-copy">
-                <span class="legacy-profile-eyebrow">EFF LEGACY PROFILE</span>
-                <h2 id="legacyProfileName">Player</h2>
-                <div class="legacy-profile-team">
-                  <img id="legacyProfileTeamLogo" alt="Team logo">
-                  <span id="legacyProfileTeam">Team unavailable</span>
-                </div>
-              </div>
-              <div class="legacy-profile-summary">
-                <div><span>Career PTS</span><strong id="legacyProfilePoints">0.0</strong></div>
-                <div><span>Top Position</span><strong id="legacyProfilePrimaryPosition">—</strong></div>
-                <div><span>Positions</span><strong id="legacyProfilePositionCount">0</strong></div>
+        <section class="legacy-rank-panel">
+          <div class="legacy-rank-toolbar">
+            <div><strong id="legacyRankedCount">0 ranked players</strong><span>Click any player to open their career showcase.</span></div>
+            <div class="legacy-rank-controls">
+              <input id="legacyPlayerSearch" class="legacy-search legacy-rank-search" type="text" placeholder="Filter players..." autocomplete="off">
+              <div class="legacy-sort-tabs" role="group" aria-label="Legacy leaderboard sort">
+                <button class="legacy-sort-tab active" type="button" data-legacy-sort="xp">XP</button>
+                <button class="legacy-sort-tab" type="button" data-legacy-sort="rings">Rings</button>
+                <button class="legacy-sort-tab" type="button" data-legacy-sort="trophies">Trophies</button>
               </div>
             </div>
+          </div>
+          <div id="legacyLeaderList" class="legacy-leader-list legacy-xp-leader-list"><div class="legacy-empty">Open Legacy to load career rankings.</div></div>
+        </section>
 
-            <div class="legacy-showcase-grid">
-              <section class="legacy-showcase-card">
-                <div class="legacy-panel-head"><div><span class="legacy-kicker">CAREER STATS</span><h3>Position Breakdown</h3><p>Career points from the connected All-Time Stats sheets.</p></div></div>
-                <div id="legacyProfileBreakdown" class="legacy-profile-breakdown"></div>
-              </section>
-
-              <section class="legacy-showcase-card" id="legacyTrophyRoom">
-                <div class="legacy-panel-head"><div><span class="legacy-kicker">TROPHY ROOM</span><h3>Career Honors</h3><p>Locked awards, standouts, and All-League honors from EFF History.</p></div></div>
-                <div id="legacyProfileTrophies" class="legacy-trophy-grid"></div>
-              </section>
+        <section class="legacy-player-showcase" id="legacyPlayerShowcase" hidden>
+          <div class="legacy-showcase-topbar">
+            <div>
+              <span class="legacy-kicker">PLAYER SHOWCASE</span>
+              <h3>EFF Career Profile</h3>
             </div>
+            <button class="legacy-showcase-close" id="legacyShowcaseClose" type="button">Close</button>
+          </div>
 
+          <div class="legacy-profile-hero legacy-xp-profile-hero">
+            <div class="legacy-profile-avatar-wrap">
+              <img id="legacyProfileAvatar" class="legacy-profile-avatar" alt="Player Roblox avatar">
+            </div>
+            <div class="legacy-profile-copy">
+              <span class="legacy-profile-eyebrow">EFF LEGACY PROFILE</span>
+              <h2 id="legacyProfileName">Player</h2>
+              <div class="legacy-profile-team">
+                <img id="legacyProfileTeamLogo" alt="Team logo">
+                <span id="legacyProfileTeam">Team unavailable</span>
+              </div>
+            </div>
+            <div class="legacy-profile-summary">
+              <div><span>Legacy XP</span><strong id="legacyProfilePoints">0</strong></div>
+              <div><span>Rings</span><strong id="legacyProfilePrimaryPosition">0</strong></div>
+              <div><span>Accolades</span><strong id="legacyProfilePositionCount">0</strong></div>
+            </div>
+          </div>
 
-            <section class="legacy-achievements-card" id="legacyAchievementsCard">
-              <div class="legacy-panel-head">
-                <div>
-                  <span class="legacy-kicker">CAREER ACHIEVEMENTS</span>
-                  <h3>Badge Collection</h3>
-                  <p>Bronze → Silver → Gold → Diamond milestones calculated from connected All-Time Stats.</p>
-                </div>
-              </div>
-              <div class="legacy-achievement-summary">
-                <div><span>Unlocked Badges</span><strong id="legacyBadgeUnlockedCount">0 / 20</strong></div>
-                <div><span>Highest Tiers</span><strong id="legacyBadgeTierSummary">—</strong></div>
-              </div>
-              <div id="legacyProfileAchievements" class="legacy-achievement-groups">
-                <div class="legacy-achievement-empty">Open a player profile to view career achievements.</div>
-              </div>
+          <div class="legacy-showcase-grid legacy-xp-showcase-grid">
+            <section class="legacy-showcase-card">
+              <div class="legacy-panel-head"><div><span class="legacy-kicker">XP BREAKDOWN</span><h3>Legacy Resume</h3><p>Every accolade currently contributing to this player’s Legacy XP.</p></div></div>
+              <div id="legacyProfileBreakdown" class="legacy-xp-breakdown"></div>
             </section>
+
+            <section class="legacy-showcase-card" id="legacyTrophyRoom">
+              <div class="legacy-panel-head"><div><span class="legacy-kicker">TROPHY ROOM</span><h3>Career Honors</h3><p>Championships, selections, weekly awards, and major individual honors.</p></div></div>
+              <div id="legacyProfileTrophies" class="legacy-trophy-grid"></div>
+            </section>
+          </div>
+
+          <section class="legacy-showcase-card legacy-stat-context-card">
+            <div class="legacy-panel-head"><div><span class="legacy-kicker">CAREER STATS · 0 XP</span><h3>Positions Played</h3><p>Career stat points are shown for context only and do not affect Legacy ranking.</p></div></div>
+            <div id="legacyProfileStatContext" class="legacy-profile-breakdown"></div>
           </section>
-        </div>
+
+          <section class="legacy-achievements-card" id="legacyAchievementsCard">
+            <div class="legacy-panel-head">
+              <div>
+                <span class="legacy-kicker">CAREER ACHIEVEMENTS</span>
+                <h3>Badge Collection</h3>
+                <p>Bronze 50 XP · Silver 125 XP · Gold 250 XP · Diamond 500 XP. Only the highest tier of each badge counts.</p>
+              </div>
+            </div>
+            <div class="legacy-achievement-summary">
+              <div><span>Unlocked Badges</span><strong id="legacyBadgeUnlockedCount">0 / 20</strong></div>
+              <div><span>Highest Tiers</span><strong id="legacyBadgeTierSummary">—</strong></div>
+            </div>
+            <div id="legacyProfileAchievements" class="legacy-achievement-groups">
+              <div class="legacy-achievement-empty">Open a player profile to view career achievements.</div>
+            </div>
+          </section>
+        </section>
       </div>
     </section>
 

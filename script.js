@@ -7317,130 +7317,250 @@ function renderLegacyAchievements(player){
   }
 }
 
-async function renderLegacyLeaders(position="overall"){
-  const container=document.getElementById("legacyLeaderList");
+const LEGACY_XP_VALUES = Object.freeze({
+  potw:100,
+  firstTeam:500,
+  secondTeam:250,
+  thirdTeam:150,
+  standout:250,
+  poty:750,
+  divisionChampion:250,
+  conferenceChampion:500,
+  superBowlRing:1250,
+  eventRing:500,
+  mvp:1000
+});
+const LEGACY_BADGE_XP = Object.freeze({bronze:50,silver:125,gold:250,diamond:500});
+let legacyXPPlayers = null;
+let legacySortMode = "xp";
+let legacySearchTerm = "";
+
+function cleanLegacyRoleName(value){
+  return String(value||"").replace(/^[^A-Za-z0-9]+/g,"").trim();
+}
+function legacyRoleMultiplier(name){
+  const match=String(name||"").match(/(?:^|\s)(\d+)\s*x\b/i);
+  return match?Math.max(1,Number(match[1])||1):1;
+}
+function legacySimpleName(value){
+  return cleanLegacyRoleName(value).toLowerCase().replace(/[–—]/g,"-").replace(/\s+/g," ").trim();
+}
+function legacyAccoladeFromRole(role){
+  const raw=cleanLegacyRoleName(role?.name||"");
+  if(!raw) return null;
+  const lower=legacySimpleName(raw);
+  const mult=legacyRoleMultiplier(raw);
+  const make=(key,label,emoji,unitXP,count=mult)=>({key,label,emoji,unitXP,count,xp:unitXP*count,roleName:raw});
+
+  if(role?.badgeTier && role?.badgeName){
+    const tier=String(role.badgeTier).toLowerCase();
+    const unitXP=LEGACY_BADGE_XP[tier]||0;
+    if(!unitXP) return null;
+    return {key:`badge:${normalize(role.badgeName)}`,label:`${role.badgeName} · ${tier[0].toUpperCase()+tier.slice(1)}`,emoji:"🎖️",unitXP,count:1,xp:unitXP,roleName:raw,badgeName:role.badgeName,badgeTier:tier,isBadge:true};
+  }
+  if(/\bpotw\b/i.test(raw) || /player of the week/i.test(lower)) return make("potw","Player of the Week","🟡",LEGACY_XP_VALUES.potw);
+  if(/(?:^|\b)(?:1st|first)\s*(?:team|all[- ]?pro)/i.test(lower)) return make("firstTeam","1st Team","⭐",LEGACY_XP_VALUES.firstTeam);
+  if(/(?:^|\b)(?:2nd|second)\s*(?:team|all[- ]?pro)/i.test(lower)) return make("secondTeam","2nd Team","⭐",LEGACY_XP_VALUES.secondTeam);
+  if(/(?:^|\b)(?:3rd|third)\s*(?:team|all[- ]?pro)/i.test(lower)) return make("thirdTeam","3rd Team","⭐",LEGACY_XP_VALUES.thirdTeam);
+  if(/\b(?:qb|rb|wr|te|c|de|db|k)\s*standout\b/i.test(lower)) return make("standout",raw.replace(/^\d+\s*x\s*[-–—]?\s*/i,""),"🌟",LEGACY_XP_VALUES.standout);
+  if(/\b(?:qb|rb|wr|te|c|de|db|k)oty\b/i.test(lower) || /player of the year/i.test(lower)) return make("poty",raw.replace(/^\d+\s*x\s*[-–—]?\s*/i,""),"🏅",LEGACY_XP_VALUES.poty);
+  if(/\bmvp\b/i.test(lower) && !/super\s*bowl/i.test(lower)) return make("mvp","League MVP","👑",LEGACY_XP_VALUES.mvp);
+  if(/(?:cascade|colonial|gulf|sunset).*\bchamp/i.test(lower) || /division\s+champ/i.test(lower)) return make("divisionChampion",raw,"🏆",LEGACY_XP_VALUES.divisionChampion,1);
+  if(/\b(?:pcc|acc)\b.*\bchamp/i.test(lower) || /conference\s+champ/i.test(lower)) return make("conferenceChampion",raw,"🏆",LEGACY_XP_VALUES.conferenceChampion,1);
+  if(/halloween/i.test(lower) || /event\s+(?:ring|champ)/i.test(lower)) return make("eventRing",raw,"🎃",LEGACY_XP_VALUES.eventRing,1);
+  if(/^s\d+$/i.test(lower) || /super\s*bowl.*(?:ring|champ)/i.test(lower) || /(?:championship|superbowl)\s+ring/i.test(lower)) return make("superBowlRing",raw,"🏆",LEGACY_XP_VALUES.superBowlRing,1);
+  return null;
+}
+
+function scoreLegacyRoles(roles){
+  const normal=[];
+  const badgeBest=new Map();
+  for(const role of Array.isArray(roles)?roles:[]){
+    const item=legacyAccoladeFromRole(role);
+    if(!item) continue;
+    if(item.isBadge){
+      const key=normalize(item.badgeName||item.label);
+      const old=badgeBest.get(key);
+      if(!old || item.xp>old.xp) badgeBest.set(key,item);
+    }else normal.push(item);
+  }
+  const grouped=new Map();
+  for(const item of normal){
+    const groupKey=`${item.key}:${normalize(item.label)}`;
+    const existing=grouped.get(groupKey);
+    if(existing){existing.count+=item.count;existing.xp+=item.xp;existing.roleNames.push(item.roleName);}
+    else grouped.set(groupKey,{...item,roleNames:[item.roleName]});
+  }
+  const accolades=[...grouped.values(),...badgeBest.values()].sort((a,b)=>b.xp-a.xp || a.label.localeCompare(b.label));
+  const totalXP=accolades.reduce((sum,item)=>sum+item.xp,0);
+  const rings=accolades.filter(item=>item.key==="superBowlRing"||item.key==="eventRing").reduce((sum,item)=>sum+item.count,0);
+  const trophies=accolades.filter(item=>!item.isBadge).reduce((sum,item)=>sum+item.count,0);
+  const accoladeCount=accolades.reduce((sum,item)=>sum+item.count,0);
+  return {totalXP,rings,trophies,accoladeCount,accolades};
+}
+
+async function buildLegacyXPPlayers(forceRefresh=false){
+  if(legacyXPPlayers && !forceRefresh) return legacyXPPlayers;
+  let identities=await getDiscordPlayers(forceRefresh).catch(()=>[]);
+  if(identities.length && !identities.some(p=>Array.isArray(p.roles))){
+    identities=await getDiscordPlayers(true).catch(()=>identities);
+  }
+  const career=await buildLegacyCareerPlayers(false).catch(()=>[]);
+  const careerByName=new Map(career.map(p=>[normalizePlayerName(p.name),p]));
+  legacyXPPlayers=identities.map(identity=>{
+    const name=String(identity.robloxUsername||identity.discordDisplayName||identity.discordUsername||"").trim();
+    const score=scoreLegacyRoles(identity.roles||[]);
+    return {
+      name,
+      identity,
+      career:careerByName.get(normalizePlayerName(name))||null,
+      ...score
+    };
+  }).filter(p=>p.name && p.totalXP>0).sort((a,b)=>b.totalXP-a.totalXP || b.rings-a.rings || a.name.localeCompare(b.name));
+  return legacyXPPlayers;
+}
+
+function legacyAwardMiniText(item){
+  const count=item.count>1?`${item.count}× `:"";
+  return `${item.emoji} ${count}${item.isBadge?(item.badgeTier?.[0]?.toUpperCase()||""):item.label}`;
+}
+
+async function hydrateLegacyRobloxAvatars(container,players,limit=40){
+  const targets=[...container.querySelectorAll('[data-legacy-avatar]')].slice(0,limit);
+  await Promise.allSettled(targets.map(async img=>{
+    const name=img.dataset.legacyAvatar;
+    const url=await getDirectRobloxPicture(name).catch(()=>"");
+    if(url){img.src=url;img.style.visibility="visible";}
+  }));
+}
+
+async function renderLegacyPodium(players){
+  const container=document.getElementById("legacyPodium");
   if(!container) return;
-  container.innerHTML='<div class="legacy-empty">Loading all-time leaders...</div>';
+  const top=players.slice(0,3);
+  if(!top.length){container.innerHTML='<div class="legacy-empty">No accolade roles found yet.</div>';return;}
+  const display=top.length===3?[top[1],top[0],top[2]]:top;
+  container.innerHTML=display.map(p=>{
+    const actualRank=players.indexOf(p)+1;
+    const cls=actualRank===1?"first":actualRank===3?"third":"second";
+    return `<article class="legacy-podium-card ${cls}" data-legacy-player="${esc(p.name)}"><span class="legacy-podium-rank">#${actualRank}</span><img class="legacy-podium-avatar" data-legacy-avatar="${esc(p.name)}" alt="${esc(p.name)} Roblox avatar" style="visibility:hidden"><strong>${esc(p.name)}</strong><div class="legacy-podium-xp">${Number(p.totalXP).toLocaleString()}<small>XP</small></div><div class="legacy-podium-meta">${p.rings}× 🏆 · ${p.trophies} accolade${p.trophies===1?"":"s"}</div></article>`;
+  }).join("");
+  hydrateLegacyRobloxAvatars(container,display,3);
+}
+
+function getLegacySortedPlayers(players){
+  const q=normalize(legacySearchTerm);
+  const filtered=q?players.filter(p=>normalize(p.name).includes(q)):players.slice();
+  if(legacySortMode==="rings") filtered.sort((a,b)=>b.rings-a.rings || b.totalXP-a.totalXP || a.name.localeCompare(b.name));
+  else if(legacySortMode==="trophies") filtered.sort((a,b)=>b.trophies-a.trophies || b.totalXP-a.totalXP || a.name.localeCompare(b.name));
+  else filtered.sort((a,b)=>b.totalXP-a.totalXP || b.rings-a.rings || a.name.localeCompare(b.name));
+  return filtered;
+}
+
+async function renderLegacyLeaders(){
+  const container=document.getElementById("legacyLeaderList");
+  const countEl=document.getElementById("legacyRankedCount");
+  if(!container) return;
+  container.innerHTML='<div class="legacy-empty">Loading accolade-based Legacy rankings...</div>';
   try{
-    await getDiscordPlayers().catch(()=>[]);
-    const players=await buildLegacyCareerPlayers(false);
-    const label=position==="overall" ? null : LEGACY_POSITION_LABELS[position];
-    const ranked=players.map(p=>({
-      ...p,
-      displayPoints: label ? Number(p.positions[label]||0) : Number(p.total||0),
-      displayPositions: label ? label : Object.keys(p.positions).join("/")
-    })).filter(p=>p.displayPoints>0).sort((a,b)=>b.displayPoints-a.displayPoints || a.name.localeCompare(b.name)).slice(0,10);
-    if(!ranked.length){container.innerHTML='<div class="legacy-empty">No all-time data found for this position.</div>';return;}
+    const players=await buildLegacyXPPlayers(false);
+    await renderLegacyPodium(players);
+    const ranked=getLegacySortedPlayers(players);
+    if(countEl) countEl.textContent=`${players.length.toLocaleString()} ranked player${players.length===1?"":"s"}`;
+    if(!ranked.length){container.innerHTML='<div class="legacy-empty">No matching Legacy player found.</div>';return;}
+    const maxXP=Math.max(1,...ranked.map(p=>p.totalXP));
     container.innerHTML=ranked.map((p,i)=>{
-      const player=findDiscordPlayerByLooseName(p.name); const logo=player?.teamLogo||""; const team=player?.team||"";
-      return `<div class="legacy-leader-row" data-legacy-player="${esc(p.name)}"><span class="legacy-rank">${i+1}</span><div class="legacy-player-main">${logo?`<img src="${esc(getDisplayImageUrl(logo))}" alt="${esc(team)}" loading="lazy">`:""}<strong>${esc(p.name)}</strong></div><strong class="legacy-points">${formatPoints(p.displayPoints)}</strong></div>`;
+      const minis=p.accolades.slice(0,6).map(item=>`<span class="legacy-xp-award-mini">${esc(legacyAwardMiniText(item))}</span>`).join("");
+      return `<div class="legacy-xp-row" data-legacy-player="${esc(p.name)}"><span class="legacy-rank">${i+1}</span><div class="legacy-xp-player"><img data-legacy-avatar="${esc(p.name)}" alt="${esc(p.name)} Roblox avatar" style="visibility:hidden"><div class="legacy-xp-player-copy"><strong>${esc(p.name)}</strong><div class="legacy-xp-awards">${minis}</div></div></div><div class="legacy-xp-bar"><span style="width:${Math.max(4,(p.totalXP/maxXP)*100).toFixed(1)}%"></span></div><div class="legacy-xp-value">${p.totalXP.toLocaleString()} <small>XP</small></div></div>`;
     }).join("");
-  }catch(error){console.error("Legacy leaders error:",error);container.innerHTML='<div class="legacy-empty">Unable to load all-time leaders.</div>';}
+    hydrateLegacyRobloxAvatars(container,ranked,40);
+  }catch(error){console.error("Legacy XP leaders error:",error);container.innerHTML='<div class="legacy-empty">Unable to load Legacy rankings.</div>';}
 }
 
 async function searchLegacyPlayers(query){
-  const container=document.getElementById("legacyPlayerSearchResults");
-  if(!container) return;
-  const q=normalize(String(query||"").trim());
-  if(!q){container.innerHTML='<div class="legacy-empty">Start typing a player name.</div>';return;}
-  try{
-    const players=await buildLegacyCareerPlayers(false);
-    const matches=players.filter(p=>normalize(p.name).includes(q)).sort((a,b)=>b.total-a.total).slice(0,12);
-    if(!matches.length){container.innerHTML='<div class="legacy-empty">No matching all-time player found.</div>';return;}
-    container.innerHTML=matches.map(p=>`<div class="legacy-player-result" data-legacy-player="${esc(p.name)}"><div class="legacy-player-result-top"><strong>${esc(p.name)}</strong><strong class="legacy-points">${formatPoints(p.total)} PTS</strong></div></div>`).join("");
-  }catch(error){console.error("Legacy search error:",error);container.innerHTML='<div class="legacy-empty">Unable to search all-time players.</div>';}
-}
-
-
-function getLegacyHistoryHonors(playerName){
-  const target=normalizePlayerName(playerName);
-  if(!target) return [];
-  const honors=[];
-  document.querySelectorAll('[data-season-detail]').forEach(panel=>{
-    const season=panel.dataset.seasonDetail || "";
-    panel.querySelectorAll('.season-history-block .award-list li').forEach(li=>{
-      const strong=li.querySelector('strong');
-      if(!strong || normalizePlayerName(strong.textContent)!==target) return;
-      const block=li.closest('.season-history-block');
-      const card=li.closest('.history-list-card');
-      const section=block?.querySelector('.season-history-block-header h3')?.textContent?.trim() || "Honor";
-      const group=card?.querySelector('.mini-label')?.textContent?.trim() || "";
-      const role=li.querySelector('span')?.textContent?.trim() || "";
-      const key=[season,section,group,role].join('|');
-      if(honors.some(h=>h.key===key)) return;
-      honors.push({key,season,section,group,role});
-    });
-  });
-  return honors;
+  legacySearchTerm=String(query||"");
+  await renderLegacyLeaders();
 }
 
 async function openLegacyPlayerShowcase(playerName){
   const panel=document.getElementById('legacyPlayerShowcase');
   if(!panel) return;
-  const players=await buildLegacyCareerPlayers(false);
+  const players=await buildLegacyXPPlayers(false);
   const player=players.find(p=>normalizePlayerName(p.name)===normalizePlayerName(playerName));
   if(!player) return;
-  await getDiscordPlayers().catch(()=>[]);
-  const identity=findDiscordPlayerByLooseName(player.name);
+  const identity=player.identity||{};
+  const career=player.career;
   const avatar=await getDirectRobloxPicture(player.name).catch(()=>"");
-  const positionEntries=Object.entries(player.positions).sort((a,b)=>b[1]-a[1]);
-  const primary=positionEntries[0]?.[0] || "—";
-  const maxPts=Math.max(1,...positionEntries.map(([,pts])=>Number(pts)||0));
-  const honors=getLegacyHistoryHonors(player.name);
+  const positionEntries=Object.entries(career?.positions||{}).sort((a,b)=>b[1]-a[1]);
 
   const nameEl=document.getElementById('legacyProfileName');
   const pointsEl=document.getElementById('legacyProfilePoints');
-  const primaryEl=document.getElementById('legacyProfilePrimaryPosition');
+  const ringsEl=document.getElementById('legacyProfilePrimaryPosition');
   const countEl=document.getElementById('legacyProfilePositionCount');
   const teamEl=document.getElementById('legacyProfileTeam');
   const avatarEl=document.getElementById('legacyProfileAvatar');
   const teamLogoEl=document.getElementById('legacyProfileTeamLogo');
   const breakdownEl=document.getElementById('legacyProfileBreakdown');
   const trophiesEl=document.getElementById('legacyProfileTrophies');
+  const statContextEl=document.getElementById('legacyProfileStatContext');
   const achievementsEl=document.getElementById('legacyProfileAchievements');
 
   if(nameEl) nameEl.textContent=player.name;
-  if(pointsEl) pointsEl.textContent=formatPoints(player.total);
-  if(primaryEl) primaryEl.textContent=primary;
-  if(countEl) countEl.textContent=String(positionEntries.length);
-  if(teamEl) teamEl.textContent=identity?.team || 'No current team';
-  if(avatarEl){avatarEl.src=avatar || '';avatarEl.style.visibility=avatar?'visible':'hidden';avatarEl.alt=`${player.name} Roblox avatar`;}
-  if(teamLogoEl){const logo=identity?.teamLogo||'';teamLogoEl.src=logo?getDisplayImageUrl(logo):'';teamLogoEl.style.display=logo?'block':'none';}
+  if(pointsEl) pointsEl.textContent=Number(player.totalXP).toLocaleString();
+  if(ringsEl) ringsEl.textContent=String(player.rings);
+  if(countEl) countEl.textContent=String(player.accoladeCount);
+  if(teamEl) teamEl.textContent=identity.team || 'No current team';
+  if(avatarEl){avatarEl.src=avatar||'';avatarEl.style.visibility=avatar?'visible':'hidden';avatarEl.alt=`${player.name} Roblox avatar`;}
+  if(teamLogoEl){const logo=identity.teamLogo||'';teamLogoEl.src=logo?getDisplayImageUrl(logo):'';teamLogoEl.style.display=logo?'block':'none';}
+
   if(breakdownEl){
-    breakdownEl.innerHTML=positionEntries.length?positionEntries.map(([pos,pts])=>`<div class="legacy-breakdown-row"><span class="legacy-breakdown-pos">${esc(pos)}</span><div class="legacy-breakdown-bar"><span style="width:${Math.max(4,Math.min(100,(Number(pts)||0)/maxPts*100))}%"></span></div><strong class="legacy-breakdown-points">${formatPoints(pts)}</strong></div>`).join(''):'<div class="legacy-trophy-empty">No career position data found.</div>';
+    breakdownEl.innerHTML=player.accolades.length?player.accolades.map(item=>`<div class="legacy-xp-breakdown-row"><span>${esc(item.emoji)} ${esc(item.count>1?`${item.count}× ${item.label}`:item.label)}</span><strong>+${Number(item.xp).toLocaleString()} XP</strong></div>`).join(''):'<div class="legacy-trophy-empty">No scored accolades found.</div>';
   }
   if(trophiesEl){
-    trophiesEl.innerHTML=honors.length?honors.map(h=>`<div class="legacy-trophy-card"><div class="legacy-trophy-icon">🏆</div><div><span>Season ${esc(h.season)} · ${esc(h.group||h.section)}</span><strong>${esc(h.role)}${h.section&&h.section!==h.group?` · ${esc(h.section)}`:''}</strong></div></div>`).join(''):'<div class="legacy-trophy-empty">No archived Season 1–3 honors found for this player yet.</div>';
+    const honors=player.accolades.filter(item=>!item.isBadge);
+    trophiesEl.innerHTML=honors.length?honors.map(item=>`<div class="legacy-trophy-card"><div class="legacy-trophy-icon">${esc(item.emoji)}</div><div><span>${item.count>1?`${item.count}× · `:""}${Number(item.xp).toLocaleString()} XP</span><strong>${esc(item.label)}</strong></div></div>`).join(''):'<div class="legacy-trophy-empty">No trophy-room accolades found yet.</div>';
   }
-  if(achievementsEl) renderLegacyAchievements(player);
+  if(statContextEl){
+    const maxPts=Math.max(1,...positionEntries.map(([,pts])=>Number(pts)||0));
+    statContextEl.innerHTML=positionEntries.length?positionEntries.map(([pos,pts])=>`<div class="legacy-breakdown-row"><span class="legacy-breakdown-pos">${esc(pos)}</span><div class="legacy-breakdown-bar"><span style="width:${Math.max(4,Math.min(100,(Number(pts)||0)/maxPts*100))}%"></span></div><strong class="legacy-breakdown-points">${formatPoints(pts)} PTS</strong></div>`).join(''):'<div class="legacy-trophy-empty">No connected all-time stat rows found for this player.</div>';
+  }
+  if(achievementsEl && career) renderLegacyAchievements(career);
+  else if(achievementsEl){
+    achievementsEl.innerHTML='<div class="legacy-achievement-empty">No connected all-time stats found for badge progress.</div>';
+    const badgeCount=document.getElementById('legacyBadgeUnlockedCount'); if(badgeCount) badgeCount.textContent='0 / 20';
+    const badgeSummary=document.getElementById('legacyBadgeTierSummary'); if(badgeSummary) badgeSummary.textContent='—';
+  }
   panel.hidden=false;
   panel.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-async function loadLegacyRecordBook(){
-  if(legacyLoaded){ await renderLegacyLeaders(document.getElementById("legacyLeaderPosition")?.value||"overall"); return; }
+async function loadLegacyRecordBook(forceRefresh=false){
+  if(forceRefresh){legacyXPPlayers=null;legacyCareerPlayers=null;}
   legacyLoaded=true;
-  await renderLegacyLeaders(document.getElementById("legacyLeaderPosition")?.value||"overall");
+  await renderLegacyLeaders();
 }
-
 
 document.addEventListener('click',(event)=>{
   const row=event.target.closest('[data-legacy-player]');
   if(row) openLegacyPlayerShowcase(row.dataset.legacyPlayer);
+  const sort=event.target.closest('[data-legacy-sort]');
+  if(sort){
+    legacySortMode=sort.dataset.legacySort||'xp';
+    document.querySelectorAll('[data-legacy-sort]').forEach(btn=>btn.classList.toggle('active',btn===sort));
+    renderLegacyLeaders();
+  }
 });
 const legacyShowcaseClose=document.getElementById('legacyShowcaseClose');
 if(legacyShowcaseClose) legacyShowcaseClose.addEventListener('click',()=>{
   const panel=document.getElementById('legacyPlayerShowcase');
   if(panel) panel.hidden=true;
 });
-
-const legacyLeaderPosition=document.getElementById("legacyLeaderPosition");
-if(legacyLeaderPosition) legacyLeaderPosition.addEventListener("change",()=>renderLegacyLeaders(legacyLeaderPosition.value));
 const legacyPlayerSearch=document.getElementById("legacyPlayerSearch");
 if(legacyPlayerSearch) legacyPlayerSearch.addEventListener("input",()=>searchLegacyPlayers(legacyPlayerSearch.value));
 const legacyNav=document.querySelector('.nav-link[data-page="legacy"]');
-if(legacyNav) legacyNav.addEventListener("click",()=>loadLegacyRecordBook());
-if(window.location.hash==="#legacy") loadLegacyRecordBook();
+if(legacyNav) legacyNav.addEventListener("click",()=>loadLegacyRecordBook(false));
+if(window.location.hash==="#legacy") loadLegacyRecordBook(false);
+
 
 /*
 ==================================================
