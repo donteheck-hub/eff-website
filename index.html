@@ -389,6 +389,43 @@
     .legacy-xp-breakdown{display:grid;gap:8px}.legacy-xp-breakdown-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:11px 13px;border-radius:11px;border:1px solid rgba(244,197,91,.13);background:rgba(35,24,12,.38)}.legacy-xp-breakdown-row span{color:#e7dcc5;font-weight:850}.legacy-xp-breakdown-row strong{color:#ffd56f}.legacy-stat-context-card{margin-top:20px}.legacy-xp-profile-hero{border-color:rgba(244,197,91,.24);background:radial-gradient(circle at 18% 0%,rgba(244,197,91,.17),transparent 38%),rgba(13,11,9,.88)}.legacy-xp-profile-hero .legacy-profile-avatar-wrap{background:linear-gradient(135deg,#ffe197,#b67b21)}
     @media(max-width:900px){.legacy-podium{grid-template-columns:1fr}.legacy-podium-card.first{order:-1}.legacy-rank-toolbar{align-items:flex-start;flex-direction:column}.legacy-rank-controls{width:100%}.legacy-rank-search{min-width:0;flex:1}.legacy-xp-row{grid-template-columns:34px minmax(0,1fr) 90px}.legacy-xp-bar{display:none}}
     @media(max-width:620px){.legacy-rank-controls{flex-direction:column;align-items:stretch}.legacy-sort-tabs{justify-content:center}.legacy-xp-row{grid-template-columns:30px minmax(0,1fr) auto}.legacy-xp-player img{width:36px;height:36px}.legacy-xp-awards{display:none}}
+
+    .team-detail-snapshot {
+      display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin:22px 0;
+    }
+    .team-snapshot-stat {
+      padding:16px; border-radius:16px; background:linear-gradient(180deg,rgba(13,35,65,.9),rgba(7,20,39,.96));
+      border:1px solid rgba(124,201,255,.2); text-align:center;
+    }
+    .team-snapshot-stat span { display:block; font-size:.68rem; font-weight:900; letter-spacing:.12em; color:#8fcfff; margin-bottom:6px; }
+    .team-snapshot-stat strong { font-size:1.35rem; color:#fff; }
+    .team-detail-feature-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+    .team-recent-form { display:flex; gap:10px; flex-wrap:wrap; align-items:center; min-height:68px; }
+    .team-form-pill { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; font-weight:1000; border:1px solid rgba(255,255,255,.16); }
+    .team-form-pill.win { background:rgba(50,205,120,.18); color:#69eda4; border-color:rgba(75,230,140,.38); }
+    .team-form-pill.loss { background:rgba(255,82,82,.15); color:#ff8d8d; border-color:rgba(255,100,100,.35); }
+    .team-form-pill.tie { background:rgba(255,202,73,.14); color:#ffd873; border-color:rgba(255,202,73,.3); }
+    .team-form-detail { color:#9eb7d3; font-size:.82rem; margin-left:4px; }
+    .team-leaders-list { display:grid; gap:9px; }
+    .team-leader-row { display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 12px; border-radius:12px; background:rgba(4,14,30,.64); border:1px solid rgba(124,201,255,.12); }
+    .team-leader-rank { color:#83cfff; font-weight:1000; }
+    .team-leader-row strong { color:#f5fbff; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .team-leader-meta { text-align:right; }
+    .team-leader-meta b { display:block; color:#fff; }
+    .team-leader-meta span { color:#86b9df; font-size:.72rem; font-weight:800; }
+    .home-activity-shell { margin-top:24px; border-radius:18px; overflow:hidden; border:1px solid rgba(124,201,255,.22); background:linear-gradient(180deg,rgba(7,19,39,.92),rgba(4,12,27,.96)); box-shadow:0 20px 45px rgba(0,0,0,.24); }
+    .home-activity-head { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:16px 18px; border-bottom:1px solid rgba(124,201,255,.18); }
+    .home-activity-head strong { color:#f4fbff; letter-spacing:.08em; }
+    .home-activity-head span { color:#7cc9ff; font-size:.82rem; font-weight:800; }
+    .home-activity-feed { display:grid; }
+    .home-activity-item { display:grid; grid-template-columns:46px minmax(0,1fr) auto; gap:13px; align-items:center; padding:14px 18px; border-bottom:1px solid rgba(124,201,255,.11); }
+    .home-activity-item:last-child { border-bottom:0; }
+    .home-activity-icon { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:rgba(52,151,255,.13); border:1px solid rgba(124,201,255,.18); font-size:1.15rem; }
+    .home-activity-copy strong { display:block; color:#f7fbff; margin-bottom:3px; }
+    .home-activity-copy span { color:#95abc4; font-size:.82rem; }
+    .home-activity-tag { padding:6px 9px; border-radius:999px; background:rgba(44,150,255,.12); border:1px solid rgba(124,201,255,.18); color:#9fd7ff; font-size:.68rem; font-weight:900; white-space:nowrap; }
+    @media(max-width:850px){ .team-detail-snapshot{grid-template-columns:repeat(2,1fr)} .team-detail-feature-grid{grid-template-columns:1fr} }
+    @media(max-width:560px){ .team-detail-snapshot{grid-template-columns:1fr 1fr}.home-activity-item{grid-template-columns:40px minmax(0,1fr)}.home-activity-tag{grid-column:2;justify-self:start} }
 </style>
 </head>
 <body>
@@ -480,6 +517,26 @@
           </div>
           <div id="homeAwardWatchList" class="home-award-list">
             <div class="home-dashboard-loading">Loading award watch...</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <span>AROUND THE LEAGUE</span>
+            <h2>EFF Activity</h2>
+          </div>
+          <p>Latest verified game results and career achievement unlocks.</p>
+        </div>
+
+        <div class="home-activity-shell">
+          <div class="home-activity-head">
+            <strong>LIVE LEAGUE FEED</strong>
+            <span>Scores + Achievements</span>
+          </div>
+          <div id="homeActivityFeed" class="home-activity-feed">
+            <div class="home-dashboard-loading">Loading league activity...</div>
           </div>
         </div>
       </section>
@@ -675,6 +732,32 @@
               <h2 id="teamDetailName">Team</h2>
               <p id="teamDetailRecord"></p>
             </div>
+          </div>
+
+          <div class="team-detail-snapshot" id="teamDetailSnapshot">
+            <div class="team-snapshot-stat"><span>RECORD</span><strong id="teamSnapshotRecord">0-0</strong></div>
+            <div class="team-snapshot-stat"><span>CONF RANK</span><strong id="teamSnapshotConferenceRank">—</strong></div>
+            <div class="team-snapshot-stat"><span>DIV RANK</span><strong id="teamSnapshotDivisionRank">—</strong></div>
+            <div class="team-snapshot-stat"><span>POINT DIFF</span><strong id="teamSnapshotPD">0</strong></div>
+            <div class="team-snapshot-stat"><span>PF / PA</span><strong id="teamSnapshotPFPA">0 / 0</strong></div>
+          </div>
+
+          <div class="team-detail-feature-grid">
+            <section class="team-detail-card">
+              <div class="team-detail-card-title">
+                <span>FORM</span>
+                <h3>Recent Results</h3>
+              </div>
+              <div class="team-recent-form" id="teamRecentForm"></div>
+            </section>
+
+            <section class="team-detail-card">
+              <div class="team-detail-card-title">
+                <span>LEADERS</span>
+                <h3>Team Leaders</h3>
+              </div>
+              <div class="team-leaders-list" id="teamLeadersList"></div>
+            </section>
           </div>
 
           <div class="team-detail-grid">

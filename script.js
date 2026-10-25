@@ -2488,6 +2488,17 @@ async function openTeamDetail(
     );
 
 
+  const recentFormElement =
+    document.getElementById(
+      "teamRecentForm"
+    );
+
+  const leadersElement =
+    document.getElementById(
+      "teamLeadersList"
+    );
+
+
   if (nameElement) {
     nameElement.textContent =
       teamName;
@@ -2507,6 +2518,23 @@ async function openTeamDetail(
     scheduleElement.innerHTML = `
       <div class="loading-card">
         Loading schedule...
+      </div>
+    `;
+  }
+
+
+  if (recentFormElement) {
+    recentFormElement.innerHTML = `
+      <div class="loading-card">
+        Loading recent results...
+      </div>
+    `;
+  }
+
+  if (leadersElement) {
+    leadersElement.innerHTML = `
+      <div class="loading-card">
+        Loading team leaders...
       </div>
     `;
   }
@@ -2612,6 +2640,38 @@ async function openTeamDetail(
       teamPlayers
     );
 
+    const allStandings = standings;
+    renderTeamSeasonSnapshot(teamName, team, allStandings);
+
+    const schedule =
+      Array.isArray(
+        data[SCHEDULE_SHEET]
+      )
+        ? data[SCHEDULE_SHEET]
+        : [];
+
+    const games =
+      schedule.filter(
+        (game) =>
+          teamNamesMatch(
+            game["Away Team"],
+            teamName
+          ) ||
+          teamNamesMatch(
+            game["Home Team"],
+            teamName
+          )
+      );
+
+    renderTeamRecentForm(recentFormElement, games, teamName);
+
+    buildTeamSeasonLeaders(teamName)
+      .then(leaders => renderTeamLeaders(leadersElement, leaders))
+      .catch(error => {
+        console.error("Team leaders error:", error);
+        if (leadersElement) leadersElement.innerHTML = `<div class="loading-card">Unable to load team leaders.</div>`;
+      });
+
 
     if (!SEASON4_SCHEDULE_READY) {
       if (scheduleElement) {
@@ -2622,26 +2682,6 @@ async function openTeamDetail(
         `;
       }
     } else {
-      const schedule =
-        Array.isArray(
-          data[SCHEDULE_SHEET]
-        )
-          ? data[SCHEDULE_SHEET]
-          : [];
-
-      const games =
-        schedule.filter(
-          (game) =>
-            teamNamesMatch(
-              game["Away Team"],
-              teamName
-            ) ||
-            teamNamesMatch(
-              game["Home Team"],
-              teamName
-            )
-        );
-
       renderTeamSeasonSchedule(
         scheduleElement,
         games,
@@ -2685,6 +2725,115 @@ async function openTeamDetail(
 
 }
 
+
+function getStandingsRank(teamName, standings, scope = "conference") {
+  const team = standings.find(item => teamNamesMatch(item.Team, teamName));
+  if (!team) return null;
+
+  const division = getDivisionForTeam(teamName);
+  let pool = [];
+  if (scope === "division" && division) {
+    pool = standings.filter(item => division.teams.some(name => teamNamesMatch(name, item.Team)));
+  } else {
+    pool = standings.filter(item => normalize(item.Conference) === normalize(team.Conference));
+  }
+  pool.sort(sortStandings);
+  const index = pool.findIndex(item => teamNamesMatch(item.Team, teamName));
+  return index >= 0 ? index + 1 : null;
+}
+
+function renderTeamSeasonSnapshot(teamName, team, standings) {
+  const setText = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+  };
+
+  setText("teamSnapshotRecord", team?.Rec || "0-0");
+  const confRank = getStandingsRank(teamName, standings, "conference");
+  const divRank = getStandingsRank(teamName, standings, "division");
+  setText("teamSnapshotConferenceRank", confRank ? `#${confRank}` : "—");
+  setText("teamSnapshotDivisionRank", divRank ? `#${divRank}` : "—");
+  setText("teamSnapshotPD", pdText(team?.PD ?? 0));
+  setText("teamSnapshotPFPA", `${team?.PF ?? 0} / ${team?.PA ?? 0}`);
+}
+
+function getTeamGameResult(game, teamName) {
+  const isAway = teamNamesMatch(game["Away Team"], teamName);
+  const teamScore = isAway ? game["Away Final Score"] : game["Home Final Score"];
+  const opponentScore = isAway ? game["Home Final Score"] : game["Away Final Score"];
+  const opponent = isAway ? game["Home Team"] : game["Away Team"];
+  const ready = String(teamScore ?? "").trim() !== "" && String(opponentScore ?? "").trim() !== "";
+  if (!ready || !Number.isFinite(Number(teamScore)) || !Number.isFinite(Number(opponentScore))) return null;
+  const result = Number(teamScore) > Number(opponentScore) ? "W" : Number(teamScore) < Number(opponentScore) ? "L" : "T";
+  return { result, teamScore: Number(teamScore), opponentScore: Number(opponentScore), opponent, week: game.Week || "" };
+}
+
+function renderTeamRecentForm(container, games, teamName) {
+  if (!container) return;
+  const completed = [...games]
+    .map(game => getTeamGameResult(game, teamName))
+    .filter(Boolean)
+    .sort((a,b) => getWeekNumber(b.week) - getWeekNumber(a.week))
+    .slice(0,5);
+
+  if (!completed.length) {
+    container.innerHTML = `<div class="loading-card">No completed games yet.</div>`;
+    return;
+  }
+
+  container.innerHTML = completed.map(item => `
+    <div class="team-form-pill ${item.result === "W" ? "win" : item.result === "L" ? "loss" : "tie"}" title="${esc(item.week)} vs ${esc(item.opponent)}: ${item.teamScore}-${item.opponentScore}">${item.result}</div>
+  `).join("") + `<span class="team-form-detail">Last ${completed.length} completed game${completed.length === 1 ? "" : "s"}</span>`;
+}
+
+async function buildTeamSeasonLeaders(teamName) {
+  const data = await getStatsSourceData("season", false);
+  await getDiscordPlayers().catch(() => []);
+  const combined = new Map();
+  const positionLabels = {
+    quarterback:"QB", runningback:"RB", center:"C", "tight end":"TE", "wide receiver":"WR",
+    "defensive end":"DE", "defensive back":"DB", kicker:"K"
+  };
+
+  for (const sheetName of STAT_SHEETS) {
+    const rawRows = Array.isArray(data?.[sheetName]) ? data[sheetName] : [];
+    const normalizedRows = normalizeStatSheetRows(rawRows);
+    const rows = applyCalculatedPoints(sheetName, normalizedRows.rows);
+    for (const row of rows) {
+      const name = getStatsPlayerName(row);
+      if (!name) continue;
+      const discordPlayer = findDiscordPlayerByLooseName(name);
+      if (!discordPlayer || !teamNamesMatch(discordPlayer.team, teamName)) continue;
+      const pts = getStatsPointsValue(row);
+      if (!Number.isFinite(pts) || pts <= 0) continue;
+      const key = getAwardPlayerKey(name);
+      const current = combined.get(key) || { name, pts: 0, positions: [] };
+      current.pts += pts;
+      const label = positionLabels[sheetName] || sheetName.toUpperCase();
+      if (!current.positions.includes(label)) current.positions.push(label);
+      combined.set(key, current);
+    }
+  }
+
+  return [...combined.values()]
+    .sort((a,b) => b.pts - a.pts || a.name.localeCompare(b.name))
+    .slice(0,5);
+}
+
+function renderTeamLeaders(container, leaders) {
+  if (!container) return;
+  if (!leaders.length) {
+    container.innerHTML = `<div class="loading-card">No player points recorded yet.</div>`;
+    return;
+  }
+  container.innerHTML = leaders.map((leader,index) => `
+    <div class="team-leader-row">
+      <span class="team-leader-rank">#${index + 1}</span>
+      <strong>${esc(leader.name)}</strong>
+      <div class="team-leader-meta"><b>${formatPoints(leader.pts)}</b><span>${esc(leader.positions.join("/"))}</span></div>
+    </div>
+  `).join("");
+}
 
 function renderTeamRoster(
   container,
@@ -7770,9 +7919,85 @@ async function renderHomeStandingsPreview(){
     renderHomeStandingsList(p,standings.filter(t=>normalize(t.Conference)==="pacific").sort(sortStandings));
   }catch(error){console.error("Home standings preview error:",error);a.innerHTML='<div class="home-dashboard-loading">Unable to load.</div>';p.innerHTML='<div class="home-dashboard-loading">Unable to load.</div>';}
 }
+async function getBotActivity() {
+  try {
+    const response = await fetch(`${DISCORD_API_URL}/api/activity`, { cache: "no-store" });
+    if (!response.ok) return [];
+    const result = await response.json();
+    return Array.isArray(result?.activity) ? result.activity : [];
+  } catch (error) {
+    console.warn("Bot activity feed unavailable:", error);
+    return [];
+  }
+}
+
+function buildLatestScoreActivity(schedule = []) {
+  return schedule
+    .map(game => {
+      const awayText = String(game["Away Final Score"] ?? "").trim();
+      const homeText = String(game["Home Final Score"] ?? "").trim();
+      if (awayText === "" || homeText === "") return null;
+      const awayScore = Number(awayText), homeScore = Number(homeText);
+      if (!Number.isFinite(awayScore) || !Number.isFinite(homeScore)) return null;
+      const away = String(game["Away Team"] || "").trim();
+      const home = String(game["Home Team"] || "").trim();
+      if (!away || !home) return null;
+      const winner = awayScore > homeScore ? away : homeScore > awayScore ? home : "Tie";
+      return {
+        type: "score",
+        icon: "🏈",
+        title: winner === "Tie" ? `${away} tied ${home}` : `${winner} won`,
+        detail: `${away} ${awayScore} · ${home} ${homeScore}`,
+        tag: String(game.Week || "Final"),
+        sortValue: getWeekNumber(game.Week)
+      };
+    })
+    .filter(Boolean)
+    .sort((a,b) => b.sortValue - a.sortValue)
+    .slice(0,6);
+}
+
+async function renderHomeActivityFeed() {
+  const container = document.getElementById("homeActivityFeed");
+  if (!container) return;
+  container.innerHTML = '<div class="home-dashboard-loading">Loading league activity...</div>';
+  try {
+    const [data, badgeActivity] = await Promise.all([
+      getLeagueData(),
+      getBotActivity()
+    ]);
+    const schedule = Array.isArray(data?.[SCHEDULE_SHEET]) ? data[SCHEDULE_SHEET] : [];
+    const scoreEvents = buildLatestScoreActivity(schedule);
+    const badgeEvents = badgeActivity.slice(0,6).map(event => ({
+      type: "badge",
+      icon: event.icon || "🏅",
+      title: event.title || "Career achievement unlocked",
+      detail: event.detail || "",
+      tag: event.tag || "Achievement",
+      timestamp: event.timestamp || ""
+    }));
+
+    const events = [...badgeEvents, ...scoreEvents].slice(0,10);
+    if (!events.length) {
+      container.innerHTML = '<div class="home-dashboard-loading">No league activity available yet.</div>';
+      return;
+    }
+    container.innerHTML = events.map(event => `
+      <div class="home-activity-item">
+        <div class="home-activity-icon">${esc(event.icon)}</div>
+        <div class="home-activity-copy"><strong>${esc(event.title)}</strong><span>${esc(event.detail)}</span></div>
+        <span class="home-activity-tag">${esc(event.tag)}</span>
+      </div>
+    `).join("");
+  } catch (error) {
+    console.error("Home activity feed error:", error);
+    container.innerHTML = '<div class="home-dashboard-loading">Unable to load league activity.</div>';
+  }
+}
+
 const homeAwardPosition=document.getElementById("homeAwardPosition");
 if(homeAwardPosition){homeAwardPosition.addEventListener("change",()=>renderHomeAwardWatch(homeAwardPosition.value));}
-async function loadHomeDashboard(){await Promise.all([renderHomeAwardWatch(homeAwardPosition?.value||"mvp"),renderHomeStandingsPreview()]);}
+async function loadHomeDashboard(){await Promise.all([renderHomeAwardWatch(homeAwardPosition?.value||"mvp"),renderHomeStandingsPreview(),renderHomeActivityFeed()]);}
 
 /*
 ==================================================
