@@ -8152,7 +8152,7 @@ async function buildHomeAwardLeaders(awardKey) {
 // The roster points shown are (all players' PTS minus the head coach's PTS) / 5.
 // Each component is normalized against the highest eligible team before weighting.
 async function buildHomeCoachOfYearLeaders() {
-  const [data, players, franchiseResponse] = await Promise.all([
+  const [data, players, franchiseResponse, rosterResponse] = await Promise.all([
     getStatsSourceData("season", false),
     getDiscordPlayers().catch(() => []),
     fetch(`${BOT_API_URL}/api/franchises`, { cache: "no-store" })
@@ -8162,6 +8162,15 @@ async function buildHomeCoachOfYearLeaders() {
       })
       .catch(error => {
         console.warn("COTY franchise owners unavailable:", error);
+        return null;
+      }),
+    fetch(`${BOT_API_URL}/api/team-rosters`, { cache: "no-store" })
+      .then(response => {
+        if (!response.ok) throw new Error(`Roster API HTTP ${response.status}`);
+        return response.json();
+      })
+      .catch(error => {
+        console.warn("COTY roster API unavailable; using player roster cache:", error);
         return null;
       })
   ]);
@@ -8199,24 +8208,69 @@ async function buildHomeCoachOfYearLeaders() {
       ? players.find(player => String(player.discordId) === ownerId) : null;
     ownerByTeam.set(key, {
       id: ownerId,
-      verified: Boolean(ownerId && owner),
+      verified: Boolean(ownerId && (owner || rosterResponse?.teams)),
       name: franchise?.ownerDisplayName || franchise?.ownerDiscordUsername ||
         owner?.displayName || "",
       player: owner
     });
   }
 
+  // Use the same Discord team rosters as Teams > Current Roster.
+  // Index only unique identities: never assign points to an ambiguous name.
+  const rosterPlayers = [];
+  const rosterTeams = rosterResponse?.teams;
+  if (rosterTeams && typeof rosterTeams === "object") {
+    for (const [rosterTeamName, roster] of Object.entries(rosterTeams)) {
+      const teamName = roster?.team || rosterTeamName;
+      for (const player of (Array.isArray(roster?.players) ? roster.players : [])) {
+        rosterPlayers.push({ ...player, team: teamName });
+      }
+    }
+  }
+  // The existing Teams page uses /api/players, so retain that as a fallback.
+  if (!rosterPlayers.length) rosterPlayers.push(...players);
+
+  const rosterNames = new Map();
+  const rosterIds = new Map();
+  for (const player of rosterPlayers) {
+    const teamKey = normalizeTeamName(player.team);
+    if (!teamPoints.has(teamKey)) continue;
+    const id = String(player.discordId || "");
+    if (id) rosterIds.set(id, player);
+    const names = [
+      player.discordUsername, player.discordGlobalName,
+      player.discordDisplayName, player.discordNickname,
+      player.displayName, player.name, player.statsDisplayName,
+      player.robloxUsername, player.robloxDisplayName,
+      ...(Array.isArray(player.lookupNames) ? player.lookupNames : [])
+    ];
+    for (const name of names) {
+      const key = getAwardPlayerKey(name);
+      if (!key) continue;
+      const existing = rosterNames.get(key);
+      if (!existing) rosterNames.set(key, player);
+      else if (String(existing.discordId || "") !== id) rosterNames.set(key, false);
+    }
+  }
+
   let unassignedPlayers = 0;
   for (const stat of statsByPlayer.values()) {
-    const player = findDiscordPlayerByLooseName(stat.name);
+    const key = getAwardPlayerKey(stat.name);
+    const rosterMatch = rosterNames.get(key);
+    // Only use the website's legacy matcher if the roster lookup has no match;
+    // never override an ambiguous roster name.
+    const legacyMatch = rosterMatch === undefined
+      ? findDiscordPlayerByLooseName(stat.name) : null;
+    const player = rosterMatch || (legacyMatch?.discordId
+      ? rosterIds.get(String(legacyMatch.discordId)) : null);
     const teamKey = normalizeTeamName(player?.team);
-    if (!teamPoints.has(teamKey)) {
+    if (!player || !teamPoints.has(teamKey)) {
       unassignedPlayers++;
       continue;
     }
     teamPoints.set(teamKey, teamPoints.get(teamKey) + stat.pts);
     const owner = ownerByTeam.get(teamKey);
-    if (owner?.verified && String(player?.discordId) === owner.id) {
+    if (owner?.verified && String(player.discordId) === owner.id) {
       coachPoints.set(teamKey, coachPoints.get(teamKey) + stat.pts);
     }
   }
@@ -8264,7 +8318,7 @@ async function renderHomeAwardWatch(awardKey="mvp") {
         const coachLabel = item.coach || 'Coach — ' + item.team;
         const note = !item.coachVerified
           ? 'Franchise Owner not verified — coach points may still be included. Check the bot Franchise Owner role and team assignment.'
-          : item.unassignedPlayers ? `${item.unassignedPlayers} stat players could not be assigned to a team.` : '';
+          : '';
         return `<div class="home-award-row" title="${esc(note)}"><span class="home-award-rank">${index+1}</span><div class="home-award-player">${logo}<div style="min-width:0"><strong style="display:block">${esc(coachLabel)}</strong><small style="color:#a8c7e3">${esc(item.team)} · ${item.wins}-${item.losses} · PD ${item.pd > 0 ? '+' : ''}${item.pd}</small>${note ? `<small style="display:block;color:#f0bf70">${esc(note)}</small>` : ''}</div></div><span class="home-award-position" title="Roster PTS excluding coach, divided by 5">${formatPoints(item.playerPoints)} PTS</span><strong class="home-award-points" title="50% player points, 35% record, 15% point differential">${item.score.toFixed(1)}</strong></div>`;
       }).join('') : '<div class="home-dashboard-loading">No Season 4 team results yet.</div>';
       return;
