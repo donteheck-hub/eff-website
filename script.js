@@ -8223,7 +8223,7 @@ async function buildHomeCoachOfYearLeaders() {
 
   const rows = teams.map(team => {
     const key = normalizeTeamName(team.Team);
-    const match = String(team.Rec || "0-0").match(/(\\d+)\\s*-\\s*(\\d+)/);
+    const match = String(team.Rec || "0-0").match(/(\d+)\s*-\s*(\d+)/);
     const wins = match ? Number(match[1]) : 0;
     const losses = match ? Number(match[2]) : 0;
     const played = wins + losses;
