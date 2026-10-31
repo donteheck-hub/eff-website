@@ -8148,6 +8148,88 @@ async function buildHomeAwardLeaders(awardKey) {
     .sort((a,b) => b.pts - a.pts || a.name.localeCompare(b.name))
     .slice(0,5);
 }
+// Regular-season COTY: 50% roster points, 35% win rate, 15% point differential.
+// The roster points shown are (all players' PTS minus the head coach's PTS) / 5.
+// Each component is normalized against the highest eligible team before weighting.
+async function buildHomeCoachOfYearLeaders() {
+  const [data, players] = await Promise.all([
+    getStatsSourceData("season", false),
+    getDiscordPlayers().catch(() => [])
+  ]);
+  const teams = buildSeason4Standings(data?.[STANDINGS_SHEET])
+    .filter(team => isActiveFranchise(team.Team));
+  const statsByPlayer = new Map();
+  for (const sheetName of HOME_AWARD_DEFINITIONS.mvp.sheets) {
+    const rawRows = Array.isArray(data?.[sheetName]) ? data[sheetName] : [];
+    const rows = applyCalculatedPoints(sheetName, normalizeStatSheetRows(rawRows).rows);
+    for (const row of rows) {
+      const name = getStatsPlayerName(row);
+      const pts = getStatsPointsValue(row);
+      const key = getAwardPlayerKey(name);
+      if (!key || !Number.isFinite(pts)) continue;
+      const previous = statsByPlayer.get(key) || { name, pts: 0 };
+      previous.pts += pts;
+      statsByPlayer.set(key, previous);
+    }
+  }
+
+  const teamPoints = new Map(teams.map(team => [normalizeTeamName(team.Team), 0]));
+  const teamCoachPoints = new Map(teams.map(team => [normalizeTeamName(team.Team), 0]));
+  const teamCoachResolved = new Map();
+  const coachIdentityKeys = new Map();
+  for (const team of teams) {
+    const key = normalizeTeamName(team.Team);
+    const coach = String(team["Head Coach"] || team.HeadCoach || team.Coach || "").trim();
+    const identity = coach ? findDiscordPlayerByLooseName(coach) : null;
+    const names = [coach, identity?.discordUsername, identity?.discordGlobalName,
+      identity?.discordDisplayName, identity?.robloxUsername, identity?.robloxDisplayName]
+      .filter(Boolean).map(getAwardPlayerKey);
+    coachIdentityKeys.set(key, new Set(names));
+    teamCoachResolved.set(key, Boolean(coach && identity));
+  }
+
+  let unassignedPlayers = 0;
+  for (const stat of statsByPlayer.values()) {
+    const player = findDiscordPlayerByLooseName(stat.name);
+    const teamKey = normalizeTeamName(player?.team);
+    if (!teamPoints.has(teamKey)) {
+      unassignedPlayers++;
+      continue;
+    }
+    teamPoints.set(teamKey, teamPoints.get(teamKey) + stat.pts);
+    if (coachIdentityKeys.get(teamKey)?.has(getAwardPlayerKey(stat.name))) {
+      teamCoachPoints.set(teamKey, teamCoachPoints.get(teamKey) + stat.pts);
+    }
+  }
+
+  const rows = teams.map(team => {
+    const key = normalizeTeamName(team.Team);
+    const match = String(team.Rec || "0-0").match(/(\d+)\s*-\s*(\d+)/);
+    const wins = match ? Number(match[1]) : 0;
+    const losses = match ? Number(match[2]) : 0;
+    const played = wins + losses;
+    const coach = String(team["Head Coach"] || team.HeadCoach || team.Coach || "").trim();
+    const eligiblePoints = Math.max(0, (teamPoints.get(key) || 0) - (teamCoachPoints.get(key) || 0));
+    return {
+      team: team.Team, logo: team.Logo, coach, wins, losses, played,
+      pct: played ? wins / played : 0, pd: Number(team.PD) || 0,
+      playerPoints: eligiblePoints / 5,
+      coachVerified: teamCoachResolved.get(key),
+      unassignedPlayers
+    };
+  }).filter(row => row.played > 0);
+
+  const maxPoints = Math.max(0, ...rows.map(row => row.playerPoints));
+  const minPd = Math.min(0, ...rows.map(row => row.pd));
+  const maxPd = Math.max(0, ...rows.map(row => row.pd));
+  return rows.map(row => ({
+    ...row,
+    score: 50 * (maxPoints > 0 ? row.playerPoints / maxPoints : 0)
+      + 35 * row.pct
+      + 15 * (maxPd > minPd ? (row.pd - minPd) / (maxPd - minPd) : 0)
+  })).sort((a,b) => b.score - a.score || b.playerPoints - a.playerPoints || b.wins - a.wins)
+    .slice(0,5);
+}
 async function renderHomeAwardWatch(awardKey="mvp") {
   const container = document.getElementById("homeAwardWatchList");
   if (!container) return;
@@ -8155,6 +8237,18 @@ async function renderHomeAwardWatch(awardKey="mvp") {
 
   try {
     await getDiscordPlayers().catch(() => []);
+    if (String(awardKey).toLowerCase() === "coty") {
+      const coaches = await buildHomeCoachOfYearLeaders();
+      container.innerHTML = coaches.length ? coaches.map((item,index) => {
+        const logo = item.logo ? `<img src="${esc(getDisplayImageUrl(item.logo))}" alt="${esc(item.team)}" loading="lazy">` : '<span class="home-award-logo-empty">—</span>';
+        const coachLabel = item.coach || 'Coach — ' + item.team;
+        const note = !item.coachVerified
+          ? 'Coach identity not verified — coach points may still be included. Add Head Coach to standings and match to Discord.'
+          : item.unassignedPlayers ? `${item.unassignedPlayers} stat players could not be assigned to a team.` : '';
+        return `<div class="home-award-row" title="${esc(note)}"><span class="home-award-rank">${index+1}</span><div class="home-award-player">${logo}<div style="min-width:0"><strong style="display:block">${esc(coachLabel)}</strong><small style="color:#a8c7e3">${esc(item.team)} · ${item.wins}-${item.losses} · PD ${item.pd > 0 ? '+' : ''}${item.pd}</small>${note ? `<small style="display:block;color:#f0bf70">${esc(note)}</small>` : ''}</div></div><span class="home-award-position" title="Roster PTS excluding coach, divided by 5">${formatPoints(item.playerPoints)} PTS</span><strong class="home-award-points" title="50% player points, 35% record, 15% point differential">${item.score.toFixed(1)}</strong></div>`;
+      }).join('') : '<div class="home-dashboard-loading">No Season 4 team results yet.</div>';
+      return;
+    }
     const leaders = await buildHomeAwardLeaders(String(awardKey || "mvp").toLowerCase());
 
     if (!leaders.length) {
