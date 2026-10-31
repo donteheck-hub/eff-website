@@ -251,36 +251,6 @@ function showPage(pageId) {
 }
 
 
-// Mobile hamburger menu: uses the same navigation buttons as desktop.
-const effMenuToggle = document.querySelector('.mobile-menu-toggle');
-const effMainNav = document.getElementById('eff-main-nav');
-function closeEffMobileMenu() {
-  if (!effMenuToggle || !effMainNav) return;
-  effMainNav.classList.remove('mobile-nav-open');
-  effMenuToggle.setAttribute('aria-expanded', 'false');
-  effMenuToggle.setAttribute('aria-label', 'Open navigation menu');
-}
-if (effMenuToggle && effMainNav) {
-  effMenuToggle.addEventListener('click', () => {
-    const opening = !effMainNav.classList.contains('mobile-nav-open');
-    effMainNav.classList.toggle('mobile-nav-open', opening);
-    effMenuToggle.setAttribute('aria-expanded', String(opening));
-    effMenuToggle.setAttribute('aria-label', opening ? 'Close navigation menu' : 'Open navigation menu');
-  });
-  effMainNav.addEventListener('click', (event) => {
-    if (event.target.closest('.nav-link')) closeEffMobileMenu();
-  });
-  document.addEventListener('click', (event) => {
-    if (!event.target.closest('.topbar')) closeEffMobileMenu();
-  });
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeEffMobileMenu();
-  });
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 900) closeEffMobileMenu();
-  });
-}
-
 navLinks.forEach((link) => {
 
   link.addEventListener(
@@ -5267,7 +5237,7 @@ function createStatsRow(
               return `
                 <td class="stats-player-cell">
 
-                  <div class="player-cell-wrap">
+                  <button type="button" class="player-cell-wrap stats-profile-link" data-stats-profile="${esc(value)}" aria-label="View ${esc(value)} career profile">
 
                     ${
                       playerPicture
@@ -5307,7 +5277,7 @@ function createStatsRow(
                       }
                     </div>
 
-                  </div>
+                  </button>
 
                 </td>
               `;
@@ -8014,8 +7984,15 @@ async function openLegacyPlayerShowcase(playerName){
   const panel=document.getElementById('legacyPlayerShowcase');
   if(!panel) return;
   const players=await buildLegacyXPPlayers(false);
-  const player=players.find(p=>normalizePlayerName(p.name)===normalizePlayerName(playerName));
-  if(!player) return;
+  let player=players.find(p=>normalizePlayerName(p.name)===normalizePlayerName(playerName));
+  // Stats tables include players without Legacy XP; they still deserve a profile.
+  if(!player){
+    const identities=await getDiscordPlayers(false).catch(()=>[]);
+    const identity=identities.find(p=>[p.robloxUsername,p.discordDisplayName,p.discordUsername].some(n=>n && normalizePlayerName(n)===normalizePlayerName(playerName)))||{};
+    const careers=await buildLegacyCareerPlayers(false).catch(()=>[]);
+    const career=careers.find(p=>normalizePlayerName(p.name)===normalizePlayerName(playerName))||null;
+    player={name:String(identity.robloxUsername||playerName),identity,career,totalXP:0,rings:0,accoladeCount:0,accolades:[]};
+  }
   const identity=player.identity||{};
   const career=player.career;
   const avatar=await getDirectRobloxPicture(player.name).catch(()=>"");
@@ -8069,6 +8046,12 @@ async function loadLegacyRecordBook(forceRefresh=false){
 }
 
 document.addEventListener('click',(event)=>{
+  const statsLink=event.target.closest('[data-stats-profile]');
+  if(statsLink){
+    showPage('legacy');
+    loadLegacyRecordBook(false).then(()=>openLegacyPlayerShowcase(statsLink.dataset.statsProfile));
+    return;
+  }
   const row=event.target.closest('[data-legacy-player]');
   if(row) openLegacyPlayerShowcase(row.dataset.legacyPlayer);
   const sort=event.target.closest('[data-legacy-sort]');

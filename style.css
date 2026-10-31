@@ -4141,3 +4141,8 @@ HISTORY BRACKET + AWARD LOGO TWEAKS
     display: none;
   }
 }
+
+/* Clickable player names in stat leaderboards */
+.stats-profile-link { width:100%; border:0; background:transparent; color:inherit; font:inherit; text-align:left; cursor:pointer; padding:4px 0; border-radius:8px; }
+.stats-profile-link:hover .player-name, .stats-profile-link:focus-visible .player-name { color:#79c9ff; text-decoration:underline; text-underline-offset:3px; }
+.stats-profile-link:focus-visible { outline:2px solid #79c9ff; outline-offset:3px; }
