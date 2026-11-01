@@ -226,6 +226,31 @@ function showPage(pageId) {
   selected.classList.add("active-page");
 
 
+navLinks.forEach((link) => {
+
+    link.classList.toggle(
+      "active",
+      link.dataset.page === pageId
+    );
+
+  });
+
+
+  history.replaceState(
+    null,
+    "",
+    `#${pageId}`
+  );
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
   // EFF mobile navigation: keep the menu functional on every page.
 const effMobileMenuToggle = document.querySelector(".mobile-menu-toggle");
 const effMobileNav = document.getElementById("eff-main-nav");
@@ -264,30 +289,6 @@ if (effMobileMenuToggle && effMobileNav) {
   window.addEventListener("resize", () => {
     if (window.innerWidth > 900) closeEffMobileMenu();
   });
-}
-
-navLinks.forEach((link) => {
-
-    link.classList.toggle(
-      "active",
-      link.dataset.page === pageId
-    );
-
-  });
-
-
-  history.replaceState(
-    null,
-    "",
-    `#${pageId}`
-  );
-
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
 }
 
 
