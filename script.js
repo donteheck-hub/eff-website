@@ -226,7 +226,47 @@ function showPage(pageId) {
   selected.classList.add("active-page");
 
 
-  navLinks.forEach((link) => {
+  // EFF mobile navigation: keep the menu functional on every page.
+const effMobileMenuToggle = document.querySelector(".mobile-menu-toggle");
+const effMobileNav = document.getElementById("eff-main-nav");
+
+if (effMobileMenuToggle && effMobileNav) {
+  function closeEffMobileMenu() {
+    effMobileNav.classList.remove("mobile-nav-open");
+    effMobileMenuToggle.setAttribute("aria-expanded", "false");
+    effMobileMenuToggle.setAttribute("aria-label", "Open navigation menu");
+  }
+
+  effMobileMenuToggle.addEventListener("click", () => {
+    const isOpen = effMobileNav.classList.toggle("mobile-nav-open");
+    effMobileMenuToggle.setAttribute("aria-expanded", String(isOpen));
+    effMobileMenuToggle.setAttribute(
+      "aria-label",
+      isOpen ? "Close navigation menu" : "Open navigation menu"
+    );
+  });
+
+  effMobileNav.querySelectorAll(".nav-link").forEach(link => {
+    link.addEventListener("click", closeEffMobileMenu);
+  });
+
+  document.addEventListener("click", event => {
+    if (!effMobileNav.contains(event.target) &&
+        !effMobileMenuToggle.contains(event.target)) {
+      closeEffMobileMenu();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeEffMobileMenu();
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 900) closeEffMobileMenu();
+  });
+}
+
+navLinks.forEach((link) => {
 
     link.classList.toggle(
       "active",
