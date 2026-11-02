@@ -8159,7 +8159,11 @@ async function buildHomeAwardLeaders(awardKey) {
   const definition = HOME_AWARD_DEFINITIONS[awardKey] || HOME_AWARD_DEFINITIONS.mvp;
   const data = await getStatsSourceData("season", false);
   const combined = new Map();
+  const isOpoty = awardKey === "opoty";
 
+  // OPOTY is a single combined RB + WR + C + TE total for each player.
+  // Resolve known Discord identities first so variations in stat-sheet names
+  // do not split the same player's points across multiple entries.
   for (const sheetName of definition.sheets) {
     const rawRows = Array.isArray(data?.[sheetName]) ? data[sheetName] : [];
     const normalizedRows = normalizeStatSheetRows(rawRows);
@@ -8172,7 +8176,9 @@ async function buildHomeAwardLeaders(awardKey) {
       const pts = getStatsPointsValue(row);
       if (!Number.isFinite(pts) || pts <= 0) continue;
 
-      const key = getAwardPlayerKey(name);
+      const player = isOpoty ? findDiscordPlayerByLooseName(name) : null;
+      const discordId = player?.discordId ? String(player.discordId) : "";
+      const key = discordId ? `discord:${discordId}` : getAwardPlayerKey(name);
       if (!key) continue;
       const current = combined.get(key) || { name, pts: 0, positions: [], bestPositionPts: -Infinity };
       current.pts += pts;
@@ -8375,7 +8381,7 @@ async function renderHomeAwardWatch(awardKey="mvp") {
       const player = findDiscordPlayerByLooseName(item.name);
       const logo = player?.teamLogo || "";
       const team = player?.team || "";
-      const positionText = item.positions.join("/");
+      const positionText = String(awardKey).toLowerCase() === "opoty" ? "RB/WR/C/TE" : item.positions.join("/");
       return `<div class="home-award-row"><span class="home-award-rank">${index+1}</span><div class="home-award-player">${logo?`<img src="${esc(getDisplayImageUrl(logo))}" alt="${esc(team)}" loading="lazy">`:`<span class="home-award-logo-empty">—</span>`}<strong>${esc(item.name)}</strong></div><span class="home-award-position">${esc(positionText)}</span><strong class="home-award-points">${formatPoints(item.pts)}</strong></div>`;
     }).join("");
   } catch(error) {
