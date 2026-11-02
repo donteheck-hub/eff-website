@@ -7536,7 +7536,7 @@ const LEGACY_BADGES = [
   {group:"REC",name:"YAC Monster",emoji:"🐲",metric:"yac",unit:"YAC",tiers:[750,2000,5000,10000]},
   {group:"REC",name:"Touchdown Machine",emoji:"🔥",metric:"recTD",unit:"receiving TD",tiers:[20,75,150,325]},
   {group:"C",name:"Iron Wall",emoji:"🧱",metric:"snaps",unit:"snaps",tiers:[500,1250,2500,5000]},
-  {group:"C",name:"Pressure Proof",emoji:"🛡️",type:"lowPctVolume",pctMetric:"pressurePct",volumeMetric:"snaps",pctUnit:"pressure rate",volumeUnit:"snaps",tiers:[[10,500],[8,1250],[6,2500],[4,5000]]},
+  {group:"C",name:"Pressure Proof",emoji:"🛡️",type:"lowPctVolume",pctMetric:"sackPct",volumeMetric:"snaps",pctUnit:"sack rate",volumeUnit:"snaps",tiers:[[10,500],[8,1250],[6,2500],[4,5000]]},
   {group:"DE",name:"Sack Artist",emoji:"💥",metric:"sacks",unit:"sacks",tiers:[20,50,100,175]},
   {group:"DE",name:"Backfield Menace",emoji:"😈",metric:"pressures",unit:"pressures",tiers:[100,250,500,1000]},
   {group:"DE",name:"QB Hunter",emoji:"🐺",metric:"qbHits",unit:"QB hits",tiers:[25,75,125,200]},
@@ -7577,7 +7577,7 @@ function getLegacyPositionStats(row,label){
     out.recTD=n(["TDS","TD","Touchdowns","Receiving TD","Receiving TDs"]);
   }else if(label==="C"){
     out.snaps=n(["SNAP","SNAPS","Snaps"]);
-    out.pressuresAllowed=n(["PRS","Pressures","Pressures Allowed","Pressure Allowed"]);
+    out.sacksAllowed=n(["SCKA","Sacks Allowed","Sack Allowed","SCK Allowed","SACKA"]);
   }else if(label==="DE"){
     out.sacks=n(["SCK","SACK","SACKS","Sacks"]);
     out.pressures=n(["PRS","Pressures"]);
@@ -7617,7 +7617,7 @@ function finalizeLegacyStats(stats){
       if((t.completions||0)>0 && (t.passAttempts||0)>0) t.completionPct=(t.completions/t.passAttempts)*100;
       else if((t.completionPctVolume||0)>0) t.completionPct=t.completionPctWeighted/t.completionPctVolume;
     }
-    if(label==="C" && (t.snaps||0)>0) t.pressurePct=((t.pressuresAllowed||0)/t.snaps)*100;
+    if(label==="C" && (t.snaps||0)>0) t.sackPct=((t.sacksAllowed||0)/t.snaps)*100;
     if(label==="DB"){
       if((t.completionsAllowed||0)>0 && (t.targets||0)>0) t.completionAllowedPct=(t.completionsAllowed/t.targets)*100;
       else if((t.completionAllowedPctVolume||0)>0) t.completionAllowedPct=t.completionAllowedPctWeighted/t.completionAllowedPctVolume;
