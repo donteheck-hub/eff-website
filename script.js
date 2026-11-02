@@ -8126,7 +8126,7 @@ const HOME_AWARD_DEFINITIONS = {
   },
   opoty: {
     label: "OPOTY",
-    sheets: ["quarterback", "runningback", "center", "tight end", "wide receiver"]
+    sheets: ["runningback", "center", "tight end", "wide receiver"]
   },
   dpoty: {
     label: "DPOTY",
