@@ -7438,6 +7438,66 @@ function renderLivePlayoffBracket(
   `;
 }
 
+/* ==================================================
+   SEASON 4 PLAYOFF PICTURE
+   Uses the same standings and seed rules as the live bracket.
+   Standings do not establish mathematical clinching or elimination.
+================================================== */
+function effPictureEscape(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  })[char]);
+}
+
+function effPictureWinPct(team) {
+  const r = parseRecord(team?.Rec);
+  const games = r.wins + r.losses + r.ties;
+  return games ? (r.wins + r.ties / 2) / games : 0;
+}
+
+function effPictureRow(team, seed, cutoff, divisionNames) {
+  const isDivisionLeader = divisionNames.has(normalizeTeamName(team.Team));
+  const inside = seed <= 7;
+  const cutoffPct = cutoff ? effPictureWinPct(cutoff) : 0;
+  const delta = Math.max(0, cutoffPct - effPictureWinPct(team));
+  const status = isDivisionLeader ? "Division leader" : inside ? "Projected playoff spot" : "In the hunt";
+  const note = inside ? status : (cutoff ? `Behind #7 by ${(delta * 100).toFixed(1)} win-pct pts` : status);
+  return `<div class="eff-picture-row ${inside ? 'eff-picture-in' : 'eff-picture-out'}">
+    <span class="eff-picture-seed">${inside ? seed : '—'}</span>
+    <span class="eff-picture-team"><strong>${effPictureEscape(team.Team)}</strong><small>${effPictureEscape(note)}</small></span>
+    <span class="eff-picture-record">${effPictureEscape(team.Rec || '0-0')}</span>
+    <span class="eff-picture-pd">${effPictureEscape(pdText(team.PD))} PD</span>
+  </div>`;
+}
+
+function renderEffPlayoffPicture(standings, atlantic, pacific) {
+  const root = document.getElementById("effPlayoffPicture");
+  if (!root) return;
+  if (!standings.length) {
+    root.innerHTML = '<div class="loading-card">No Season 4 standings are available yet.</div>';
+    return;
+  }
+  root.innerHTML = [
+    ["Atlantic", atlantic], ["Pacific", pacific]
+  ].map(([name, seeds]) => {
+    const conferenceTeams = standings.filter(team => normalize(team.Conference) === normalize(name));
+    const seededNames = new Set(seeds.map(team => normalizeTeamName(team.Team)));
+    const outsiders = conferenceTeams.filter(team => !seededNames.has(normalizeTeamName(team.Team))).sort(sortPlayoffSeeds);
+    const divisionNames = new Set(Object.values(DIVISION_CONFIG)
+      .filter(div => normalize(div.conference) === normalize(name))
+      .map(div => conferenceTeams.filter(team => div.teams.some(t => normalizeTeamName(t) === normalizeTeamName(team.Team))).sort(sortPlayoffSeeds)[0])
+      .filter(Boolean).map(team => normalizeTeamName(team.Team)));
+    const cutoff = seeds[6] || null;
+    return `<section class="eff-picture-conference" aria-label="${name} playoff picture">
+      <div class="eff-picture-conference-head"><h4>${name} Conference</h4><span>${seeds.length} projected seeds</span></div>
+      <div class="eff-picture-group-label">CURRENT PLAYOFF SEEDS</div>
+      ${seeds.length ? seeds.map((team,i) => effPictureRow(team,i+1,cutoff,divisionNames)).join('') : '<p class="eff-picture-empty">No teams available.</p>'}
+      <div class="eff-picture-group-label eff-picture-hunt">IN THE HUNT</div>
+      ${outsiders.length ? outsiders.map((team,i) => effPictureRow(team,i+8,cutoff,divisionNames)).join('') : '<p class="eff-picture-empty">No teams outside the current top seven.</p>'}
+    </section>`;
+  }).join('');
+}
+
 async function loadPlayoffs(forceRefresh = false) {
   const container = document.getElementById("livePlayoffBracket");
 
@@ -7448,6 +7508,8 @@ async function loadPlayoffs(forceRefresh = false) {
   }
 
   container.innerHTML = `<div class="loading-card">Loading current playoff bracket...</div>`;
+  const picture = document.getElementById("effPlayoffPicture");
+  if (picture) picture.innerHTML = `<div class="loading-card">Loading playoff picture...</div>`;
 
   try {
     const data = await getLeagueData();
@@ -7480,8 +7542,11 @@ async function loadPlayoffs(forceRefresh = false) {
       updates,
       standings
     );
+    renderEffPlayoffPicture(standings, atlantic, pacific);
   } catch (error) {
     console.error("Playoff bracket error:", error);
+    const picture = document.getElementById("effPlayoffPicture");
+    if (picture) picture.innerHTML = `<div class="loading-card">Unable to load playoff picture.</div>`;
     container.innerHTML = `
       <div class="loading-card">
         Unable to load the live playoff bracket.
