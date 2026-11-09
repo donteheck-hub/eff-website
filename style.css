@@ -4170,3 +4170,13 @@ HISTORY BRACKET + AWARD LOGO TWEAKS
 .eff-picture-divider:before,.eff-picture-divider:after{content:"";height:1px;flex:1;background:#304660}
 @media(max-width:850px){.eff-picture-grid{grid-template-columns:1fr}.eff-picture-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:420px){.eff-picture-row{grid-template-columns:27px minmax(0,1fr) 55px;gap:6px;padding:10px}.eff-picture-pd{display:none}.eff-picture-team strong{font-size:12px}}
+
+/* Playoff picture: team crests, strength-of-schedule notes, simulated odds */
+.eff-picture-row{grid-template-columns:30px minmax(0,1fr) 58px 65px 88px;gap:9px}
+.eff-picture-team{flex-direction:row;align-items:center;gap:10px}
+.eff-picture-logo{width:34px;height:34px;object-fit:contain;flex-shrink:0}
+.eff-picture-team-copy{display:flex;flex-direction:column;min-width:0;gap:4px}
+.eff-picture-odds{text-align:right;color:#75e6bb;font-size:17px;font-weight:900;white-space:nowrap}
+.eff-picture-odds small{display:block;color:#93aac6;font-size:8px;font-weight:800;letter-spacing:.04em}
+.eff-picture-out .eff-picture-odds{color:#f4c28c}
+@media(max-width:520px){.eff-picture-row{grid-template-columns:25px minmax(0,1fr) 45px 67px;gap:6px;padding:10px}.eff-picture-pd{display:none}.eff-picture-logo{width:27px;height:27px}.eff-picture-odds{font-size:14px}.eff-picture-odds small{font-size:7px}}

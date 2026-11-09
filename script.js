@@ -7455,22 +7455,110 @@ function effPictureWinPct(team) {
   return games ? (r.wins + r.ties / 2) / games : 0;
 }
 
-function effPictureRow(team, seed, cutoff, divisionNames) {
+// Estimated odds use a reproducible Monte Carlo simulation of unplayed regular-season
+// matchups. They are NOT official qualification, clinching or elimination probabilities.
+function effPictureOdds(standings, schedule) {
+  const lookup = new Map(standings.map(t => [normalizeTeamName(t.Team), t]));
+  const remaining = (Array.isArray(schedule) ? schedule : []).filter(g => {
+    const a = lookup.get(normalizeTeamName(g["Away Team"]));
+    const h = lookup.get(normalizeTeamName(g["Home Team"]));
+    if (!a || !h || a === h) return false;
+    const type = String(g.Type || "").toLowerCase();
+    if (/playoff|postseason|wild.?card|divisional|super.?bowl|championship/.test(type)) return false;
+    return String(g["Away Final Score"] ?? "").trim() === "" ||
+           String(g["Home Final Score"] ?? "").trim() === "";
+  });
+  if (!remaining.length) return null; // Cannot infer a season end from missing schedule data.
+
+  const divPct = new Map();
+  for (const t of standings) {
+    const div = parseRecord(t["Division Rec"]);
+    const played = div.wins + div.losses + div.ties;
+    divPct.set(normalizeTeamName(t.Team), played ? (div.wins + div.ties / 2) / played : .5);
+  }
+  const strength = t => {
+    const r = parseRecord(t.Rec);
+    const n = r.wins + r.losses + r.ties;
+    const pct = n ? (r.wins + r.ties / 2 + 1.5) / (n + 3) : .5;
+    const pd = Number(t.PD) || 0;
+    const differential = Math.tanh((pd / Math.max(2, n)) / 22);
+    return 1.65 * (pct - .5) + .40 * differential +
+      .35 * (divPct.get(normalizeTeamName(t.Team)) - .5);
+  };
+  // Fixed seed means the odds do not randomly change on every page refresh.
+  let randomState = 20261109;
+  const rand = () => {
+    randomState = (Math.imul(1664525, randomState) + 1013904223) >>> 0;
+    return randomState / 4294967296;
+  };
+  const counts = new Map(standings.map(t => [normalizeTeamName(t.Team), 0]));
+  const rounds = 1200;
+  const games = remaining.map(g => {
+    const away = lookup.get(normalizeTeamName(g["Away Team"]));
+    const home = lookup.get(normalizeTeamName(g["Home Team"]));
+    const diff = strength(home) - strength(away) + .08;
+    return {away: normalizeTeamName(away.Team), home: normalizeTeamName(home.Team),
+      homeChance: Math.min(.9, Math.max(.1, 1 / (1 + Math.exp(-2.0 * diff))))};
+  });
+  for (let iteration = 0; iteration < rounds; iteration++) {
+    const simulated = standings.map(t => ({...t}));
+    const byName = new Map(simulated.map(t => [normalizeTeamName(t.Team), t]));
+    const records = new Map(simulated.map(t => {
+      const r = parseRecord(t.Rec);
+      return [normalizeTeamName(t.Team), {w: r.wins, l: r.losses, ties: r.ties}];
+    }));
+    for (const g of games) {
+      const homeWins = rand() < g.homeChance;
+      records.get(g.home)[homeWins ? 'w' : 'l']++;
+      records.get(g.away)[homeWins ? 'l' : 'w']++;
+    }
+    for (const [name, r] of records) {
+      byName.get(name).Rec = `${r.w}-${r.l}${r.ties ? `-${r.ties}` : ''}`;
+    }
+    for (const conf of ['Atlantic', 'Pacific']) {
+      for (const t of buildConferencePlayoffSeeds(conf, simulated)) {
+        const key = normalizeTeamName(t.Team);
+        counts.set(key, counts.get(key) + 1);
+      }
+    }
+  }
+  const odds = new Map([...counts].map(([key, count]) => [key, Math.round(100 * count / rounds)]));
+  const opponents = new Map(standings.map(t => [normalizeTeamName(t.Team), []]));
+  for (const g of games) {
+    const home = lookup.get(g.home), away = lookup.get(g.away);
+    opponents.get(g.home).push(effPictureWinPct(away));
+    opponents.get(g.away).push(effPictureWinPct(home));
+  }
+  const sos = new Map([...opponents].map(([name, arr]) =>
+    [name, arr.length ? Math.round(100 * arr.reduce((a,b) => a+b,0) / arr.length) : null]));
+  return {odds, sos, remaining: opponents};
+}
+
+function effPictureRow(team, seed, cutoff, divisionNames, forecast) {
   const isDivisionLeader = divisionNames.has(normalizeTeamName(team.Team));
   const inside = seed <= 7;
   const cutoffPct = cutoff ? effPictureWinPct(cutoff) : 0;
   const delta = Math.max(0, cutoffPct - effPictureWinPct(team));
   const status = isDivisionLeader ? "Division leader" : inside ? "Projected playoff spot" : "In the hunt";
   const note = inside ? status : (cutoff ? `Behind #7 by ${(delta * 100).toFixed(1)} win-pct pts` : status);
+  const logo = getTeamLogoByName(team.Team, team.Logo || "");
+  const key = normalizeTeamName(team.Team);
+  const chance = forecast?.odds.get(key);
+  const oddsLabel = chance == null ? 'N/A' : `${chance}%`;
+  const remainingCount = forecast?.remaining.get(key)?.length;
+  const sos = forecast?.sos.get(key);
+  const extra = forecast ? `${remainingCount} left · Remaining SOS ${sos == null ? 'N/A' : `${sos}%`}` : 'Schedule data needed for odds';
   return `<div class="eff-picture-row ${inside ? 'eff-picture-in' : 'eff-picture-out'}">
     <span class="eff-picture-seed">${inside ? seed : '—'}</span>
-    <span class="eff-picture-team"><strong>${effPictureEscape(team.Team)}</strong><small>${effPictureEscape(note)}</small></span>
+    <span class="eff-picture-team">${logo ? `<img class="eff-picture-logo" src="${effPictureEscape(logo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}<span class="eff-picture-team-copy"><strong>${effPictureEscape(team.Team)}</strong><small>${effPictureEscape(note)} · ${effPictureEscape(extra)}</small></span></span>
     <span class="eff-picture-record">${effPictureEscape(team.Rec || '0-0')}</span>
     <span class="eff-picture-pd">${effPictureEscape(pdText(team.PD))} PD</span>
+    <span class="eff-picture-odds" title="Estimated playoff qualification chance">${oddsLabel}<small>PLAYOFF ODDS</small></span>
   </div>`;
 }
 
-function renderEffPlayoffPicture(standings, atlantic, pacific) {
+function renderEffPlayoffPicture(standings, atlantic, pacific, schedule) {
+  const forecast = effPictureOdds(standings, schedule);
   const root = document.getElementById("effPlayoffPicture");
   if (!root) return;
   if (!standings.length) {
@@ -7491,9 +7579,9 @@ function renderEffPlayoffPicture(standings, atlantic, pacific) {
     return `<section class="eff-picture-conference" aria-label="${name} playoff picture">
       <div class="eff-picture-conference-head"><h4>${name} Conference</h4><span>${seeds.length} projected seeds</span></div>
       <div class="eff-picture-group-label">CURRENT PLAYOFF SEEDS</div>
-      ${seeds.length ? seeds.map((team,i) => effPictureRow(team,i+1,cutoff,divisionNames)).join('') : '<p class="eff-picture-empty">No teams available.</p>'}
+      ${seeds.length ? seeds.map((team,i) => effPictureRow(team,i+1,cutoff,divisionNames,forecast)).join('') : '<p class="eff-picture-empty">No teams available.</p>'}
       <div class="eff-picture-group-label eff-picture-hunt">IN THE HUNT</div>
-      ${outsiders.length ? outsiders.map((team,i) => effPictureRow(team,i+8,cutoff,divisionNames)).join('') : '<p class="eff-picture-empty">No teams outside the current top seven.</p>'}
+      ${outsiders.length ? outsiders.map((team,i) => effPictureRow(team,i+8,cutoff,divisionNames,forecast)).join('') : '<p class="eff-picture-empty">No teams outside the current top seven.</p>'}
     </section>`;
   }).join('');
 }
@@ -7542,7 +7630,7 @@ async function loadPlayoffs(forceRefresh = false) {
       updates,
       standings
     );
-    renderEffPlayoffPicture(standings, atlantic, pacific);
+    renderEffPlayoffPicture(standings, atlantic, pacific, data?.[SCHEDULE_SHEET]);
   } catch (error) {
     console.error("Playoff bracket error:", error);
     const picture = document.getElementById("effPlayoffPicture");
