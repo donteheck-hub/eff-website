@@ -7492,12 +7492,16 @@ function effPictureOdds(standings, schedule) {
     return randomState / 4294967296;
   };
   const counts = new Map(standings.map(t => [normalizeTeamName(t.Team), 0]));
-  const rounds = 1200;
+  const rounds = 10000;
   const games = remaining.map(g => {
     const away = lookup.get(normalizeTeamName(g["Away Team"]));
     const home = lookup.get(normalizeTeamName(g["Home Team"]));
     const diff = strength(home) - strength(away) + .08;
-    return {away: normalizeTeamName(away.Team), home: normalizeTeamName(home.Team),
+    const sameConference = normalize(away.Conference) === normalize(home.Conference);
+    const sameDivision = Object.values(DIVISION_CONFIG).some(d =>
+      d.teams.some(n => normalizeTeamName(n) === normalizeTeamName(away.Team)) &&
+      d.teams.some(n => normalizeTeamName(n) === normalizeTeamName(home.Team)));
+    return {away: normalizeTeamName(away.Team), home: normalizeTeamName(home.Team), sameConference, sameDivision,
       homeChance: Math.min(.9, Math.max(.1, 1 / (1 + Math.exp(-2.0 * diff))))};
   });
   for (let iteration = 0; iteration < rounds; iteration++) {
@@ -7505,15 +7509,30 @@ function effPictureOdds(standings, schedule) {
     const byName = new Map(simulated.map(t => [normalizeTeamName(t.Team), t]));
     const records = new Map(simulated.map(t => {
       const r = parseRecord(t.Rec);
-      return [normalizeTeamName(t.Team), {w: r.wins, l: r.losses, ties: r.ties}];
+      const d = parseRecord(t["Division Rec"]);
+      const c = parseRecord(t["Conf Rec"]);
+      return [normalizeTeamName(t.Team), {w: r.wins, l: r.losses, ties: r.ties,
+        dw: d.wins, dl: d.losses, dt: d.ties,
+        cw: c.wins, cl: c.losses, ct: c.ties}];
     }));
     for (const g of games) {
       const homeWins = rand() < g.homeChance;
       records.get(g.home)[homeWins ? 'w' : 'l']++;
       records.get(g.away)[homeWins ? 'l' : 'w']++;
+      if (g.sameConference) {
+        records.get(g.home)[homeWins ? 'cw' : 'cl']++;
+        records.get(g.away)[homeWins ? 'cl' : 'cw']++;
+      }
+      if (g.sameDivision) {
+        records.get(g.home)[homeWins ? 'dw' : 'dl']++;
+        records.get(g.away)[homeWins ? 'dl' : 'dw']++;
+      }
     }
     for (const [name, r] of records) {
-      byName.get(name).Rec = `${r.w}-${r.l}${r.ties ? `-${r.ties}` : ''}`;
+      const team = byName.get(name);
+      team.Rec = `${r.w}-${r.l}${r.ties ? `-${r.ties}` : ''}`;
+      team['Division Rec'] = `${r.dw}-${r.dl}${r.dt ? `-${r.dt}` : ''}`;
+      team['Conf Rec'] = `${r.cw}-${r.cl}${r.ct ? `-${r.ct}` : ''}`;
     }
     for (const conf of ['Atlantic', 'Pacific']) {
       for (const t of buildConferencePlayoffSeeds(conf, simulated)) {
@@ -7522,7 +7541,10 @@ function effPictureOdds(standings, schedule) {
       }
     }
   }
-  const odds = new Map([...counts].map(([key, count]) => [key, Math.round(100 * count / rounds)]));
+  // Jeffreys smoothing prevents a finite Monte Carlo sample from implying
+  // mathematical 0% or 100% certainty. Keep precision for rare outcomes.
+  const odds = new Map([...counts].map(([key, count]) =>
+    [key, 100 * (count + 0.5) / (rounds + 1)]));
   const opponents = new Map(standings.map(t => [normalizeTeamName(t.Team), []]));
   for (const g of games) {
     const home = lookup.get(g.home), away = lookup.get(g.away);
@@ -7544,7 +7566,9 @@ function effPictureRow(team, seed, cutoff, divisionNames, forecast) {
   const logo = getTeamLogoByName(team.Team, team.Logo || "");
   const key = normalizeTeamName(team.Team);
   const chance = forecast?.odds.get(key);
-  const oddsLabel = chance == null ? 'N/A' : `${chance}%`;
+  const oddsLabel = chance == null ? 'N/A' :
+    chance < 0.1 ? '<0.1%' : chance > 99.9 ? '>99.9%' :
+    `${chance.toFixed(1)}%`;
   const remainingCount = forecast?.remaining.get(key)?.length;
   const sos = forecast?.sos.get(key);
   const extra = forecast ? `${remainingCount} left · Remaining SOS ${sos == null ? 'N/A' : `${sos}%`}` : 'Schedule data needed for odds';
@@ -7553,7 +7577,7 @@ function effPictureRow(team, seed, cutoff, divisionNames, forecast) {
     <span class="eff-picture-team">${logo ? `<img class="eff-picture-logo" src="${effPictureEscape(logo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}<span class="eff-picture-team-copy"><strong>${effPictureEscape(team.Team)}</strong><small>${effPictureEscape(note)} · ${effPictureEscape(extra)}</small></span></span>
     <span class="eff-picture-record">${effPictureEscape(team.Rec || '0-0')}</span>
     <span class="eff-picture-pd">${effPictureEscape(pdText(team.PD))} PD</span>
-    <span class="eff-picture-odds" title="Estimated playoff qualification chance">${oddsLabel}<small>PLAYOFF ODDS</small></span>
+    <span class="eff-picture-odds" title="Model estimate from 10,000 simulated remaining schedules; not a clinching or elimination guarantee">${oddsLabel}<small>PLAYOFF ODDS</small></span>
   </div>`;
 }
 
