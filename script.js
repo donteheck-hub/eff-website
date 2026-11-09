@@ -7458,102 +7458,125 @@ function effPictureWinPct(team) {
 // Estimated odds use a reproducible Monte Carlo simulation of unplayed regular-season
 // matchups. They are NOT official qualification, clinching or elimination probabilities.
 function effPictureOdds(standings, schedule) {
+  const SEASON_GAMES = 12;
+  const SIMULATIONS = 12000;
   const lookup = new Map(standings.map(t => [normalizeTeamName(t.Team), t]));
   const remaining = (Array.isArray(schedule) ? schedule : []).filter(g => {
-    const a = lookup.get(normalizeTeamName(g["Away Team"]));
-    const h = lookup.get(normalizeTeamName(g["Home Team"]));
-    if (!a || !h || a === h) return false;
+    const away = lookup.get(normalizeTeamName(g["Away Team"]));
+    const home = lookup.get(normalizeTeamName(g["Home Team"]));
+    if (!away || !home || away === home) return false;
     const type = String(g.Type || "").toLowerCase();
     if (/playoff|postseason|wild.?card|divisional|super.?bowl|championship/.test(type)) return false;
     return String(g["Away Final Score"] ?? "").trim() === "" ||
            String(g["Home Final Score"] ?? "").trim() === "";
   });
-  if (!remaining.length) return null; // Cannot infer a season end from missing schedule data.
 
-  const divPct = new Map();
-  for (const t of standings) {
-    const div = parseRecord(t["Division Rec"]);
-    const played = div.wins + div.losses + div.ties;
-    divPct.set(normalizeTeamName(t.Team), played ? (div.wins + div.ties / 2) / played : .5);
-  }
-  const strength = t => {
+  const remainingByTeam = new Map(standings.map(t => [normalizeTeamName(t.Team), []]));
+  const matchups = remaining.map(g => {
+    const away = normalizeTeamName(g["Away Team"]);
+    const home = normalizeTeamName(g["Home Team"]);
+    remainingByTeam.get(away).push(home);
+    remainingByTeam.get(home).push(away);
+    const awayTeam = lookup.get(away), homeTeam = lookup.get(home);
+    return {
+      away, home,
+      sameConference: normalize(awayTeam.Conference) === normalize(homeTeam.Conference),
+      sameDivision: getDivisionForTeam(awayTeam.Team)?.name === getDivisionForTeam(homeTeam.Team)?.name
+    };
+  });
+
+  // A complete 12-game schedule is required for meaningful season-end probabilities.
+  // Never silently predict from an incomplete or duplicated schedule.
+  if (!matchups.length || standings.some(t => {
     const r = parseRecord(t.Rec);
-    const n = r.wins + r.losses + r.ties;
-    const pct = n ? (r.wins + r.ties / 2 + 1.5) / (n + 3) : .5;
-    const pd = Number(t.PD) || 0;
-    const differential = Math.tanh((pd / Math.max(2, n)) / 22);
-    return 1.65 * (pct - .5) + .40 * differential +
-      .35 * (divPct.get(normalizeTeamName(t.Team)) - .5);
-  };
-  // Fixed seed means the odds do not randomly change on every page refresh.
+    const played = r.wins + r.losses + r.ties;
+    return played > SEASON_GAMES || played + remainingByTeam.get(normalizeTeamName(t.Team)).length !== SEASON_GAMES;
+  })) {
+    console.warn("EFF playoff odds: 12-game schedule incomplete or inconsistent; odds unavailable.");
+    return null;
+  }
+
+  // Early-season records are noisy. Shrink team estimates toward .500, and
+  // sample an uncertain team strength for each possible season outcome.
+  // This is a predictive model, not mathematical clinching/elimination proof.
+  const base = new Map(standings.map(t => {
+    const r = parseRecord(t.Rec);
+    const played = r.wins + r.losses + r.ties;
+    const d = parseRecord(t["Division Rec"]);
+    const divGames = d.wins + d.losses + d.ties;
+    const recordSignal = (r.wins + .5 * r.ties - .5 * played) / (played + 8);
+    const divSignal = (d.wins + .5 * d.ties - .5 * divGames) / (divGames + 10);
+    const pdPerGame = (Number(t.PD) || 0) / Math.max(1, played);
+    const pdSignal = Math.tanh(pdPerGame / 30) * played / (played + 8);
+    return [normalizeTeamName(t.Team), {
+      mean: 2.0 * recordSignal + .28 * divSignal + .35 * pdSignal,
+      uncertainty: .42 * Math.sqrt(8 / (played + 8))
+    }];
+  }));
+
   let randomState = 20261109;
   const rand = () => {
     randomState = (Math.imul(1664525, randomState) + 1013904223) >>> 0;
-    return randomState / 4294967296;
+    return (randomState + .5) / 4294967296;
   };
+  const normal = () => Math.sqrt(-2 * Math.log(rand())) * Math.cos(2 * Math.PI * rand());
   const counts = new Map(standings.map(t => [normalizeTeamName(t.Team), 0]));
-  const rounds = 10000;
-  const games = remaining.map(g => {
-    const away = lookup.get(normalizeTeamName(g["Away Team"]));
-    const home = lookup.get(normalizeTeamName(g["Home Team"]));
-    const diff = strength(home) - strength(away) + .08;
-    const sameConference = normalize(away.Conference) === normalize(home.Conference);
-    const sameDivision = Object.values(DIVISION_CONFIG).some(d =>
-      d.teams.some(n => normalizeTeamName(n) === normalizeTeamName(away.Team)) &&
-      d.teams.some(n => normalizeTeamName(n) === normalizeTeamName(home.Team)));
-    return {away: normalizeTeamName(away.Team), home: normalizeTeamName(home.Team), sameConference, sameDivision,
-      homeChance: Math.min(.9, Math.max(.1, 1 / (1 + Math.exp(-2.0 * diff))))};
-  });
-  for (let iteration = 0; iteration < rounds; iteration++) {
+  for (let iteration = 0; iteration < SIMULATIONS; iteration++) {
     const simulated = standings.map(t => ({...t}));
     const byName = new Map(simulated.map(t => [normalizeTeamName(t.Team), t]));
+    const strengths = new Map([...base].map(([name, v]) =>
+      [name, v.mean + v.uncertainty * normal()]));
     const records = new Map(simulated.map(t => {
-      const r = parseRecord(t.Rec);
-      const d = parseRecord(t["Division Rec"]);
-      const c = parseRecord(t["Conf Rec"]);
-      return [normalizeTeamName(t.Team), {w: r.wins, l: r.losses, ties: r.ties,
-        dw: d.wins, dl: d.losses, dt: d.ties,
-        cw: c.wins, cl: c.losses, ct: c.ties}];
+      const r = parseRecord(t.Rec), d = parseRecord(t["Division Rec"]), c = parseRecord(t["Conf Rec"]);
+      return [normalizeTeamName(t.Team), {
+        w:r.wins, l:r.losses, ties:r.ties,
+        dw:d.wins, dl:d.losses, dt:d.ties,
+        cw:c.wins, cl:c.losses, ct:c.ties,
+        pd:Number(t.PD) || 0
+      }];
     }));
-    for (const g of games) {
-      const homeWins = rand() < g.homeChance;
-      records.get(g.home)[homeWins ? 'w' : 'l']++;
-      records.get(g.away)[homeWins ? 'l' : 'w']++;
+    for (const g of matchups) {
+      const diff = strengths.get(g.home) - strengths.get(g.away) + .06;
+      const homeChance = Math.max(.18, Math.min(.82, 1 / (1 + Math.exp(-1.4 * diff))));
+      const homeWins = rand() < homeChance;
+      const home = records.get(g.home), away = records.get(g.away);
+      home[homeWins ? "w" : "l"]++;
+      away[homeWins ? "l" : "w"]++;
       if (g.sameConference) {
-        records.get(g.home)[homeWins ? 'cw' : 'cl']++;
-        records.get(g.away)[homeWins ? 'cl' : 'cw']++;
+        home[homeWins ? "cw" : "cl"]++;
+        away[homeWins ? "cl" : "cw"]++;
       }
       if (g.sameDivision) {
-        records.get(g.home)[homeWins ? 'dw' : 'dl']++;
-        records.get(g.away)[homeWins ? 'dl' : 'dw']++;
+        home[homeWins ? "dw" : "dl"]++;
+        away[homeWins ? "dl" : "dw"]++;
       }
+      // Simulate a modest winning margin so point-differential tiebreakers
+      // do not use today's PD as though no more games were played.
+      const margin = 3 + Math.floor(rand() * 18);
+      home.pd += homeWins ? margin : -margin;
+      away.pd += homeWins ? -margin : margin;
     }
     for (const [name, r] of records) {
       const team = byName.get(name);
-      team.Rec = `${r.w}-${r.l}${r.ties ? `-${r.ties}` : ''}`;
-      team['Division Rec'] = `${r.dw}-${r.dl}${r.dt ? `-${r.dt}` : ''}`;
-      team['Conf Rec'] = `${r.cw}-${r.cl}${r.ct ? `-${r.ct}` : ''}`;
+      team.Rec = `${r.w}-${r.l}${r.ties ? `-${r.ties}` : ""}`;
+      team["Division Rec"] = `${r.dw}-${r.dl}${r.dt ? `-${r.dt}` : ""}`;
+      team["Conf Rec"] = `${r.cw}-${r.cl}${r.ct ? `-${r.ct}` : ""}`;
+      team.PD = r.pd;
     }
-    for (const conf of ['Atlantic', 'Pacific']) {
-      for (const t of buildConferencePlayoffSeeds(conf, simulated)) {
-        const key = normalizeTeamName(t.Team);
+    for (const conference of ["Atlantic", "Pacific"]) {
+      for (const team of buildConferencePlayoffSeeds(conference, simulated)) {
+        const key = normalizeTeamName(team.Team);
         counts.set(key, counts.get(key) + 1);
       }
     }
   }
-  // Jeffreys smoothing prevents a finite Monte Carlo sample from implying
-  // mathematical 0% or 100% certainty. Keep precision for rare outcomes.
   const odds = new Map([...counts].map(([key, count]) =>
-    [key, 100 * (count + 0.5) / (rounds + 1)]));
-  const opponents = new Map(standings.map(t => [normalizeTeamName(t.Team), []]));
-  for (const g of games) {
-    const home = lookup.get(g.home), away = lookup.get(g.away);
-    opponents.get(g.home).push(effPictureWinPct(away));
-    opponents.get(g.away).push(effPictureWinPct(home));
-  }
-  const sos = new Map([...opponents].map(([name, arr]) =>
-    [name, arr.length ? Math.round(100 * arr.reduce((a,b) => a+b,0) / arr.length) : null]));
-  return {odds, sos, remaining: opponents};
+    [key, 100 * (count + .5) / (SIMULATIONS + 1)]));
+  const sos = new Map([...remainingByTeam].map(([name, opponents]) =>
+    [name, opponents.length ? Math.round(100 * opponents.reduce((sum, opponent) =>
+      sum + (base.get(opponent)?.mean == null ? .5 :
+        1 / (1 + Math.exp(-1.4 * base.get(opponent).mean))), 0) / opponents.length) : null]));
+  return {odds, sos, remaining: remainingByTeam};
 }
 
 function effPictureRow(team, seed, cutoff, divisionNames, forecast) {
@@ -7571,13 +7594,13 @@ function effPictureRow(team, seed, cutoff, divisionNames, forecast) {
     `${chance.toFixed(1)}%`;
   const remainingCount = forecast?.remaining.get(key)?.length;
   const sos = forecast?.sos.get(key);
-  const extra = forecast ? `${remainingCount} left · Remaining SOS ${sos == null ? 'N/A' : `${sos}%`}` : 'Schedule data needed for odds';
+  const extra = forecast ? `${remainingCount} left · Remaining SOS ${sos == null ? 'N/A' : `${sos}%`}` : 'Complete 12-game schedule needed for odds';
   return `<div class="eff-picture-row ${inside ? 'eff-picture-in' : 'eff-picture-out'}">
     <span class="eff-picture-seed">${inside ? seed : '—'}</span>
     <span class="eff-picture-team">${logo ? `<img class="eff-picture-logo" src="${effPictureEscape(logo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}<span class="eff-picture-team-copy"><strong>${effPictureEscape(team.Team)}</strong><small>${effPictureEscape(note)} · ${effPictureEscape(extra)}</small></span></span>
     <span class="eff-picture-record">${effPictureEscape(team.Rec || '0-0')}</span>
     <span class="eff-picture-pd">${effPictureEscape(pdText(team.PD))} PD</span>
-    <span class="eff-picture-odds" title="Model estimate from 10,000 simulated remaining schedules; not a clinching or elimination guarantee">${oddsLabel}<small>PLAYOFF ODDS</small></span>
+    <span class="eff-picture-odds" title="Estimated from 12,000 simulated full 12-game seasons, including team-strength uncertainty; not a clinching or elimination guarantee">${oddsLabel}<small>PLAYOFF ODDS</small></span>
   </div>`;
 }
 
