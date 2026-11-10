@@ -4180,3 +4180,44 @@ HISTORY BRACKET + AWARD LOGO TWEAKS
 .eff-picture-odds small{display:block;color:#93aac6;font-size:8px;font-weight:800;letter-spacing:.04em}
 .eff-picture-out .eff-picture-odds{color:#f4c28c}
 @media(max-width:520px){.eff-picture-row{grid-template-columns:25px minmax(0,1fr) 45px 67px;gap:6px;padding:10px}.eff-picture-pd{display:none}.eff-picture-logo{width:27px;height:27px}.eff-picture-odds{font-size:14px}.eff-picture-odds small{font-size:7px}}
+
+
+/* EFF stats profile links: remove native button appearance. */
+.website-stats-table .stats-profile-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.website-stats-table .stats-profile-link .player-name-stack {
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+.website-stats-table .stats-profile-link .player-name {
+  display: block;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+.website-stats-table .stats-profile-link .player-subline {
+  display: block;
+  color: #9ca8b8;
+}
+.website-stats-table .stats-profile-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
